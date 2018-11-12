@@ -9,8 +9,12 @@ public class User {
     private Key privateKey;
     private Key publicKey;
 
-
     public User() {
+    }
+
+    public User(String username, String password) {
+        this.username = username;
+        this.password = password;
     }
 
     public User(String username, String password, Key privateKey, Key publicKey) {

@@ -17,12 +17,10 @@ public class Communication {
     }
 
     public void register(User user){
-
         throw new UnsupportedOperationException();
     }
 
     public Token login(User user){
-
         throw new UnsupportedOperationException();
     }
 
