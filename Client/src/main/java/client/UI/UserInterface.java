@@ -1,36 +1,52 @@
 package client.UI;
 
+import client.security.Login;
+
+import java.io.Console;
 import java.sql.SQLOutput;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Scanner;
 
+
+/**
+ * User interface class
+ * Simple implementation of a console-like app
+ * Tries to safely retrieve password, however due to some limitations
+ * not all shells support java.io.Console making passwords difficult to obscure
+ */
 public interface UserInterface {
 
-    static Scanner input = new Scanner(System.in);
+    Console input = System.console();
+    Scanner scan = new Scanner(System.in);
 
     /**
      * Requests the user to input login info
      * @return array with username[0] and password [1]
      */
-    static String[] requestLogin(){
-        String login[] = new String[2];
-
-        String username;
-        String password;
+    static Login requestLogin(){
+        Login login = new Login();
 
         System.out.println();
         System.out.println("Please insert login information:");
         System.out.println("Username: ");
-        username = input.next(); // TODO: validate input
+
+        try{
+            login.setUsername( input.readLine());
+        }catch(NullPointerException np){
+            login.setUsername(scan.next());
+        }
 
         System.out.println("Password: ");
-        password = input.next(); // TODO: validate input
-        System.out.println();
 
-        login[0] = username;
-        login[1] = password;
+        try{
+            login.setPassword(input.readPassword());
+        }catch(NullPointerException np){
+            login.setPassword(scan.next().toCharArray());
+        }
+
+        System.out.println();
 
         return login;
     }
@@ -56,21 +72,22 @@ public interface UserInterface {
     static void help(){
         System.out.println();
         System.out.println("Command description");
+        System.out.println("add   - add new file to remote server");
         System.out.println("pull  - get files from remote server");
         System.out.println("push  - send file to remote server");
-        System.out.println("add   - add new file to remote server");
         System.out.println("share - share file with another user");
+        System.out.println("list  - lists current tracked files");
         System.out.println("exit  - exit program");
         System.out.println();
     }
 
-    static boolean parseCommand(){
+    static void parseCommand(){
         String command;
 
         System.out.println();
         System.out.println("Insert command:");
 
-        command = input.next();
+        command = scan.next();
 
         switch(command){
 
@@ -90,6 +107,10 @@ public interface UserInterface {
                 CommandExecution.share();
                 break;
 
+            case ("list"):
+                CommandExecution.list();
+                break;
+
             case ("help"):
                 help();
                 break;
@@ -99,12 +120,12 @@ public interface UserInterface {
                 break;
 
             default:
+                System.out.println();
                 System.out.println("Unknown command");
-                return false;
+                break;
         }
 
         System.out.println();
-        return true;
     }
 
     static void clearScreen(){

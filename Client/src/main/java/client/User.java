@@ -5,19 +5,19 @@ import java.security.Key;
 public class User {
 
     private String username;
-    private String password;
+    private char[] password;
     private Key privateKey;
     private Key publicKey;
 
     public User() {
     }
 
-    public User(String username, String password) {
+    public User(String username, char[] password) {
         this.username = username;
         this.password = password;
     }
 
-    public User(String username, String password, Key privateKey, Key publicKey) {
+    public User(String username, char[] password, Key privateKey, Key publicKey) {
         this.username = username;
         this.password = password;
         this.privateKey = privateKey;
@@ -32,11 +32,11 @@ public class User {
         this.privateKey = privateKey;
     }
 
-    public String getPassword() {
+    public char[] getPassword() {
         return password;
     }
 
-    public void setPassword(String password) {
+    public void setPassword(char[] password) {
         this.password = password;
     }
 

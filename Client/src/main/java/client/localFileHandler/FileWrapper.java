@@ -1,4 +1,4 @@
-package client;
+package client.localFileHandler;
 
 import java.io.File;
 import java.security.Key;

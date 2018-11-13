@@ -5,6 +5,7 @@ public enum Command {
     push("push"),
     add("add"),
     share("share"),
+    list("list"),
     help("help"),
     exit("exit");
 

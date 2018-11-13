@@ -18,6 +18,10 @@ public interface CommandExecution {
         System.out.println("Sharing file with user ...");
     }
 
+    static void list(){
+        System.out.println("Listing Files...");
+    }
+
     static void exit(){
         System.out.println("Shutting down...");
         System.exit(0);

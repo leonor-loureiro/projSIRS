@@ -1,21 +1,15 @@
 package client;
 
+import client.localFileHandler.FileWrapper;
 import client.security.Token;
-import com.sun.net.httpserver.HttpsServer;
 
-import java.io.IOException;
-import java.net.InetSocketAddress;
 import java.util.List;
 
 public class Communication {
     private Token loginToken;
 
     public void ping(){
-        try {
-            HttpsServer server = HttpsServer.create(new InetSocketAddress(8080), 0);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+
     }
 
     public Token getLoginToken() {
