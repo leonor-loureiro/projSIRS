@@ -1,5 +1,6 @@
 package filesystem;
 
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -7,6 +8,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
 import java.io.IOException;
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 
 @RestController
@@ -19,8 +21,8 @@ public class FileSystemController {
         FileSystemInterface.newfile(file);
     } */
     @RequestMapping(value = "/download")
-    public void download(){
-        FileSystemInterface.download();
+    public ArrayList<FileWrapper> download(@Valid @RequestBody String name) throws IOException, ClassNotFoundException {
+        return FileSystemInterface.download(name);
     }
 
     @PostMapping(value = "/upload")

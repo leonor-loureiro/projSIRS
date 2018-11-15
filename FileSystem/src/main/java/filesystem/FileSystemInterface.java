@@ -25,20 +25,48 @@ public class FileSystemInterface {
 
     } */
 
-    public static void download(){
+    public static ArrayList<FileWrapper> download(String name) throws IOException, ClassNotFoundException {
         System.out.println("Downloading file");
 
         // check sessiontoken
 
         // check folder of user
 
+        Path path = Paths.get("./" + name);
+
+        if(!Files.exists(path)){
+            System.out.println(name + " " + "not registered");
+
+            //Send exception
+        }
+
+        // download all files? or file by file?
+
+        File folder = new File(path.toString());
+
+        File[] listoffiles = folder.listFiles();
+
+        ArrayList<FileWrapper> files = new ArrayList<FileWrapper>();
+
+        for(int i = 0; i<listoffiles.length; i++){
+            FileInputStream f = new FileInputStream(listoffiles[i]);
+            ObjectInputStream o = new ObjectInputStream(f);
+            FileWrapper file = (FileWrapper)o.readObject();
+            files.add(file);
+        }
+
+
+        return files;
         // get list of files add mac of file to the list
 
         // add {Kcs}pubuser of each file to the list
 
         // return the list
     }
+
     public static void upload(FileWrapper[] files) throws IOException {
+
+        System.out.println("uploading");
 
 
         String fileCreator = files[0].getFileCreator();
@@ -77,17 +105,11 @@ public class FileSystemInterface {
 
 
 
-
-
-
-
         // for each file check mac and compare to the mac(file)
 
         // add files to the folder if exists
 
         // return OK
-
-
 
 
     }
