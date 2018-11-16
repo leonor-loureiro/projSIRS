@@ -1,6 +1,5 @@
 package filesystem;
 
-import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -8,7 +7,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
 import java.io.IOException;
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 
 @RestController
@@ -36,5 +34,9 @@ public class FileSystemController {
         FileSystemInterface.share();
     }
 
+    @RequestMapping(value = "/test")
+    public String test(){
+        return "works";
+    }
 }
 
