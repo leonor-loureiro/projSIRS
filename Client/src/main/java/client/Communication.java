@@ -2,9 +2,6 @@ package client;
 
 import client.localFileHandler.FileWrapper;
 import client.security.Token;
-<<<<<<< HEAD
-
-=======
 import com.sun.net.httpserver.HttpsServer;
 import org.apache.http.client.HttpClient;
 import org.apache.http.conn.ssl.NoopHostnameVerifier;
@@ -18,7 +15,6 @@ import javax.net.ssl.SSLContext;
 import java.io.File;
 import java.io.IOException;
 import java.net.InetSocketAddress;
->>>>>>> 82f5084d07946a71a47ccd7e675842883c6aec2e
 import java.util.List;
 
 

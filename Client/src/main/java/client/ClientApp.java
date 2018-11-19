@@ -24,23 +24,23 @@ public class ClientApp {
 
     public static void main(String[] args) throws Exception {
         Login login;
+        UserInterface.home();
         login = UserInterface.requestLogin();
         UserInterface.welcome(login.getUsername());
 
-     //   login = UserInterface.requestLogin();
-     //   UserInterface.welcome(login[0]);
-        Communication comms = new Communication();
-        RestTemplate Rest = comms.restTemplate();
-        ResponseEntity<String> suptofs = Rest.getForEntity("https://localhost:8080/operations/test",String.class);
-        System.out.println(suptofs.getStatusCode());
-        ResponseEntity<String> suptoauth = Rest.getForEntity("https://localhost:8081/auth/test",String.class);
-        System.out.println(suptoauth.getStatusCode());
-    /* while(true) {
+
+//        Communication comms = new Communication();
+//        RestTemplate Rest = comms.restTemplate();
+//        ResponseEntity<String> suptofs = Rest.getForEntity("https://localhost:8080/operations/test",String.class);
+//        System.out.println(suptofs.getStatusCode());
+//        ResponseEntity<String> suptoauth = Rest.getForEntity("https://localhost:8081/auth/test",String.class);
+//        System.out.println(suptoauth.getStatusCode());
+
+    while(true) {
             UserInterface.listCommands();
             UserInterface.parseCommand();
-        }
             UserInterface.clearScreen();
-        } */
+        }
 
     }
 

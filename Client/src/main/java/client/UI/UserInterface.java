@@ -21,6 +21,17 @@ public interface UserInterface {
     Console input = System.console();
     Scanner scan = new Scanner(System.in);
 
+    static void home(){
+        System.out.println("   _____                          _____                _____                                           \n" +
+                "  / ____|                        |  __ \\              |  __ \\               /\\                         \n" +
+                " | (___   ___  ___ _   _ _ __ ___| |__) |___ _ __ ___ | |  | | ___   ___   /  \\   ___ ___ ___  ___ ___ \n" +
+                "  \\___ \\ / _ \\/ __| | | | '__/ _ \\  _  // _ \\ '_ ` _ \\| |  | |/ _ \\ / __| / /\\ \\ / __/ __/ _ \\/ __/ __|\n" +
+                "  ____) |  __/ (__| |_| | | |  __/ | \\ \\  __/ | | | | | |__| | (_) | (__ / ____ \\ (_| (_|  __/\\__ \\__ \\\n" +
+                " |_____/ \\___|\\___|\\__,_|_|  \\___|_|  \\_\\___|_| |_| |_|_____/ \\___/ \\___/_/    \\_\\___\\___\\___||___/___/\n" +
+                "                                                                                                       \n" +
+                "                                                                                                       ".replace("\\", "\\\\"));
+    }
+
     /**
      * Requests the user to input login info
      * @return array with username[0] and password [1]
@@ -31,6 +42,7 @@ public interface UserInterface {
         System.out.println();
         System.out.println("Please insert login information:");
         System.out.println("Username: ");
+
 
         try{
             login.setUsername( input.readLine());
@@ -63,8 +75,9 @@ public interface UserInterface {
         System.out.println();
         System.out.println("Available commands:");
 
+        System.out.print("\t");
         EnumSet.allOf(Command.class)
-                .forEach(command -> System.out.println("\t" + command));
+                .forEach(command -> System.out.print(" " + command));
 
         System.out.println();
     }
@@ -129,7 +142,7 @@ public interface UserInterface {
     }
 
     static void clearScreen(){
-        for(int i = 0; i < 30; i++)
+        for(int i = 0; i < 2; i++)
             System.out.println();
     }
 }
