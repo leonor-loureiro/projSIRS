@@ -3,30 +3,34 @@ package client.security;
 import java.security.Key;
 import java.util.List;
 
-public class SecurityHandler {
+public interface SecurityHandler {
 
-    public List<Key> generateKeyPair(){
+    static List<Key> generateKeyPair(){
         throw new UnsupportedOperationException();
     }
 
-    public Key generateSyncKey(){
+    static Key generateSyncKey(){
         throw new UnsupportedOperationException();
     }
 
-    public Object cipherObject (Object object, Key key){
+    static Object cipherObject (Object object, Key key){
         throw new UnsupportedOperationException();
     }
-    public Object decipherObject (Object objet, Key key){
-        throw new UnsupportedOperationException();
-    }
-
-    public Key loadPrivateKey(){
+    static Object decipherObject (Object objet, Key key){
         throw new UnsupportedOperationException();
     }
 
-    public void storePrivateKey(Key key){
+    static Key loadPrivateKey(){
+        throw new UnsupportedOperationException();
+    }
+
+    static void storePrivateKey(Key key){
         throw new UnsupportedOperationException();
     }
 
 
+    static  byte[] generateMAC( byte[] content, Key key){
+
+        throw new UnsupportedOperationException();
+    }
 }

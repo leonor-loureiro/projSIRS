@@ -36,7 +36,7 @@ public class ClientApp {
 //        ResponseEntity<String> suptoauth = Rest.getForEntity("https://localhost:8081/auth/test",String.class);
 //        System.out.println(suptoauth.getStatusCode());
 
-    while(true) {
+        while (true) {
             UserInterface.listCommands();
             UserInterface.parseCommand();
             UserInterface.clearScreen();

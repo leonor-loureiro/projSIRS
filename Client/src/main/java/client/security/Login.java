@@ -1,5 +1,8 @@
 package client.security;
 
+/**
+ * Login class wrapper
+ */
 public class Login {
     private String username;
     private char[] password;
