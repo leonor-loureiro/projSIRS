@@ -1,4 +1,4 @@
-++++package client;
+package client;
 
 import client.localFileHandler.FileManager;
 import client.localFileHandler.FileWrapper;
