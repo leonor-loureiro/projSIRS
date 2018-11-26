@@ -44,7 +44,6 @@ public class CommandExecution {
 
         user.addFileToStaged(file);
 
-        communication.addNewFile(user, file);
     }
 
     /**
@@ -73,6 +72,8 @@ public class CommandExecution {
             System.out.println("User must be logged for this operation!!");
             return;
         }
+
+        communication.putFiles(user, user.getstagedFiles());
     }
 
     /**

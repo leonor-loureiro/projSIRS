@@ -29,12 +29,6 @@ public class ClientApp {
         UserInterface.welcome(login.getUsername());
 
 
-//        Communication comms = new Communication();
-//        RestTemplate Rest = comms.restTemplate();
-//        ResponseEntity<String> suptofs = Rest.getForEntity("https://localhost:8080/operations/test",String.class);
-//        System.out.println(suptofs.getStatusCode());
-//        ResponseEntity<String> suptoauth = Rest.getForEntity("https://localhost:8081/auth/test",String.class);
-//        System.out.println(suptoauth.getStatusCode());
 
         while (true) {
             UserInterface.listCommands();

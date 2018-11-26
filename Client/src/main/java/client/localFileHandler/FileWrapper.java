@@ -1,5 +1,8 @@
 package client.localFileHandler;
 
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -133,4 +136,20 @@ public class FileWrapper {
     public byte[] getFileMAC() { return fileMAC; }
 
     public void setFileMAC(byte[] fileMAC) { this.fileMAC = fileMAC; }
+
+    /**
+     * Generates a multivalue map with the fileWrapper's attributes
+     * @return the multivalue map
+     */
+    public MultiValueMap<String, Object> getMap(){
+        MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
+
+        body.add("fileName", getFileName());
+        body.add("MAC", getFileMAC());
+        body.add("key", getFileKey());
+        body.add("Creator", getFileCreator());
+        body.add("file", getFile());
+
+        return body;
+    }
 }
