@@ -6,6 +6,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.List;
 
 public class FileSystemInterface {
 
@@ -25,7 +26,7 @@ public class FileSystemInterface {
 
     } */
 
-    public static ArrayList<FileWrapper> download(String name) throws IOException, ClassNotFoundException {
+    public static List<EncryptedFileWrapper> download(String name) throws IOException, ClassNotFoundException {
         System.out.println("Downloading file");
 
         // check sessiontoken
@@ -46,12 +47,12 @@ public class FileSystemInterface {
 
         File[] listoffiles = folder.listFiles();
 
-        ArrayList<FileWrapper> files = new ArrayList<FileWrapper>();
+        ArrayList<EncryptedFileWrapper> files = new ArrayList<EncryptedFileWrapper>();
 
         for(int i = 0; i<listoffiles.length; i++){
             FileInputStream f = new FileInputStream(listoffiles[i]);
             ObjectInputStream o = new ObjectInputStream(f);
-            FileWrapper file = (FileWrapper)o.readObject();
+            EncryptedFileWrapper file = (EncryptedFileWrapper)o.readObject();
             files.add(file);
         }
 
@@ -64,12 +65,12 @@ public class FileSystemInterface {
         // return the list
     }
 
-    public static void upload(FileWrapper[] files) throws IOException {
+    public static void upload(List<EncryptedFileWrapper> files) throws IOException {
 
         System.out.println("uploading");
 
 
-        String fileCreator = files[0].getFileCreator();
+        String fileCreator = files.get(0).getFileCreator();
 
         // check sessiontoken
 
@@ -93,12 +94,12 @@ public class FileSystemInterface {
 
         System.out.println("Uploading files");
 
-        for(int i = 0 ;i < Array.getLength(files);i++){
+        for(int i = 0 ; i < files.size() ;i++){
 
-            System.out.println(files[0].getFileName());
-            FileOutputStream writer = new FileOutputStream(fileCreator + "\\" + files[i].getFileName() + ".file");
+            System.out.println(files.get(i).getFileName());
+            FileOutputStream writer = new FileOutputStream(fileCreator + "\\" + files.get(i).getFileName() + ".file");
             ObjectOutputStream outwriter = new ObjectOutputStream(writer );
-            outwriter.writeObject(files[i]);
+            outwriter.writeObject(files.get(i));
             outwriter.close();
 
         }

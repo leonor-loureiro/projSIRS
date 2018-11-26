@@ -1,13 +1,13 @@
 package filesystem;
 
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.util.MultiValueMap;
+import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 @RestController
 @RequestMapping("/operations")
@@ -19,13 +19,15 @@ public class FileSystemController {
         FileSystemInterface.newfile(file);
     } */
     @RequestMapping(value = "/download")
-    public ArrayList<FileWrapper> download(@Valid @RequestBody String name) throws IOException, ClassNotFoundException {
+    public List<EncryptedFileWrapper> download(@Valid @RequestBody String name) throws IOException, ClassNotFoundException {
         return FileSystemInterface.download(name);
     }
 
     @PostMapping(value = "/upload")
-    public void upload(@Valid @RequestBody FileWrapper[] files) throws IOException {
+    public void upload(@Valid @RequestBody List<EncryptedFileWrapper> files) throws IOException {
 
+//        System.out.println(file.get(0).getFileName());
+//        System.out.println(Arrays.toString(file.get(0).getFile()));
         FileSystemInterface.upload(files);
     }
 
