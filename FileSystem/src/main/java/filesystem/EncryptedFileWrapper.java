@@ -1,29 +1,18 @@
 package filesystem;
 
-import java.io.File;
 import java.io.Serializable;
-import java.security.Key;
 
+public class EncryptedFileWrapper implements Serializable {
 
-public class FileWrapper implements Serializable {
     private String fileName;
-    private File file;
-    private Key fileKey;
+
+    private byte[] file;
+
+    private byte[] fileKey;
+
     private String fileCreator;
+
     private String fileMAC;
-
-
-    public FileWrapper(){
-
-    }
-
-    public FileWrapper(String fileName, File file, Key fileKey, String fileCreator, String fileMAC) {
-        this.fileName = fileName;
-        this.file = file;
-        this.fileKey = fileKey;
-        this.fileCreator = fileCreator;
-        this.fileMAC = fileMAC;
-    }
 
     public String getFileName() {
         return fileName;
@@ -33,19 +22,19 @@ public class FileWrapper implements Serializable {
         this.fileName = fileName;
     }
 
-    public File getFile() {
+    public byte[] getFile() {
         return file;
     }
 
-    public void setFile(File file) {
+    public void setFile(byte[] file) {
         this.file = file;
     }
 
-    public Key getFileKey() {
+    public byte[] getFileKey() {
         return fileKey;
     }
 
-    public void setFileKey(Key fileKey) {
+    public void setFileKey(byte[] fileKey) {
         this.fileKey = fileKey;
     }
 

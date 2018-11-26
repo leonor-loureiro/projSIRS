@@ -31,10 +31,9 @@ public class FileWrapper {
     private String fileCreator;
 
     /**
-     * MAC to ensure File's integrity
+     *
      */
-    private byte[] fileMAC;
-
+    private byte[] fileContent;
 
     // TODO: add version
 
@@ -59,21 +58,6 @@ public class FileWrapper {
         this.fileCreator = fileCreator;
     }
 
-    /**
-     * FileWrapper constructor Overload
-     * @param fileName file name and extension of the wrapped file
-     * @param file file to be wrapped
-     * @param fileKey key used to encrypt this file when not stored locally
-     * @param fileCreator original creator of this file
-     * @param fileMAC Message Authentication Code to keep integrity
-     */
-    public FileWrapper(String fileName, File file, Key fileKey, String fileCreator, byte[] fileMAC) {
-        this.fileName = fileName;
-        this.file = file;
-        this.fileKey = fileKey;
-        this.fileCreator = fileCreator;
-        this.fileMAC = fileMAC;
-    }
 
     /**
      * Get the string content of a file
@@ -133,23 +117,11 @@ public class FileWrapper {
 
     public void setFileCreator(String fileCreator) { this.fileCreator = fileCreator; }
 
-    public byte[] getFileMAC() { return fileMAC; }
+    public byte[] getFileContent() {
+        return fileContent;
+    }
 
-    public void setFileMAC(byte[] fileMAC) { this.fileMAC = fileMAC; }
-
-    /**
-     * Generates a multivalue map with the fileWrapper's attributes
-     * @return the multivalue map
-     */
-    public MultiValueMap<String, Object> getMap(){
-        MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
-
-        body.add("fileName", getFileName());
-        body.add("MAC", getFileMAC());
-        body.add("key", getFileKey());
-        body.add("Creator", getFileCreator());
-        body.add("file", getFile());
-
-        return body;
+    public void setFileContent(byte[] fileContent) {
+        this.fileContent = fileContent;
     }
 }

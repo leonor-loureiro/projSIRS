@@ -4,6 +4,8 @@ import client.localFileHandler.FileManager;
 import client.localFileHandler.FileWrapper;
 import client.security.Login;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.util.List;
 
 public class CommandExecution {
@@ -58,8 +60,18 @@ public class CommandExecution {
 
         List<FileWrapper> files = communication.getFiles(user);
 
-        user.addFilesToStaged(files);
+        for(FileWrapper file: files){
 
+            file.setFile(new File(file.getFileName()));
+
+            try ( FileOutputStream outputStream = new FileOutputStream(file.getFile())) {
+                outputStream.write(file.getFileContent());
+
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        user.addFilesToStaged(files);
 
     }
 

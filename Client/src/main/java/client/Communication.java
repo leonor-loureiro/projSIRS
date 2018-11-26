@@ -1,19 +1,19 @@
 package client;
 
 import client.localFileHandler.FileWrapper;
+import client.security.EncryptedFileWrapper;
+import client.security.SecurityHandler;
 import client.security.Token;
+
 import org.apache.http.client.HttpClient;
 import org.apache.http.conn.ssl.NoopHostnameVerifier;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.ssl.SSLContextBuilder;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
 import javax.net.ssl.SSLContext;
@@ -23,12 +23,13 @@ import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
+import java.util.ArrayList;
 import java.util.List;
 
 
 public class Communication {
     private Token loginToken;
-
+    private String serverUrl = "https://localhost:8080/operations";
     public void ping(){
 
     }
@@ -42,16 +43,29 @@ public class Communication {
     }
 
     public void register(User user){
+
         throw new UnsupportedOperationException();
     }
 
-    public Token login(User user){
-        throw new UnsupportedOperationException();
+    public void login(User user) {
+        System.out.println("Pretending to login...");
+
     }
 
     public List<FileWrapper> getFiles(User user){
+        RestTemplate restTemplate = restTemplate();
 
-        throw new UnsupportedOperationException();
+
+        ResponseEntity<List<EncryptedFileWrapper>> response = restTemplate.exchange(
+                        serverUrl + "/download" ,
+                        HttpMethod.POST,
+                        null,
+                        new ParameterizedTypeReference<List<EncryptedFileWrapper>>(){});
+
+
+        List<EncryptedFileWrapper> files = response.getBody();
+
+        return SecurityHandler.decryptFileWrappers(files);
     }
 
     /**
@@ -61,32 +75,13 @@ public class Communication {
      */
     public void putFiles(User user, List<FileWrapper> files){
         RestTemplate restTemp = restTemplate();
-        //ResponseEntity<String> res = Rest.getForEntity("https://localhost:8080/operations/upload", String.class);
-
-
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.MULTIPART_FORM_DATA);
-
-        MultiValueMap<String, Object> body
-                = new LinkedMultiValueMap<>();
+        List<EncryptedFileWrapper> list = new ArrayList<>();
 
         for(FileWrapper f: files){
-            body.add("files", f.getMap());
+            list.add(new EncryptedFileWrapper(f));
         }
 
-        HttpEntity<MultiValueMap<String, Object>> requestEntity
-                = new HttpEntity<>(body, headers);
-
-        String serverUrl = "https://localhost:8080/operations/upload";
-
-        ResponseEntity<String> res = restTemp
-                .postForEntity(serverUrl, requestEntity, String.class);
-
-
-
-        System.out.println(res.getStatusCode());
-//        ResponseEntity<String> suptoauth = Rest.getForEntity("https://localhost:8081/auth/test",String.class);
-//        System.out.println(suptoauth.getStatusCode());
+        restTemp.postForObject(serverUrl+"/upload", list,  ResponseEntity.class);
 
     }
 
@@ -94,6 +89,10 @@ public class Communication {
         throw new UnsupportedOperationException();
     }
 
+    /**
+     * Generates a rest template for https
+     * @return https rest template
+     */
     private RestTemplate restTemplate()
     {
 
