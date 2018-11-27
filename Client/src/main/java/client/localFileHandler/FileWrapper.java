@@ -18,7 +18,7 @@ public class FileWrapper {
     /**
      * The file being wrapped around
      */
-    private File file;
+    private byte[] file;
 
     /**
      * Key used to encrypt this file
@@ -30,10 +30,6 @@ public class FileWrapper {
      */
     private String fileCreator;
 
-    /**
-     *
-     */
-    private byte[] fileContent;
 
     // TODO: add version
 
@@ -51,34 +47,13 @@ public class FileWrapper {
      * @param fileKey key used to encrypt this file when not stored locally
      * @param fileCreator original creator of this file
      */
-    public FileWrapper(String fileName, File file, Key fileKey, String fileCreator) {
+    public FileWrapper(String fileName, byte[] file, Key fileKey, String fileCreator) {
         this.fileName = fileName;
         this.file = file;
         this.fileKey = fileKey;
         this.fileCreator = fileCreator;
     }
 
-
-    /**
-     * Get the string content of a file
-     * @param file the FileWrapper which content u want the string from
-     * @return the string content of the file
-     * @throws IOException if any error occur with file opening
-     */
-    static String getFileContentString(FileWrapper file) throws IOException {
-
-        try(BufferedReader br = new BufferedReader(new FileReader(file.getFile()))) {
-            StringBuilder sb = new StringBuilder();
-            String line = br.readLine();
-
-            while (line != null) {
-                sb.append(line);
-                sb.append(System.lineSeparator());
-                line = br.readLine();
-            }
-            return sb.toString();
-        }
-    }
 
     /**
      * Compares files by their name
@@ -105,9 +80,9 @@ public class FileWrapper {
 
     public void setFileName(String fileName) { this.fileName = fileName; }
 
-    public File getFile() { return file; }
+    public byte[] getFile() { return file; }
 
-    public void setFile(File file) { this.file = file; }
+    public void setFile(byte[] file) { this.file = file; }
 
     public Key getFileKey() { return fileKey; }
 
@@ -117,11 +92,5 @@ public class FileWrapper {
 
     public void setFileCreator(String fileCreator) { this.fileCreator = fileCreator; }
 
-    public byte[] getFileContent() {
-        return fileContent;
-    }
 
-    public void setFileContent(byte[] fileContent) {
-        this.fileContent = fileContent;
-    }
 }

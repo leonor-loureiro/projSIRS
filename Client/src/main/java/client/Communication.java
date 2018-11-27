@@ -53,18 +53,22 @@ public class Communication {
     }
 
     public List<FileWrapper> getFiles(User user){
-        RestTemplate restTemplate = restTemplate();
+        RestTemplate restTemp = restTemplate();
 
 
-        ResponseEntity<List<EncryptedFileWrapper>> response = restTemplate.exchange(
-                        serverUrl + "/download" ,
-                        HttpMethod.POST,
-                        null,
-                        new ParameterizedTypeReference<List<EncryptedFileWrapper>>(){});
+//        ResponseEntity<List<EncryptedFileWrapper>> response = restTemp.postForEntity(
+//                        serverUrl + "/download" ,
+//                        HttpMethod.POST,
+//                        null,
+//                        new ParameterizedTypeReference<List<EncryptedFileWrapper>>(){});
+//
+//
 
+        ResponseEntity <List<EncryptedFileWrapper>> response =
+                restTemp.postForObject(serverUrl+"/download", user.getUsername(),  ResponseEntity.class);
 
         List<EncryptedFileWrapper> files = response.getBody();
-
+        System.out.println(response);
         return SecurityHandler.decryptFileWrappers(files);
     }
 

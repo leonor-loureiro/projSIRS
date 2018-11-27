@@ -20,15 +20,8 @@ public interface FileManager {
 
         File dest = new File(path + file.getFileName());
 
-        // Try-with-resource in java is a try statement that closes the resources at the end, it works
-        // like try catch finally were you close resources on finally statement
-        try (InputStream is = new FileInputStream(file.getFile()); OutputStream os = new FileOutputStream(dest)) {
-            byte[] buffer = new byte[1024];
-            int length;
-            // writes file buffer into destinationFile buffer
-            while ((length = is.read(buffer)) > 0) {
-                os.write(buffer, 0, length);
-            }
+        try (FileOutputStream stream = new FileOutputStream(path)) {
+            stream.write(file.getFile());
         }
     }
 
@@ -55,10 +48,12 @@ public interface FileManager {
 
         File[] files = new File(path).listFiles();
 
+
+
         if (files != null) {
             for (File file : files) {
                 if (file.isFile() && file.getName().equals(name)) {
-                    temp.setFile(file);
+                    temp.setFile(getFileContent(file));
                     temp.setFileName(file.getName());
                     return temp;
                 }
@@ -66,6 +61,19 @@ public interface FileManager {
         }
 
         return null;
+    }
+
+    static byte[] getFileContent(File inputFile){
+        FileInputStream inputStream = null;
+        byte[] file = null;
+        try {
+            inputStream = new FileInputStream(inputFile);
+            file = new byte[(int) inputFile.length()];
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        
+        return file;
     }
 
     /**
@@ -82,7 +90,7 @@ public interface FileManager {
             for (File file : files) {
                 if (file.isFile()) {
                     FileWrapper temp = new FileWrapper();
-                    temp.setFile(file);
+                    temp.setFile(getFileContent(file));
                     temp.setFileName(file.getName());
                     results.add(temp);
                 }

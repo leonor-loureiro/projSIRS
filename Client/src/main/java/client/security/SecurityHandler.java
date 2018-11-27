@@ -44,7 +44,7 @@ public interface SecurityHandler {
 
         file.setFileName(enc.getFileName());
         file.setFileCreator(enc.getFileCreator());
-        file.setFileContent(enc.getFile());
+        file.setFile(enc.getFile());
 
         // TODO: Get FileKEY file.setFileKey(enc.getFileKey());
 

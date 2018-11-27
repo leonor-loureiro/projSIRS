@@ -44,6 +44,12 @@ public class CommandExecution {
 
         FileWrapper file = FileManager.loadFile(filename);
 
+        if(file == null){
+            System.out.println("File " + filename + " not found.");
+            return;
+        }
+
+        file.setFileCreator(user.getUsername());
         user.addFileToStaged(file);
 
     }
@@ -60,17 +66,6 @@ public class CommandExecution {
 
         List<FileWrapper> files = communication.getFiles(user);
 
-        for(FileWrapper file: files){
-
-            file.setFile(new File(file.getFileName()));
-
-            try ( FileOutputStream outputStream = new FileOutputStream(file.getFile())) {
-                outputStream.write(file.getFileContent());
-
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
         user.addFilesToStaged(files);
 
     }

@@ -2,11 +2,6 @@ package client.security;
 
 import client.localFileHandler.FileWrapper;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-
 public class EncryptedFileWrapper {
 
     private String fileName;
@@ -24,15 +19,7 @@ public class EncryptedFileWrapper {
     public EncryptedFileWrapper(FileWrapper fp){
         fileName = fp.getFileName();
 
-        File inputFile = fp.getFile();
-        FileInputStream inputStream = null;
-        try {
-            inputStream = new FileInputStream(inputFile);
-            file = new byte[(int) inputFile.length()];
-            // TODO:Encrypt File
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        file = fp.getFile(); //TODO: Encrypt file
 
         // TODO: Encrypt fileKey
         fileKey = null;
