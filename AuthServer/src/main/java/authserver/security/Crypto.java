@@ -6,18 +6,31 @@ import org.bouncycastle.crypto.digests.SHA3Digest;
 import org.bouncycastle.crypto.generators.PKCS5S2ParametersGenerator;
 import org.bouncycastle.crypto.params.KeyParameter;
 import org.bouncycastle.crypto.prng.DigestRandomGenerator;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.security.Key;
-import java.security.KeyStore;
-import java.security.KeyStoreException;
-import java.security.PublicKey;
+import java.security.*;
 import java.security.cert.Certificate;
 import java.util.Base64;
 
 public class Crypto {
 
+    /**
+     * Sets the Security policy as unlimited
+     * Adds the security provider BouncyCastle
+     */
+    public static void init(){
+        // Set java security policy
+        Security.setProperty("crypto.policy", "unlimited");
+
+        // Add security provider
+        if(Security.getProvider("BC") == null)
+            Security.addProvider(new BouncyCastleProvider());
+    }
+    /***********************************************
+     *         Password Crypto Functions
+     ***********************************************/
     // Salt generator
     private static final DigestRandomGenerator generator = new DigestRandomGenerator(new SHA3Digest(512));
 
@@ -139,6 +152,11 @@ public class Crypto {
     public static String getSalt(String input) {
         return input.substring(0, input.indexOf("|"));
     }
+
+    /**************************************************************
+     *              Asymmetric Crypto Functions
+     **************************************************************/
+
 
     /***
      * Extracts private key from keystore

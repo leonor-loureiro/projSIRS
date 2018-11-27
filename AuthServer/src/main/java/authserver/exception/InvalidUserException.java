@@ -1,10 +1,13 @@
 package authserver.exception;
 
-public class CryptoException extends Exception {
+public class InvalidUserException extends Exception {
     private String message;
 
-    public CryptoException( String message) {
+    public InvalidUserException(String message) {
         this.message = message;
+    }
+
+    public InvalidUserException() {
     }
 
     public String getMessage() {

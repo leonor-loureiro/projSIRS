@@ -1,10 +1,13 @@
 package authserver.exception;
 
-public class CryptoException extends Exception {
-    private String message;
+public class UserAlreadyExistsException extends Exception {
+    private String message = "User already exists";
 
-    public CryptoException( String message) {
+    public UserAlreadyExistsException(String message) {
         this.message = message;
+    }
+
+    public UserAlreadyExistsException() {
     }
 
     public String getMessage() {

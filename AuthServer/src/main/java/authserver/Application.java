@@ -3,6 +3,8 @@ package authserver;
 import authserver.db.DBConnection;
 import authserver.data.User;
 import authserver.exception.CryptoException;
+import authserver.exception.InvalidUserException;
+import authserver.exception.UserAlreadyExistsException;
 import authserver.security.Crypto;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.springframework.boot.SpringApplication;
@@ -31,14 +33,16 @@ public class Application {
     private static final String myAlias = "server-keypair";
 
     public static void main(String[] args) {
-        // Set java security policy
-        Security.setProperty("crypto.policy", "unlimited");
 
-        // Add security provider
-        if(Security.getProvider("BC") == null)
-            Security.addProvider(new BouncyCastleProvider());
+        Crypto.init();
 
+        /*try {
+            System.out.println(AuthService.getInstance().login("try2", "password"));
+        } catch (InvalidUserException e) {
+            e.printStackTrace();
+        }*/
 
+/*
 
         try {
             Key Kpriv = Crypto.getPrivateKey(keystoreFile, keystorePwd, myAlias, keyPwd);
@@ -49,7 +53,7 @@ public class Application {
 
         } catch (CryptoException e) {
             e.printStackTrace();
-        }
+        }*/
 
         /*String saltedPass = "";
         try {

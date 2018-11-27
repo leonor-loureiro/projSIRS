@@ -49,36 +49,6 @@ public class DBConnection {
 
     }
 
-    /**
-     * Opens a connection to the database
-     */
-    public void openConnection() throws SQLException {
-
-        // Open a connection
-        conn = DriverManager.getConnection(DB_URL,USER,PASS);
-
-        // Prepare statements
-        selectStm = conn.prepareStatement(SELECT_USER_SQL);
-        insertStm = conn.prepareStatement(INSERT_USER_SQL);
-
-    }
-
-    /**
-     * Closes the connection to the database
-     * @throws SQLException
-     */
-    public void closeConnection() throws SQLException {
-        // Close statements
-        if(selectStm != null)
-            selectStm.close();
-
-        if(insertStm != null)
-            insertStm.close();
-
-        //Close connection
-        if(conn != null)
-            conn.close();
-    }
 
     /**
      * Extracts the user from the database
@@ -89,16 +59,15 @@ public class DBConnection {
      */
     public User getUser(String username) throws SQLException {
 
-        if(selectStm == null || selectStm.isClosed())
-            return null;
-
+        //Create connection
+        conn = DriverManager.getConnection(DB_URL,USER,PASS);
+        // Prepare statment
+        selectStm = conn.prepareStatement(SELECT_USER_SQL);
         //Set params
         selectStm.setString(1, username);
 
+        //Execute query
         try (ResultSet resultSet = selectStm.executeQuery()) {
-            // Set params
-
-            //Execute query
 
             String saltedPwd = null;
             //Extract result
@@ -112,7 +81,8 @@ public class DBConnection {
 
         } finally {
             //Clean-up
-            selectStm.clearParameters();
+            selectStm.close();
+            conn.close();
         }
     }
 
@@ -125,8 +95,11 @@ public class DBConnection {
      */
     public boolean setUser(User user) throws SQLException {
 
-        if(insertStm == null || insertStm.isClosed())
-            return false;
+        // Create a connection to the database
+        conn = DriverManager.getConnection(DB_URL,USER,PASS);
+
+        //Prepare statement
+        insertStm = conn.prepareStatement(INSERT_USER_SQL);
 
         try {
             // Set params
@@ -138,7 +111,8 @@ public class DBConnection {
 
         } finally {
             // Clean up
-            insertStm.clearParameters();
+            insertStm.close();
+            conn.close();
         }
     }
 
