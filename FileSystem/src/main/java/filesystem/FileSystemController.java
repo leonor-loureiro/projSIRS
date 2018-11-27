@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/operations")
@@ -32,8 +33,8 @@ public class FileSystemController {
     }
 
     @RequestMapping(value = "/share")
-    public void share(){
-        FileSystemInterface.share();
+    public void share(@RequestBody Map<String,String> information, EncryptedFileWrapper file) throws IOException, ClassNotFoundException {
+        FileSystemInterface.share(information,file);
     }
 
     @RequestMapping(value = "/test")
