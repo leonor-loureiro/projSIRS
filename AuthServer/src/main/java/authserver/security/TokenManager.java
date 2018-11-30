@@ -77,27 +77,32 @@ public class TokenManager {
         try {
             key = Crypto.getPublicKey(keystoreFile, keystorePwd, myAlias);
         } catch (CryptoException e) {
-            e.printStackTrace();
+            return false;
         }
 
         // Parse JTW to obtain claims
-        Claims claims = Jwts.parser().setSigningKey(key).parseClaimsJws(jtw).getBody();
+        try {
+            Claims claims = Jwts.parser().setSigningKey(key).parseClaimsJws(jtw).getBody();
 
-        String jtwSubject = claims.getSubject();
-        String jtwIssuer = claims.getIssuer();
-        Date jtwExpireDate = claims.getExpiration();
-        Date jtwIssuedAt = claims.getIssuedAt();
-        Date currentDate = new Date(System.currentTimeMillis());
+            String jtwSubject = claims.getSubject();
+            String jtwIssuer = claims.getIssuer();
+            Date jtwExpireDate = claims.getExpiration();
+            Date jtwIssuedAt = claims.getIssuedAt();
+            Date currentDate = new Date(System.currentTimeMillis());
 
-        //Print details
-        System.out.println("ID: " + claims.getId());
-        System.out.println("Subject: " + claims.getSubject());
-        System.out.println("Issuer: " + claims.getIssuer());
-        System.out.println("Expiration: " + claims.getExpiration());
+            //Print details
+            System.out.println("ID: " + claims.getId());
+            System.out.println("Subject: " + claims.getSubject());
+            System.out.println("Issuer: " + claims.getIssuer());
+            System.out.println("Expiration: " + claims.getExpiration());
 
-        return jtwSubject.equals(subject) && jtwIssuer.equals(issuer) &&
-                jtwIssuedAt.before(currentDate) && jtwExpireDate.after(currentDate);
+            return jtwSubject.equals(subject) && jtwIssuer.equals(issuer) &&
+                    jtwIssuedAt.before(currentDate) && jtwExpireDate.after(currentDate);
 
+
+        }catch (Exception e){
+            return false;
+        }
     }
 
 

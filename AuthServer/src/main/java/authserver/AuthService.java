@@ -100,7 +100,16 @@ public class AuthService {
         return TokenManager.validateJTW(token, "authServer", username);
     }
 
+    public String getPublicKey(String username) throws InvalidUserException {
+        try {
+            return db.getPublicKey(username);
+        } catch (SQLException e) {
+            throw new InvalidUserException("Invalid user");
+        }
+    }
+
     private String generateToken(String username){
-        return TokenManager.createJTW(""+random.nextInt(), "authServer", username, VALID_PERIOD);
+        String id = "" + random.nextInt(9000000) + 1000000;
+        return TokenManager.createJTW(id, "authServer", username, VALID_PERIOD);
     }
 }
