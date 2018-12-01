@@ -17,7 +17,7 @@ public class DBConnection {
     // Select user SQL
     private static final String SELECT_USER_SQL = "Select saltedPwd from users where username = ?";
     // Insert user SQL
-    private static final String INSERT_USER_SQL = "insert into users (username, saltedPwd) values ( ? , ? )";
+    private static final String INSERT_USER_SQL = "insert into users (username, saltedPwd, kpub) values ( ? , ? , ?)";
     // Select public key SQL
     private static final String SELECT_KEY_SQL = "Select kpub from users where username = ?";
 
@@ -81,7 +81,7 @@ public class DBConnection {
             if (saltedPwd == null)
                 return null;
 
-            return new User(username, saltedPwd);
+            return new User(username, saltedPwd, null);
 
         } finally {
             //Clean-up
@@ -138,6 +138,7 @@ public class DBConnection {
             // Set params
             insertStm.setString(1, user.getUsername());
             insertStm.setString(2, user.getSaltedPwd());
+            insertStm.setString(3, user.getKpub());
 
             // Execute insert statement
             return insertStm.executeUpdate() == 1;

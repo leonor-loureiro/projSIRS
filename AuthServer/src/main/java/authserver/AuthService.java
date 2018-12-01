@@ -8,7 +8,15 @@ import authserver.exception.UserAlreadyExistsException;
 import authserver.security.Crypto;
 import authserver.security.TokenManager;
 
+import java.security.Key;
+import java.security.KeyFactory;
+import java.security.NoSuchAlgorithmException;
+import java.security.PublicKey;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.X509EncodedKeySpec;
 import java.sql.SQLException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Random;
 
 /**
@@ -46,16 +54,15 @@ public class AuthService {
         return instance;
     }
 
-    public String register(String username, String password) throws UserAlreadyExistsException {
+    public String register(String username, String password, String Kpub) throws UserAlreadyExistsException {
         String saltedPwd = null;
         try {
             saltedPwd = Crypto.hash(password);
-            System.out.println(saltedPwd);
-            System.out.println((Crypto.getSalt(saltedPwd)));
+
         } catch (CryptoException e) {
             throw  new UserAlreadyExistsException("Registration Failed");
         }
-        User user = new User(username, saltedPwd);
+        User user = new User(username, saltedPwd, Kpub);
 
 
         try {
@@ -100,9 +107,21 @@ public class AuthService {
         return TokenManager.validateJTW(token, "authServer", username);
     }
 
-    public String getPublicKey(String username) throws InvalidUserException {
+    public String getPublicKey(String username) throws InvalidUserException, CryptoException {
         try {
-            return db.getPublicKey(username);
+            // Get public key
+            String Kpub = db.getPublicKey(username);
+
+            // Encrypt public key with secret key
+            Key Ks = Crypto.generateSecretKey(256, "AES");
+            String cipheredKpub = Crypto.encryptAES(Ks, Kpub);
+
+            // Encrypt secret key with authServer Kpriv
+            Key Kpriv = Crypto.getPrivateKey(keystoreFile, keystorePwd, myAlias, keyPwd);
+            String cipheredKs = Crypto.encryptRSA(Ks.getEncoded(), Kpriv);
+
+            return cipheredKpub + "|" + cipheredKs;
+
         } catch (SQLException e) {
             throw new InvalidUserException("Invalid user");
         }
@@ -111,5 +130,42 @@ public class AuthService {
     private String generateToken(String username){
         String id = "" + random.nextInt(9000000) + 1000000;
         return TokenManager.createJTW(id, "authServer", username, VALID_PERIOD);
+    }
+
+
+    /***********************************************************
+     * For the client
+     */
+
+    public static PublicKey recoverPublicKey(String cipher){
+        //Extract ciphered keys
+        String cipheredKpub = cipher.substring(0, cipher.indexOf("|"));
+        String cipheredKs = cipher.substring(cipher.indexOf("|") + 1);
+
+        try {
+            // Get public key from authserver
+            PublicKey publicKeyAuth = Crypto.getPublicKey(keystoreFile, keystorePwd, myAlias);
+
+            // Decipher Ks
+            byte[] Ks = Crypto.decryptRSA(cipheredKs, publicKeyAuth);
+
+            //Decrypt Kpub
+            byte[] publicKeyBytes = Crypto.decryptAES(Ks, cipheredKpub);
+
+            // Convert to public key
+            PublicKey publicKey = KeyFactory.getInstance("RSA").generatePublic(new X509EncodedKeySpec(publicKeyBytes));
+
+            return publicKey;
+
+        } catch (InvalidKeySpecException e) {
+            e.printStackTrace();
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        } catch (CryptoException e) {
+            e.printStackTrace();
+        }
+
+        return null;
+
     }
 }

@@ -8,12 +8,19 @@ import org.bouncycastle.crypto.params.KeyParameter;
 import org.bouncycastle.crypto.prng.DigestRandomGenerator;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.util.encoders.Base64;
+import org.omg.CORBA.DynAnyPackage.Invalid;
 
 import javax.crypto.*;
+import javax.crypto.spec.IvParameterSpec;
+import javax.crypto.spec.SecretKeySpec;
+import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.security.*;
 import java.security.cert.Certificate;
+import java.security.spec.InvalidParameterSpecException;
+import java.util.HashMap;
+import java.util.Map;
 
 import static javax.crypto.Cipher.DECRYPT_MODE;
 import static javax.crypto.Cipher.ENCRYPT_MODE;
@@ -301,14 +308,29 @@ public class Crypto {
      *                      RSA Encryption and Decryption
      ****************************************************************************/
 
-    public static String encryptRSA (String data, PrivateKey privateKey) throws CryptoException {
+    public static KeyPair generateRSAKeys() throws CryptoException {
+        return generateRSAKeys(2048);
+    }
+    public static KeyPair generateRSAKeys(int blockSize) throws CryptoException {
+        KeyPairGenerator kpg = null;
+        try {
+            kpg = KeyPairGenerator.getInstance("RSA");
+        } catch (NoSuchAlgorithmException e) {
+            throw new CryptoException("Failed to generate RSA key pair");
+        }
+        kpg.initialize(blockSize);
+        KeyPair kp = kpg.generateKeyPair();
+        return  kp;
+    }
+
+    public static String encryptRSA (byte[] data, Key key) throws CryptoException {
         if(data == null)
             throw  new CryptoException("Data is null");
 
         try {
             Cipher cipher = Cipher.getInstance("RSA", "BC");
-            cipher.init(ENCRYPT_MODE, privateKey);
-            return toString(cipher.doFinal(toByteArray(data)));
+            cipher.init(ENCRYPT_MODE, key);
+            return toString(cipher.doFinal(data));
 
         } catch (InvalidKeyException e) {
             e.printStackTrace();
@@ -319,14 +341,14 @@ public class Crypto {
         }
     }
 
-    public static String decryptRSA (String data, PublicKey publicKey) throws CryptoException {
+    public static byte[] decryptRSA (String data, Key key) throws CryptoException {
         if(data == null)
             throw  new CryptoException("Data is null");
 
         try {
             Cipher cipher = Cipher.getInstance("RSA", "BC");
-            cipher.init(DECRYPT_MODE, publicKey);
-            return toString(cipher.doFinal(toByteArray(data)));
+            cipher.init(DECRYPT_MODE, key);
+            return (cipher.doFinal(toByteArray(data)));
 
         } catch (InvalidKeyException e) {
             e.printStackTrace();
@@ -337,13 +359,21 @@ public class Crypto {
         }
     }
 
-    /**
-     * Generates a secret key
-     * @param size key size
-     * @param alg algorithm
-     * @return secret key
-     * @throws CryptoException
-     */
+    /************************************************************************
+     *                  SYMMETRIC ENCRYPTION / DECRYPTION
+     ***********************************************************************/
+
+    public static SecretKey generateSecretKey() throws CryptoException {
+        return generateSecretKey(256, "AES");
+    }
+
+        /**
+         * Generates a secret key
+         * @param size key size
+         * @param alg algorithm
+         * @return secret key
+         * @throws CryptoException
+         */
     public static SecretKey generateSecretKey(int size, String alg) throws CryptoException {
         KeyGenerator keyGen = null;
         try {
@@ -353,5 +383,133 @@ public class Crypto {
         }
         keyGen.init(size);
         return keyGen.generateKey();
+    }
+
+    public static String encryptAES(Key key, String data) throws CryptoException {
+        return  toString(encryptAES(key, toByteArray(data)));
+    }
+    public static byte[] decryptAES(byte[] key, String cipher) throws CryptoException {
+        return decryptAES(key, toByteArray(cipher));
+    }
+
+
+    public static byte[] encryptAES(Key key, byte[] data) throws CryptoException {
+        //Create secret key
+        SecretKeySpec sKey = new SecretKeySpec(key.getEncoded(),"AES");
+
+        // Create IV param
+        byte[] iv = new byte[16];
+        SecureRandom random = new SecureRandom();
+        random.nextBytes(iv);
+        IvParameterSpec ivParam = new IvParameterSpec(iv);
+
+        try {
+            //Create cipher instance
+            Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding", "BC");
+            cipher.init(ENCRYPT_MODE, sKey, ivParam);
+
+            // Cipher data
+            byte[] cipheredData = cipher.doFinal(data);
+
+            // Concat the IV and the ciphered data
+            ByteArrayOutputStream outputStream = new ByteArrayOutputStream( );
+            outputStream.write( cipher.getIV());
+            outputStream.write( cipheredData );
+            return outputStream.toByteArray();
+
+
+        } catch (InvalidKeyException e) {
+            throw new CryptoException("Invalid key");
+        } catch (Exception e) {
+            throw new CryptoException("Encryption failed");
+        }
+    }
+
+
+    public static byte[] decryptAES(byte[] key, byte[] cipherIVandData) throws CryptoException {
+        //Extract IV
+        byte iv[] = new byte[16];
+        System.arraycopy(cipherIVandData, 0, iv, 0, iv.length);
+        IvParameterSpec ivParam = new IvParameterSpec(iv);
+
+        //Extract encrypted data
+        byte[] cipheredData = new byte[cipherIVandData.length - iv.length];
+        System.arraycopy(cipherIVandData, iv.length, cipheredData, 0, cipheredData.length);
+
+        //Extract secret key
+        SecretKeySpec sKey = new SecretKeySpec(key, "AES");
+
+        try{
+            //Create cipher instance
+            Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding", "BC");
+
+            cipher.init(DECRYPT_MODE, sKey, ivParam);
+
+            // Decipher data
+            return cipher.doFinal(cipheredData);
+
+        } catch (InvalidKeyException e) {
+            throw new CryptoException("Invalid Key");
+        } catch (Exception e){
+            throw new CryptoException("Decryption failed");
+        }
+
+    }
+
+    /******************************************************************************************
+     *                          MESSAGE AUTHENTICATION CODE (MAC)
+     *****************************************************************************************/
+
+    public static String computeMAC(Key key, byte[] message) throws CryptoException {
+        return computeMAC(key, message, "HmacSHA256");
+    }
+
+    public static boolean validateMAC(Key key, byte[] message, String mac) throws CryptoException {
+        return validateMAC(key, message, mac, "HmacSHA256");
+
+    }
+        /**
+         * Computes the MAC of a message
+         * @param key secret key
+         * @param message message
+         * @param alg MAC algorithm
+         * @return MAC
+         * @throws CryptoException
+         */
+    public static String computeMAC(Key key, byte[] message, String alg) throws CryptoException {
+
+        try {
+            SecretKeySpec keyParam = new SecretKeySpec(key.getEncoded(), alg);
+            Mac mac = Mac.getInstance(alg, "BC");
+            mac.init(keyParam);
+            return toString(mac.doFinal(message));
+
+        } catch (NoSuchAlgorithmException e) {
+            throw new CryptoException("No such algorithm");
+        } catch (InvalidKeyException e) {
+            throw  new CryptoException("Invalid Key");
+        } catch (NoSuchProviderException e) {
+            throw  new CryptoException("Failed to generate MAC");
+        }
+
+
+    }
+
+    /**
+     * Checks if MAC matches message
+     * @param key secret key
+     * @param alg MAC algorithm
+     * @param message message
+     * @param mac MAC
+     * @return true if matches; false otherwise
+     */
+    public static boolean validateMAC(Key key, byte[] message, String mac, String alg){
+        String computedMac = null;
+        try {
+            computedMac = computeMAC(key, message, alg);
+        } catch (CryptoException e) {
+            return false;
+        }
+        return computedMac.equals(mac);
     }
 }

@@ -1,5 +1,6 @@
 package authserver;
 
+import authserver.exception.CryptoException;
 import authserver.exception.InvalidUserException;
 import authserver.exception.UserAlreadyExistsException;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -51,6 +52,7 @@ public class AuthController {
         //Extract params
         String username = credentials.get("username");
         String password = credentials.get("password");
+        String Kpub = credentials.get("Kpub");
 
         //Validate params
         if(username == null || username.isEmpty())
@@ -59,10 +61,13 @@ public class AuthController {
         if(password == null || password.isEmpty())
             throw new ServletException("Invalid password");
 
+        if(Kpub == null || Kpub.isEmpty())
+            throw new ServletException("Invalid public key");
+
         String jwtToken = null;
 
         try {
-            jwtToken = authService.register(username, password);
+            jwtToken = authService.register(username, password, Kpub);
         } catch (UserAlreadyExistsException uaee) {
             throw new ServletException(uaee.getMessage());
         }
@@ -81,7 +86,7 @@ public class AuthController {
 
 
         if(username2 == null || username2.isEmpty())
-            throw new ServletException("Username2 is invalid");
+            throw new ServletException("Username 2 is invalid");
 
 
         if(token == null || token.isEmpty())
@@ -92,7 +97,9 @@ public class AuthController {
             try {
                 return authService.getPublicKey(username2);
             } catch (InvalidUserException e) {
-                throw  new ServletException("Username 2 does not exist");
+                throw  new ServletException("Username " + username2 +" does not exist");
+            } catch (CryptoException e) {
+                throw  new ServletException("Failed to get public key of" + username2);
             }
         }
 
