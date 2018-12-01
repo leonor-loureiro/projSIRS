@@ -7,12 +7,17 @@ import org.bouncycastle.crypto.generators.PKCS5S2ParametersGenerator;
 import org.bouncycastle.crypto.params.KeyParameter;
 import org.bouncycastle.crypto.prng.DigestRandomGenerator;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.bouncycastle.util.encoders.Base64;
 
+import javax.crypto.*;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.security.*;
 import java.security.cert.Certificate;
-import java.util.Base64;
+
+import static javax.crypto.Cipher.DECRYPT_MODE;
+import static javax.crypto.Cipher.ENCRYPT_MODE;
+//import java.util.Base64;
 
 public class Crypto {
 
@@ -48,8 +53,9 @@ public class Crypto {
     }
 
 
-    private static String toString(byte[] input) {
-        return Base64.getEncoder().encodeToString(input);
+    public static String toString(byte[] input) {
+        //return Base64.getEncoder().encodeToString(input);
+        return new String(Base64.encode(input));
     }
 
     /**
@@ -58,8 +64,9 @@ public class Crypto {
      * @param input byte array
      * @return converted string
      */
-    private static byte[] toByteArray(String input) {
-        return Base64.getDecoder().decode(input);
+    public static byte[] toByteArray(String input) {
+        //return Base64.getDecoder().decode(input);
+        return Base64.decode(input);
     }
 
     /**
@@ -223,5 +230,128 @@ public class Crypto {
         } catch (KeyStoreException e) {
             throw new CryptoException("Failed to retrieve the key");
         }
+    }
+
+
+    /*************************************************************************
+     *                  DIGITAL SIGNATURE FUNCTION
+     *************************************************************************/
+
+    /**
+     * Signs data with a private key
+     * @param data data to sign
+     * @param signingKey private key used to sign
+     * @return signature
+     * @throws CryptoException
+     */
+    public static String sign(String data, PrivateKey signingKey) throws CryptoException {
+
+        if(data == null)
+            throw  new CryptoException("Data is null");
+
+        try {
+            // Create RSA signature instance
+            Signature signAlg = Signature.getInstance("SHA256withRSA", "BC");
+            // Initialize the signature with the private key
+            signAlg.initSign(signingKey);
+            // Load the data
+            signAlg.update(toByteArray(data));
+            // Sign data
+            return toString(signAlg.sign());
+
+
+        } catch (InvalidKeyException e) {
+            e.printStackTrace();
+            throw new CryptoException("Invalid Key");
+        } catch (Exception e){
+            e.printStackTrace();
+            throw new CryptoException("Signing failed");
+        }
+    }
+
+    /**
+     * Verifying the signature
+     * @param signature
+     * @param data data signed
+     * @param key public key
+     * @return true if valid, false otherwise
+     * @throws CryptoException
+     */
+    public static boolean verifySignature(String signature, String data, PublicKey key) throws CryptoException {
+        if(data == null)
+            throw  new CryptoException("Data is null");
+        if(signature == null)
+            throw  new CryptoException("Signature is null");
+        try {
+            Signature signAlg = Signature.getInstance("SHA256withRSA", "BC");
+            signAlg.initVerify(key);
+            signAlg.update(toByteArray(data));
+            return  signAlg.verify(toByteArray(signature));
+        } catch (InvalidKeyException e) {
+            e.printStackTrace();
+            throw new CryptoException("Invalid Key");
+        } catch (Exception e){
+            e.printStackTrace();
+            throw new CryptoException("Verification failed");
+        }
+
+    }
+
+    /*****************************************************************************
+     *                      RSA Encryption and Decryption
+     ****************************************************************************/
+
+    public static String encryptRSA (String data, PrivateKey privateKey) throws CryptoException {
+        if(data == null)
+            throw  new CryptoException("Data is null");
+
+        try {
+            Cipher cipher = Cipher.getInstance("RSA", "BC");
+            cipher.init(ENCRYPT_MODE, privateKey);
+            return toString(cipher.doFinal(toByteArray(data)));
+
+        } catch (InvalidKeyException e) {
+            e.printStackTrace();
+            throw new CryptoException("Invalid Key");
+        } catch (Exception e){
+            e.printStackTrace();
+            throw new CryptoException("Verification failed");
+        }
+    }
+
+    public static String decryptRSA (String data, PublicKey publicKey) throws CryptoException {
+        if(data == null)
+            throw  new CryptoException("Data is null");
+
+        try {
+            Cipher cipher = Cipher.getInstance("RSA", "BC");
+            cipher.init(DECRYPT_MODE, publicKey);
+            return toString(cipher.doFinal(toByteArray(data)));
+
+        } catch (InvalidKeyException e) {
+            e.printStackTrace();
+            throw new CryptoException("Invalid Key");
+        } catch (Exception e){
+            e.printStackTrace();
+            throw new CryptoException("Verification failed");
+        }
+    }
+
+    /**
+     * Generates a secret key
+     * @param size key size
+     * @param alg algorithm
+     * @return secret key
+     * @throws CryptoException
+     */
+    public static SecretKey generateSecretKey(int size, String alg) throws CryptoException {
+        KeyGenerator keyGen = null;
+        try {
+            keyGen = KeyGenerator.getInstance(alg);
+        } catch (NoSuchAlgorithmException e) {
+            throw  new CryptoException("Failed to generate secret key");
+        }
+        keyGen.init(size);
+        return keyGen.generateKey();
     }
 }

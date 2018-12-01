@@ -69,4 +69,34 @@ public class AuthController {
 
         return jwtToken;
     }
+
+    @RequestMapping(value = "/getPublicKey")
+    public String getPublicKey(@RequestBody Map<String, String> params) throws ServletException {
+        String username1 = params.get("username1");
+        String username2 = params.get("username2");
+        String token = params.get("token");
+
+        if(username1 == null || username1.isEmpty())
+            throw new ServletException("Username1 is invalid");
+
+
+        if(username2 == null || username2.isEmpty())
+            throw new ServletException("Username2 is invalid");
+
+
+        if(token == null || token.isEmpty())
+            throw new ServletException("Token is invalid");
+
+
+        if(authService.authenticate(username1, token)) {
+            try {
+                return authService.getPublicKey(username2);
+            } catch (InvalidUserException e) {
+                throw  new ServletException("Username 2 does not exist");
+            }
+        }
+
+        throw new ServletException("Token expired");
+
+    }
 }

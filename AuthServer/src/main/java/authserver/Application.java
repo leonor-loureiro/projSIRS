@@ -11,13 +11,12 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 
+import javax.crypto.KeyGenerator;
+import javax.crypto.SecretKey;
 import java.io.Console;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.security.Key;
-import java.security.NoSuchProviderException;
-import java.security.PublicKey;
-import java.security.Security;
+import java.security.*;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
@@ -36,13 +35,21 @@ public class Application {
 
         Crypto.init();
 
+        DBConnection db = new DBConnection("root", "nino_1500");
+
+        /* String key = null;
+        try {
+            key = db.getPublicKey("test1");
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        System.out.println(key);*/
         /*try {
             System.out.println(AuthService.getInstance().login("try2", "password"));
         } catch (InvalidUserException e) {
             e.printStackTrace();
         }*/
 
-/*
 
         try {
             Key Kpriv = Crypto.getPrivateKey(keystoreFile, keystorePwd, myAlias, keyPwd);
@@ -51,9 +58,33 @@ public class Application {
             System.out.println("Kpriv=" + Kpriv.toString());
             System.out.println("Kpub=" + Kpub.toString());
 
+            KeyGenerator keyGen = KeyGenerator.getInstance("AES");
+            keyGen.init(256);
+            SecretKey secretKey = keyGen.generateKey();
+            String datab64 = Crypto.toString(secretKey.getEncoded());
+
+            /*String signature = Crypto.sign(datab64, (PrivateKey) Kpriv);
+            if(Crypto.verifySignature(signature, datab64, Kpub))
+                System.out.println("Valid");
+            else
+                System.out.println("Invalid");
+
+            System.out.println(signature);*/
+
+            String encryptedData = Crypto.encryptRSA(datab64, (PrivateKey) Kpriv);
+            String decryptedData = Crypto.decryptRSA(encryptedData, Kpub);
+
+            if (decryptedData.equals(datab64))
+                System.out.println("Equals");
+            else
+                System.out.println("Not equals");
+
+
         } catch (CryptoException e) {
             e.printStackTrace();
-        }*/
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        }
 
         /*String saltedPass = "";
         try {
@@ -83,7 +114,6 @@ public class Application {
         }*/
 
         SpringApplication.run(Application.class, args);
-
 
     }
 }
