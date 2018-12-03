@@ -23,7 +23,7 @@ public class FileWrapper {
     /**
      * Key used to encrypt this file
      */
-    private Key fileKey;
+    private byte[] fileKey;
 
     /**
      * Creator of the file
@@ -47,7 +47,7 @@ public class FileWrapper {
      * @param fileKey key used to encrypt this file when not stored locally
      * @param fileCreator original creator of this file
      */
-    public FileWrapper(String fileName, byte[] file, Key fileKey, String fileCreator) {
+    public FileWrapper(String fileName, byte[] file, byte[] fileKey, String fileCreator) {
         this.fileName = fileName;
         this.file = file;
         this.fileKey = fileKey;
@@ -84,9 +84,9 @@ public class FileWrapper {
 
     public void setFile(byte[] file) { this.file = file; }
 
-    public Key getFileKey() { return fileKey; }
+    public byte[] getFileKey() { return fileKey; }
 
-    public void setFileKey(Key fileKey) { this.fileKey = fileKey; }
+    public void setFileKey(byte[] fileKey) { this.fileKey = fileKey; }
 
     public String getFileCreator() { return fileCreator; }
 

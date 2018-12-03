@@ -146,10 +146,10 @@ public class AuthService {
             PublicKey publicKeyAuth = Crypto.getPublicKey(keystoreFile, keystorePwd, myAlias);
 
             // Decipher Ks
-            byte[] Ks = Crypto.decryptRSA(cipheredKs, publicKeyAuth);
+            byte[] Ks = Crypto.decryptRSA(Crypto.toByteArray(cipheredKs), publicKeyAuth);
 
             //Decrypt Kpub
-            byte[] publicKeyBytes = Crypto.decryptAES(Ks, cipheredKpub);
+            byte[] publicKeyBytes = Crypto.decryptAES(Ks, cipheredKpub.getBytes());
 
             // Convert to public key
             PublicKey publicKey = KeyFactory.getInstance("RSA").generatePublic(new X509EncodedKeySpec(publicKeyBytes));

@@ -340,14 +340,14 @@ public class Crypto {
         }
     }
 
-    public static String encryptRSA (byte[] data, Key key) throws CryptoException {
+    public static byte[] encryptRSA (byte[] data, Key key) throws CryptoException {
         if(data == null)
             throw  new CryptoException("Data is null");
 
         try {
             Cipher cipher = Cipher.getInstance("RSA", "BC");
             cipher.init(ENCRYPT_MODE, key);
-            return toString(cipher.doFinal(data));
+            return (cipher.doFinal(data));
 
         } catch (InvalidKeyException e) {
             e.printStackTrace();
@@ -358,14 +358,14 @@ public class Crypto {
         }
     }
 
-    public static byte[] decryptRSA (String data, Key key) throws CryptoException {
+    public static byte[] decryptRSA (byte[] data, Key key) throws CryptoException {
         if(data == null)
             throw  new CryptoException("Data is null");
 
         try {
             Cipher cipher = Cipher.getInstance("RSA", "BC");
             cipher.init(DECRYPT_MODE, key);
-            return (cipher.doFinal(toByteArray(data)));
+            return (cipher.doFinal((data)));
 
         } catch (InvalidKeyException e) {
             e.printStackTrace();
@@ -402,17 +402,10 @@ public class Crypto {
         return keyGen.generateKey();
     }
 
-    public static String encryptAES(Key key, String data) throws CryptoException {
-        return  toString(encryptAES(key, toByteArray(data)));
-    }
-    public static byte[] decryptAES(byte[] key, String cipher) throws CryptoException {
-        return decryptAES(key, toByteArray(cipher));
-    }
 
-
-    public static byte[] encryptAES(Key key, byte[] data) throws CryptoException {
+    public static byte[] encryptAES(byte[] key, byte[] data) throws CryptoException {
         //Create secret key
-        SecretKeySpec sKey = new SecretKeySpec(key.getEncoded(),"AES");
+        SecretKeySpec sKey = new SecretKeySpec(key,"AES");
 
         // Create IV param
         byte[] iv = new byte[16];
@@ -477,11 +470,11 @@ public class Crypto {
      *                          MESSAGE AUTHENTICATION CODE (MAC)
      *****************************************************************************************/
 
-    public static String computeMAC(Key key, byte[] message) throws CryptoException {
+    public static String computeMAC(byte[] key, byte[] message) throws CryptoException {
         return computeMAC(key, message, "HmacSHA256");
     }
 
-    public static boolean validateMAC(Key key, byte[] message, String mac) throws CryptoException {
+    public static boolean validateMAC(byte[] key, byte[] message, String mac) throws CryptoException {
         return validateMAC(key, message, mac, "HmacSHA256");
 
     }
@@ -493,10 +486,10 @@ public class Crypto {
          * @return MAC
          * @throws CryptoException
          */
-    public static String computeMAC(Key key, byte[] message, String alg) throws CryptoException {
+    public static String computeMAC(byte[] key, byte[] message, String alg) throws CryptoException {
 
         try {
-            SecretKeySpec keyParam = new SecretKeySpec(key.getEncoded(), alg);
+            SecretKeySpec keyParam = new SecretKeySpec(key, alg);
             Mac mac = Mac.getInstance(alg, "BC");
             mac.init(keyParam);
             return toString(mac.doFinal(message));
@@ -520,7 +513,7 @@ public class Crypto {
      * @param mac MAC
      * @return true if matches; false otherwise
      */
-    public static boolean validateMAC(Key key, byte[] message, String mac, String alg){
+    public static boolean validateMAC(byte[] key, byte[] message, String mac, String alg){
         String computedMac = null;
         try {
             computedMac = computeMAC(key, message, alg);
