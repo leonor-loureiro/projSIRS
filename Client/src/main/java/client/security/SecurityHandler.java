@@ -1,7 +1,9 @@
 package client.security;
 
 import client.localFileHandler.FileWrapper;
+import client.security.exception.BadEncryption;
 import client.security.exception.FileCorrupted;
+import client.security.exception.BadArgument;
 import crypto.Crypto;
 import crypto.exception.CryptoException;
 
@@ -17,13 +19,15 @@ public interface SecurityHandler {
     String keyPwd = "password";
     String myAlias = "server-keypair";
 
+    //TODO: init that sets keystore variables
+
     /**
      * Decrypts a an encrypted file wrapper
      * @param enc
      * @return decrypted file wrapper
      * @throws FileCorrupted
      */
-    static FileWrapper decryptFileWrapper(EncryptedFileWrapper enc) throws FileCorrupted {
+    static FileWrapper decryptFileWrapper(EncryptedFileWrapper enc, Key privateKey) throws FileCorrupted {
         FileWrapper file = new FileWrapper();
 
         // Set file
@@ -33,7 +37,8 @@ public interface SecurityHandler {
 
         // Decipher file key
         try {
-            Key privateKey = Crypto.getPrivateKey(keystoreFile, keystorePwd, myAlias, keyPwd);
+            //TODO: get private key from keystore
+            //Key privateKey = Crypto.getPrivateKey(keystoreFile, keystorePwd, myAlias, keyPwd);
 
             byte[] cipheredFileKey = enc.getFileKey();
             byte[] fileKey = Crypto.decryptRSA(cipheredFileKey, privateKey);
@@ -45,7 +50,7 @@ public interface SecurityHandler {
         }
 
         // Decipher file
-        try {
+       try {
             byte[] cipheredData = enc.getFile();
             byte[] data = Crypto.decryptAES(file.getFileKey(), cipheredData);
             file.setFile(data);
@@ -75,20 +80,21 @@ public interface SecurityHandler {
 
     /**
      * Decrypts a list of files
-     * @param encriptedFiles
+     * @param encyptedFiles
      * @return decrypted files
      */
-    static List<FileWrapper> decryptFileWrappers(List<EncryptedFileWrapper> encriptedFiles){
+    static List<FileWrapper> decryptFileWrappers(List<EncryptedFileWrapper> encyptedFiles){
 
         List<FileWrapper> list = new ArrayList<>();
 
-        for(EncryptedFileWrapper enc : encriptedFiles){
+        //TODO: descomentar
+        /*for(EncryptedFileWrapper enc : encriptedFiles){
             try {
                 list.add(decryptFileWrapper(enc));
             } catch (FileCorrupted fileCorrupted) {
                 System.out.println("File " + enc.getFileName() + " is corrupted.");
             }
-        }
+        }*/
         return list;
     }
 
@@ -97,7 +103,7 @@ public interface SecurityHandler {
      * @param file
      * @return encrypted file wrapper
      */
-    static EncryptedFileWrapper encryptFileWrapper(FileWrapper file){
+    static EncryptedFileWrapper encryptFileWrapper(FileWrapper file, PublicKey publicKey){
         EncryptedFileWrapper enc = new EncryptedFileWrapper();
 
         // Set file name
@@ -129,9 +135,10 @@ public interface SecurityHandler {
             e.printStackTrace();
         }
 
-        // Encrypt file key
+            // Encrypt file key
         try {
-            PublicKey publicKey = Crypto.getPublicKey(keystoreFile, keystorePwd, myAlias);
+            //TODO: get public key from keystore
+            //PublicKey publicKey = Crypto.getPublicKey(keystoreFile, keystorePwd, myAlias);
             byte[] cipheredFileKey = Crypto.encryptRSA(fileKey, publicKey);
             enc.setFileKey(cipheredFileKey);
 
@@ -155,7 +162,7 @@ public interface SecurityHandler {
     static byte[] extractFileData(FileWrapper file) {
         byte[] fileKey = file.getFileKey();
         byte[] fileData = file.getFile() ;
-        byte[] metadata = Crypto.toByteArray(file.getFileName() + file.getFileCreator());
+        byte[] metadata = (file.getFileName() + file.getFileCreator()).getBytes();
 
         byte [] data = new byte[metadata.length + fileData.length + fileKey.length ];
         System.arraycopy(metadata, 0, data, 0, metadata.length);
@@ -174,9 +181,34 @@ public interface SecurityHandler {
 
         List<EncryptedFileWrapper> encryptedFiles = new ArrayList<>();
 
+        //TODO: descomentar
         for(FileWrapper file : files){
-            encryptedFiles.add(encryptFileWrapper(file));
+            //encryptedFiles.add(encryptFileWrapper(file));
         }
         return encryptedFiles;
+    }
+
+    /**
+     * Encrypt a secret key with a public key
+     * @param secretKey
+     * @param publicKey
+     * @return encrypted key
+     * @throws BadArgument
+     * @throws BadEncryption
+     */
+    static byte[] encryptSecretKey(byte[] secretKey, PublicKey publicKey) throws BadArgument, BadEncryption {
+
+        if(secretKey == null)
+            throw new BadArgument("Invalid secret key");
+
+        //TODO: get public key from keystore
+        //PublicKey publicKey = Crypto.getPublicKey(keystoreFile, keystorePwd, myAlias);
+
+        try {
+            return Crypto.encryptRSA(secretKey, publicKey);
+
+        } catch (CryptoException e) {
+            throw new BadEncryption();
+        }
     }
 }

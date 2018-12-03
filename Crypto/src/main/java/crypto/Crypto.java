@@ -431,6 +431,7 @@ public class Crypto {
         } catch (InvalidKeyException e) {
             throw new CryptoException("Invalid key");
         } catch (Exception e) {
+            e.printStackTrace();
             throw new CryptoException("Encryption failed");
         }
     }
