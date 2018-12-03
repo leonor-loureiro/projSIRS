@@ -2,21 +2,18 @@ package authserver;
 
 import authserver.data.User;
 import authserver.db.DBConnection;
-import authserver.exception.CryptoException;
 import authserver.exception.InvalidUserException;
 import authserver.exception.UserAlreadyExistsException;
-import authserver.security.Crypto;
 import authserver.security.TokenManager;
+import crypto.Crypto;
+import crypto.exception.CryptoException;
 
-import java.security.Key;
 import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
 import java.sql.SQLException;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Random;
 
 /**

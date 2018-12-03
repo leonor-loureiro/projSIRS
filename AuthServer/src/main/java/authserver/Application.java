@@ -1,16 +1,11 @@
 package authserver;
 
 import authserver.db.DBConnection;
-import authserver.security.Crypto;
+import crypto.Crypto;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
-import javax.crypto.SecretKey;
-import java.security.Key;
-import java.security.KeyFactory;
-import java.security.KeyPair;
 import java.security.PublicKey;
-import java.security.spec.X509EncodedKeySpec;
 import java.util.Arrays;
 import java.util.Random;
 

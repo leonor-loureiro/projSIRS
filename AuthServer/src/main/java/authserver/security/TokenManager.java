@@ -1,6 +1,7 @@
 package authserver.security;
 
-import authserver.exception.CryptoException;
+import crypto.Crypto;
+import crypto.exception.CryptoException;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtBuilder;
 import io.jsonwebtoken.Jwts;

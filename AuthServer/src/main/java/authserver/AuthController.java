@@ -1,8 +1,8 @@
 package authserver;
 
-import authserver.exception.CryptoException;
 import authserver.exception.InvalidUserException;
 import authserver.exception.UserAlreadyExistsException;
+import crypto.exception.CryptoException;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -98,8 +98,6 @@ public class AuthController {
                 return authService.getPublicKey(username2);
             } catch (InvalidUserException e) {
                 throw  new ServletException("Username " + username2 +" does not exist");
-            } catch (CryptoException e) {
-                throw  new ServletException("Failed to get public key of" + username2);
             }
         }
 

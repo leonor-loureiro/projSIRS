@@ -12,6 +12,7 @@
         <module>Client</module>
         <module>FileSystem</module>
         <module>AuthServer</module>
+        <module>Crypto</module>
     </modules>
 
     <dependencies>
