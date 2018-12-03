@@ -55,7 +55,7 @@ public class Application {
             String token = authService.register(usermame, "password", publicKeyStr);
             String cipheredKeys = authService.getPublicKey(usermame);
 
-            PublicKey decipheredKey = authService.recoverPublicKey(cipheredKeys);
+            PublicKey decipheredKey = Crypto.recoverPublicKey(Crypto.toByteArray(cipheredKeys));
 
             if(decipheredKey == null)
                 System.out.println("decipheredKey == null");

@@ -18,7 +18,9 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.security.*;
 import java.security.cert.Certificate;
+import java.security.spec.InvalidKeySpecException;
 import java.security.spec.InvalidParameterSpecException;
+import java.security.spec.X509EncodedKeySpec;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -321,6 +323,22 @@ public class Crypto {
         kpg.initialize(blockSize);
         KeyPair kp = kpg.generateKeyPair();
         return  kp;
+    }
+
+    /**
+     * Converts the public key bytes to a PublicKey instance
+     * @param encoded
+     * @return PublicKey instance
+     * @throws CryptoException
+     */
+    public static PublicKey recoverPublicKey(byte[] encoded) throws CryptoException {
+        try {
+            return KeyFactory.getInstance("RSA").generatePublic(new X509EncodedKeySpec(encoded));
+        } catch (InvalidKeySpecException e) {
+            throw new CryptoException("Invalid key");
+        } catch (NoSuchAlgorithmException e) {
+            throw new CryptoException("Failed to recover public key");
+        }
     }
 
     public static String encryptRSA (byte[] data, Key key) throws CryptoException {

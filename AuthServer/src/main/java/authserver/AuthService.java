@@ -107,11 +107,12 @@ public class AuthService {
         return TokenManager.validateJTW(token, "authServer", username);
     }
 
-    public String getPublicKey(String username) throws InvalidUserException, CryptoException {
+    public String getPublicKey(String username) throws InvalidUserException {
         try {
             // Get public key
-            String Kpub = db.getPublicKey(username);
+            return db.getPublicKey(username);
 
+            /*
             // Encrypt public key with secret key
             Key Ks = Crypto.generateSecretKey(256, "AES");
             String cipheredKpub = Crypto.encryptAES(Ks, Kpub);
@@ -121,6 +122,7 @@ public class AuthService {
             String cipheredKs = Crypto.encryptRSA(Ks.getEncoded(), Kpriv);
 
             return cipheredKpub + "|" + cipheredKs;
+            */
 
         } catch (SQLException e) {
             throw new InvalidUserException("Invalid user");
