@@ -1,6 +1,5 @@
-package authserver.security;
+package filesystem;
 
-import authserver.exception.CryptoException;
 import org.bouncycastle.crypto.PBEParametersGenerator;
 import org.bouncycastle.crypto.digests.SHA3Digest;
 import org.bouncycastle.crypto.generators.PKCS5S2ParametersGenerator;

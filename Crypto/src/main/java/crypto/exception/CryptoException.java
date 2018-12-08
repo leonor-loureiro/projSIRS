@@ -1,9 +1,9 @@
-package authserver.exception;
+package crypto.exception;
 
 public class CryptoException extends Exception {
     private String message;
 
-    public CryptoException( String message) {
+    public CryptoException(String message) {
         this.message = message;
     }
 

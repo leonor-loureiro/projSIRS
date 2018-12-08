@@ -8,6 +8,7 @@
         <outputRelativeToContentRoot value="true" />
         <module name="AuthServer" />
         <module name="Client" />
+        <module name="Crypto" />
         <module name="FileSystem" />
       </profile>
     </annotationProcessing>
