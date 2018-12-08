@@ -1,5 +1,7 @@
 package filesystem;
 
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,16 +22,16 @@ public class FileSystemController {
         FileSystemInterface.newfile(file);
     } */
     @RequestMapping(value = "/download")
-    public List<EncryptedFileWrapper> download(@Valid @RequestBody String name) throws IOException, ClassNotFoundException {
-        return FileSystemInterface.download(name);
+    public FileSystemMessage download(@Valid @RequestBody String name) throws IOException, ClassNotFoundException {
+        return new FileSystemMessage(FileSystemInterface.download(name));
     }
 
     @PostMapping(value = "/upload")
-    public void upload(@Valid @RequestBody List<EncryptedFileWrapper> files) throws IOException {
+    public void upload(@Valid @RequestBody FileSystemMessage fMsg) throws IOException {
 
 //        System.out.println(file.get(0).getFileName());
 //        System.out.println(Arrays.toString(file.get(0).getFile()));
-        FileSystemInterface.upload(files);
+        FileSystemInterface.upload(fMsg.getFiles());
     }
 
     @RequestMapping(value = "/share")

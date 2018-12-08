@@ -11,9 +11,13 @@ import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.ssl.SSLContextBuilder;
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
 import javax.net.ssl.SSLContext;
@@ -64,11 +68,9 @@ public class Communication {
 //
 //
 
-        ResponseEntity <List<EncryptedFileWrapper>> response =
-                restTemp.postForObject(serverUrl+"/download", user.getUsername(),  ResponseEntity.class);
 
-        List<EncryptedFileWrapper> files = response.getBody();
-        System.out.println(response);
+
+
         return SecurityHandler.decryptFileWrappers(files);
     }
 
