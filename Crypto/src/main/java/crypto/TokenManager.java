@@ -1,7 +1,5 @@
-package authserver.security;
+package crypto;
 
-import crypto.Crypto;
-import crypto.exception.CryptoException;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtBuilder;
 import io.jsonwebtoken.Jwts;
@@ -18,10 +16,6 @@ import java.util.Date;
  */
 public class TokenManager {
 
-    private static final String keystoreFile = "./" + "\\src\\main\\resources\\serverkeystore.jks";
-    private static final String keystorePwd = "password";
-    private static final String keyPwd = "password";
-    private static final String myAlias = "server-keypair";
 
     /**
      * Creates a JTW token
@@ -31,7 +25,7 @@ public class TokenManager {
      * @param validPeriod how long the token is valid for (milliseconds)
      * @return signed compact token
      */
-    public static String createJTW(String id, String issuer, String subject, long validPeriod){
+    public static String createJTW(String id, String issuer, String subject, long validPeriod, Key signingKey){
 
         if(id == null || id.isEmpty() || issuer == null || issuer.isEmpty() ||
                 subject == null || subject.isEmpty() || validPeriod < 0)
@@ -45,13 +39,6 @@ public class TokenManager {
         Date currDate = new Date(currentTimeMillis);
         Date expiredDate = new Date(currentTimeMillis + validPeriod);
 
-        // Get the private key for the signature
-        Key signingKey = null;
-        try {
-            signingKey = Crypto.getPrivateKey(keystoreFile, keystorePwd, myAlias, keyPwd);
-        } catch (CryptoException e) {
-            return null;
-        }
 
         // Set the JWT Claims
         JwtBuilder tokenBuilder = Jwts.builder().setId(id)     //unique identifier of the token
@@ -73,15 +60,8 @@ public class TokenManager {
      * @param subject subject the token was supposedly created for
      * @return true if valid; false otherwise
      */
-    public static boolean validateJTW(String jtw, String issuer, String subject){
-        PublicKey key = null;
-        try {
-            key = Crypto.getPublicKey(keystoreFile, keystorePwd, myAlias);
-        } catch (CryptoException e) {
-            return false;
-        }
+    public static boolean validateJTW(String jtw, String issuer, String subject, PublicKey key){
 
-        // Parse JTW to obtain claims
         try {
             Claims claims = Jwts.parser().setSigningKey(key).parseClaimsJws(jtw).getBody();
 

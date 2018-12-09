@@ -4,10 +4,11 @@ import authserver.data.User;
 import authserver.db.DBConnection;
 import authserver.exception.InvalidUserException;
 import authserver.exception.UserAlreadyExistsException;
-import authserver.security.TokenManager;
 import crypto.Crypto;
+import crypto.TokenManager;
 import crypto.exception.CryptoException;
 
+import java.security.Key;
 import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
@@ -101,7 +102,13 @@ public class AuthService {
     }
 
     public boolean authenticate(String username, String token){
-        return TokenManager.validateJTW(token, "authServer", username);
+        PublicKey key = null;
+        try {
+            key = Crypto.getPublicKey(keystoreFile, keystorePwd, myAlias);
+        } catch (CryptoException e) {
+            return false;
+        }
+        return TokenManager.validateJTW(token, "authServer", username, key);
     }
 
     public String getPublicKey(String username) throws InvalidUserException {
@@ -127,8 +134,15 @@ public class AuthService {
     }
 
     private String generateToken(String username){
+        // Get the private key for the signature
+        Key signingKey = null;
+        try {
+            signingKey = Crypto.getPrivateKey(keystoreFile, keystorePwd, myAlias, keyPwd);
+        } catch (CryptoException e) {
+            return null;
+        }
         String id = "" + random.nextInt(9000000) + 1000000;
-        return TokenManager.createJTW(id, "authServer", username, VALID_PERIOD);
+        return TokenManager.createJTW(id, "authServer", username, VALID_PERIOD, signingKey);
     }
 
 
