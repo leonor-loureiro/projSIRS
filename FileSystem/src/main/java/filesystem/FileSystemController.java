@@ -6,6 +6,7 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -22,8 +23,11 @@ public class FileSystemController {
         FileSystemInterface.newfile(file);
     } */
     @RequestMapping(value = "/download")
-    public FileSystemMessage download(@Valid @RequestBody String name) throws IOException, ClassNotFoundException {
-        return new FileSystemMessage(FileSystemInterface.download(name));
+    public FileSystemMessage download(@Valid @RequestBody FileSystemMessage fMsg) throws IOException, ClassNotFoundException {
+        FileSystemMessage m = new FileSystemMessage();
+        m.setFiles(FileSystemInterface.download(fMsg.getName()));
+        return m;
+        //return null;
     }
 
     @PostMapping(value = "/upload")

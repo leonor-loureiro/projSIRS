@@ -10,21 +10,23 @@ import java.util.List;
  * Class used for communication with File System server
  */
 @JsonIdentityInfo(generator=ObjectIdGenerators.IntSequenceGenerator.class,property="@id", scope = FileSystemMessage.class)
+
 public class FileSystemMessage {
 
-    private List<EncryptedFileWrapper> files;
+    private EncryptedFileWrapper[] files;
 
     private String token;
 
+    private String userName;
+
     FileSystemMessage(){
-        files = new ArrayList<>();
     }
 
-    public List<EncryptedFileWrapper> getFiles() {
+    public EncryptedFileWrapper[] getFiles() {
         return files;
     }
 
-    public void setFiles(List<EncryptedFileWrapper> files) {
+    public void setFiles(EncryptedFileWrapper[] files) {
         this.files = files;
     }
 
@@ -34,5 +36,13 @@ public class FileSystemMessage {
 
     public void setToken(String token) {
         this.token = token;
+    }
+
+    public String getName() {
+        return userName;
+    }
+
+    public void setName(String user){
+        userName = user;
     }
 }

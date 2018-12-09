@@ -60,6 +60,8 @@ public class Communication {
         //make the object
         FileSystemMessage obj = new FileSystemMessage();
 
+        obj.setName(user.getUsername());
+
 
         //set headers
         HttpHeaders headers = new HttpHeaders();
@@ -69,11 +71,15 @@ public class Communication {
         HttpEntity entity = new HttpEntity(obj,headers);
 
         // send
-        ResponseEntity<FileSystemMessage> out = restTemplate.exchange("url", HttpMethod.POST, entity
+        ResponseEntity<FileSystemMessage> out = restTemplate.exchange(serverUrl+"/download",HttpMethod.POST, entity
                 , FileSystemMessage.class);
 
 
         EncryptedFileWrapper[] files = out.getBody().getFiles();
+
+        for(int i = 0;i < files.length;i++){
+            System.out.println("got this file " + files[i].getFileName());
+        }
 
         return SecurityHandler.decryptFileWrappers(Arrays.asList(files));
     }
@@ -85,19 +91,24 @@ public class Communication {
      */
     public void putFiles(User user, List<FileWrapper> files){
         RestTemplate restTemp = restTemplate();
-        List<EncryptedFileWrapper> list = new ArrayList<>();
+        EncryptedFileWrapper[] list;
+        list = new EncryptedFileWrapper[files.size()];
         EncryptedFileWrapper enc;
-        for(FileWrapper f: files){
+        System.out.println(files.size());
+        for(int i = 0;i< files.size();i++){
+            System.out.println(files.get(i).getFileName());
             //list.add(SecurityHandler.encryptFileWrapper(f, user.getPublicKey()));
             enc = new EncryptedFileWrapper();
-            enc.setFileCreator(f.getFileCreator());
-            enc.setFileName(f.getFileName());
+            enc.setFileCreator(files.get(i).getFileCreator());
+            enc.setFileName(files.get(i).getFileName());
             enc.setFileKey("Key".getBytes());
-            list.add(enc);
+            list[i] = enc;
         }
 
         //TODO : Replace with FileSystemMessage
-        restTemp.postForObject(serverUrl+"/upload", list,  ResponseEntity.class);
+        FileSystemMessage m = new FileSystemMessage();
+        m.setFiles(list);
+        restTemp.postForObject(serverUrl+"/upload", m,  ResponseEntity.class);
 
     }
 

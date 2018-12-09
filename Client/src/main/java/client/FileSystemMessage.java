@@ -17,6 +17,8 @@ public class FileSystemMessage {
 
     private String token;
 
+    private String userName;
+
     FileSystemMessage(){
     }
 
@@ -34,5 +36,13 @@ public class FileSystemMessage {
 
     public void setToken(String token) {
         this.token = token;
+    }
+
+    public String getName() {
+        return userName;
+    }
+
+    public void setName(String user){
+        userName = user;
     }
 }
