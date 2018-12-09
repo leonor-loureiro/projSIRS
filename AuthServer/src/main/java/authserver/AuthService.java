@@ -8,6 +8,10 @@ import crypto.Crypto;
 import crypto.TokenManager;
 import crypto.exception.CryptoException;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
 import java.security.Key;
 import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
@@ -15,6 +19,7 @@ import java.security.PublicKey;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
 import java.sql.SQLException;
+import java.util.Properties;
 import java.util.Random;
 
 /**
@@ -43,7 +48,24 @@ public class AuthService {
     private static Random random = new Random();
 
     private AuthService(){
-        db = new DBConnection("root", "nino_1500");
+
+        /*Properties properties = new Properties();
+        InputStream input = null;
+
+        try {
+            input = new FileInputStream("./" + "\\src\\main\\resources\\config.properties");
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+        try {
+            properties.load(input);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }*/
+
+        db = new DBConnection(Application.properties.getProperty("dbuser"),
+               Application.properties.getProperty("dbpassword"),
+               Application.properties.getProperty("database"));
     }
 
     public static AuthService getInstance(){

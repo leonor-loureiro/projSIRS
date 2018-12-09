@@ -16,6 +16,10 @@ import java.util.Map;
 public class FileSystemInterface {
 
 
+    private static final String keystoreFile = "./" + "\\src\\main\\resources\\serverkeystore.jks";
+    private static final String keystorePwd = "password";
+    private static final String authServerAlias = "authServer";
+
     // f* this not necessary
 
  /*   public static void newfile(FileWrapper file){
@@ -32,9 +36,10 @@ public class FileSystemInterface {
     } */
 
     public static boolean validateToken(String username, String token){
+
         PublicKey key = null;
         try {
-            key = Crypto.getPublicKey(keystoreFile, keystorePwd, myAlias);
+            key = Crypto.getPublicKey(keystoreFile, keystorePwd, authServerAlias);
         } catch (CryptoException e) {
             return false;
         }
