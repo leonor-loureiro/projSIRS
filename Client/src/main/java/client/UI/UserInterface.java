@@ -166,6 +166,7 @@ public interface UserInterface {
                     break;
             }
         } catch (IllegalArgumentException e) {
+            e.printStackTrace();
             System.out.println("Unknown Command!");
         }
 

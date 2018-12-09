@@ -1,6 +1,8 @@
 package client;
 
 import client.security.EncryptedFileWrapper;
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -8,21 +10,21 @@ import java.util.List;
 /**
  * Class used for communication with File System server
  */
+@JsonIdentityInfo(generator=ObjectIdGenerators.IntSequenceGenerator.class,property="@id", scope = FileSystemMessage.class)
 public class FileSystemMessage {
 
-    private List<EncryptedFileWrapper> files;
+    private EncryptedFileWrapper[] files;
 
     private String token;
 
     FileSystemMessage(){
-        files = new ArrayList<>();
     }
 
-    public List<EncryptedFileWrapper> getFiles() {
+    public EncryptedFileWrapper[] getFiles() {
         return files;
     }
 
-    public void setFiles(List<EncryptedFileWrapper> files) {
+    public void setFiles(EncryptedFileWrapper[] files) {
         this.files = files;
     }
 

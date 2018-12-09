@@ -1,7 +1,10 @@
 package client.security;
 
 import client.localFileHandler.FileWrapper;
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 
+@JsonIdentityInfo(generator=ObjectIdGenerators.IntSequenceGenerator.class,property="@id", scope = EncryptedFileWrapper.class)
 public class EncryptedFileWrapper {
 
     private String fileName;
@@ -15,19 +18,6 @@ public class EncryptedFileWrapper {
     private String fileMAC;
 
     public EncryptedFileWrapper(){}
-
-    public EncryptedFileWrapper(FileWrapper fp){
-        fileName = fp.getFileName();
-
-        file = fp.getFile(); //TODO: Encrypt file
-
-        // TODO: Encrypt fileKey
-        fileKey = null;
-
-        fileCreator = fp.getFileCreator();
-
-        fileMAC = "MAC"; // TODO: Generate MAC
-    }
 
     public String getFileName() {
         return fileName;

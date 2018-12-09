@@ -1,11 +1,15 @@
 package filesystem;
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
+
 import java.util.ArrayList;
 import java.util.List;
 
 /**
  * Class used for communication with File System server
  */
+@JsonIdentityInfo(generator=ObjectIdGenerators.IntSequenceGenerator.class,property="@id", scope = FileSystemMessage.class)
 public class FileSystemMessage {
 
     private List<EncryptedFileWrapper> files;
@@ -14,10 +18,6 @@ public class FileSystemMessage {
 
     FileSystemMessage(){
         files = new ArrayList<>();
-    }
-
-    FileSystemMessage(List<EncryptedFileWrapper> fileList){
-        files = fileList;
     }
 
     public List<EncryptedFileWrapper> getFiles() {
