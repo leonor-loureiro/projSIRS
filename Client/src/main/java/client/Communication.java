@@ -11,9 +11,10 @@ import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.ssl.SSLContextBuilder;
 import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
 import javax.net.ssl.SSLContext;
@@ -24,6 +25,7 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 
@@ -53,23 +55,27 @@ public class Communication {
     }
 
     public List<FileWrapper> getFiles(User user){
-        RestTemplate restTemp = restTemplate();
+        RestTemplate restTemplate = restTemplate();
+
+        //make the object
+        FileSystemMessage obj = new FileSystemMessage();
 
 
-//        ResponseEntity<List<EncryptedFileWrapper>> response = restTemp.postForEntity(
-//                        serverUrl + "/download" ,
-//                        HttpMethod.POST,
-//                        null,
-//                        new ParameterizedTypeReference<List<EncryptedFileWrapper>>(){});
-//
-//
+        //set headers
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
 
-        ResponseEntity <List<EncryptedFileWrapper>> response =
-                restTemp.postForObject(serverUrl+"/download", user.getUsername(),  ResponseEntity.class);
+        //set entity to send
+        HttpEntity entity = new HttpEntity(obj,headers);
 
-        List<EncryptedFileWrapper> files = response.getBody();
-        System.out.println(response);
-        return SecurityHandler.decryptFileWrappers(files);
+        // send
+        ResponseEntity<FileSystemMessage> out = restTemplate.exchange("url", HttpMethod.POST, entity
+                , FileSystemMessage.class);
+
+
+        EncryptedFileWrapper[] files = out.getBody().getFiles();
+
+        return SecurityHandler.decryptFileWrappers(Arrays.asList(files));
     }
 
     /**
@@ -80,11 +86,17 @@ public class Communication {
     public void putFiles(User user, List<FileWrapper> files){
         RestTemplate restTemp = restTemplate();
         List<EncryptedFileWrapper> list = new ArrayList<>();
-
+        EncryptedFileWrapper enc;
         for(FileWrapper f: files){
-            list.add(new EncryptedFileWrapper(f));
+            //list.add(SecurityHandler.encryptFileWrapper(f, user.getPublicKey()));
+            enc = new EncryptedFileWrapper();
+            enc.setFileCreator(f.getFileCreator());
+            enc.setFileName(f.getFileName());
+            enc.setFileKey("Key".getBytes());
+            list.add(enc);
         }
 
+        //TODO : Replace with FileSystemMessage
         restTemp.postForObject(serverUrl+"/upload", list,  ResponseEntity.class);
 
     }

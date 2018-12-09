@@ -97,8 +97,10 @@ public class FileSystemInterface {
 
         for(int i = 0 ; i < files.size() ;i++){
 
-            System.out.println(files.get(i).getFileName());
-            FileOutputStream writer = new FileOutputStream(fileCreator + "\\" + files.get(i).getFileName() + ".file");
+            //System.out.println(files.get(i).getFileName());
+            String fileName  = files.get(i).getFileName();
+            checkForBackup(fileCreator + "\\" + fileName);
+            FileOutputStream writer = new FileOutputStream(fileCreator + "\\" + fileName + ".file");
             ObjectOutputStream outwriter = new ObjectOutputStream(writer );
             outwriter.writeObject(files.get(i));
             outwriter.close();
@@ -115,6 +117,84 @@ public class FileSystemInterface {
 
 
     }
+
+    private static void checkForBackup(String file) {
+        File f = new File(file + ".file");
+        int versionumber = 0;
+        loop:
+        if(f.exists() && !f.isDirectory()) {
+            for(int i = 0;true;i++){
+                File oldbackup = new File(file + "oldv" + i + ".file");
+                versionumber++;
+                if(oldbackup.exists()) {
+                    continue;
+
+                }
+                else {
+                    break loop;
+                }
+            }
+        }
+        else
+            return;
+        File newfile  = new File(file + "oldv" + versionumber + ".file");
+        f.renameTo(newfile);
+        return;
+    }
+
+    public EncryptedFileWrapper getOldVersion(String fileCreator,String fileName,Boolean corrupted) throws IOException, ClassNotFoundException {
+        File file = new File(fileCreator + "\\" + fileName + ".file");
+        if (corrupted){
+            int versionumber = 0;
+            file.delete();
+            loop:
+            for(int i = 0;true;i++){
+                File oldbackup = new File(fileCreator + "\\" + fileName + "oldv" + i + ".file");
+                versionumber++;
+                if(oldbackup.exists()) {
+                    continue;
+
+                }
+                else {
+                    break loop;
+                }
+            }
+
+            File newMainFile = new File(fileCreator + "\\" + fileName + ".file");
+            File higherVersionFile = new File(fileCreator + "\\" + fileName + "oldv" + versionumber + ".file");
+            higherVersionFile.renameTo(newMainFile);
+
+            FileInputStream f = new FileInputStream(newMainFile);
+            ObjectInputStream o = new ObjectInputStream(f);
+            EncryptedFileWrapper filetobereturned = (EncryptedFileWrapper)o.readObject();
+            return filetobereturned;
+        }
+        else{
+            int versionumber = 0;
+            loop:
+            for(int i = 0;true;i++){
+                File oldbackup = new File(fileCreator + "\\" + fileName + "oldv" + i + ".file");
+                versionumber++;
+                if(oldbackup.exists()) {
+                    continue;
+
+                }
+                else {
+                    break loop;
+                }
+            }
+
+            File higherVersionFile = new File(fileCreator + "\\" + fileName + "oldv" + versionumber + ".file");
+
+            FileInputStream f = new FileInputStream(higherVersionFile);
+            ObjectInputStream o = new ObjectInputStream(f);
+            EncryptedFileWrapper filetobereturned = (EncryptedFileWrapper)o.readObject();
+            return filetobereturned;
+        }
+
+
+    }
+
     public static void share(Map<String,String> information, EncryptedFileWrapper file) throws IOException, ClassNotFoundException {
 
         System.out.println("Share file");

@@ -3,6 +3,8 @@ package client;
 import client.localFileHandler.FileWrapper;
 
 import java.security.Key;
+import java.security.PrivateKey;
+import java.security.PublicKey;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -14,8 +16,8 @@ public class User {
 
     private String username;
     private char[] password;
-    private Key privateKey;
-    private Key publicKey;
+    private PrivateKey privateKey;
+    private PublicKey publicKey;
     private List<FileWrapper> stagedFiles = new ArrayList<>();
 
     public User() {
@@ -26,16 +28,16 @@ public class User {
         this.password = password;
     }
 
-    public User(String username, char[] password, Key privateKey, Key publicKey) {
+    public User(String username, char[] password, PrivateKey privateKey, PublicKey publicKey) {
         this.username = username;
         this.password = password;
         this.privateKey = privateKey;
         this.publicKey = publicKey;
     }
 
-    public Key getPrivateKey() { return privateKey; }
+    public PrivateKey getPrivateKey() { return privateKey; }
 
-    public void setPrivateKey(Key privateKey) { this.privateKey = privateKey; }
+    public void setPrivateKey(PrivateKey privateKey) { this.privateKey = privateKey; }
 
     public char[] getPassword() { return password; }
 
@@ -45,9 +47,9 @@ public class User {
 
     public void setUsername(String username) { this.username = username; }
 
-    public Key getPublicKey() { return publicKey; }
+    public PublicKey getPublicKey() { return publicKey; }
 
-    public void setPublicKey(Key publicKey) { this.publicKey = publicKey; }
+    public void setPublicKey(PublicKey publicKey) { this.publicKey = publicKey; }
 
     public List<FileWrapper> getstagedFiles() {
         return stagedFiles;

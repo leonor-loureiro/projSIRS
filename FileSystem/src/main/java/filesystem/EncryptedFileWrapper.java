@@ -1,8 +1,10 @@
 package filesystem;
 
-import java.io.Serializable;
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 
-public class EncryptedFileWrapper implements Serializable {
+@JsonIdentityInfo(generator=ObjectIdGenerators.IntSequenceGenerator.class,property="@id", scope = EncryptedFileWrapper.class)
+public class EncryptedFileWrapper {
 
     private String fileName;
 
@@ -13,6 +15,8 @@ public class EncryptedFileWrapper implements Serializable {
     private String fileCreator;
 
     private String fileMAC;
+
+    public EncryptedFileWrapper(){}
 
     public String getFileName() {
         return fileName;
