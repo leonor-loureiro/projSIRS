@@ -4,7 +4,8 @@ import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 
 @JsonIdentityInfo(generator=ObjectIdGenerators.IntSequenceGenerator.class,property="@id", scope = EncryptedFileWrapper.class)
-public class EncryptedFileWrapper {
+
+public class EncryptedFileWrapper implements java.io.Serializable{
 
     private String fileName;
 
