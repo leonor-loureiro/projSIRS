@@ -252,7 +252,7 @@ public class Crypto {
      * @return signature
      * @throws CryptoException
      */
-    public static String sign(String data, PrivateKey signingKey) throws CryptoException {
+    public static String sign(byte[] data, PrivateKey signingKey) throws CryptoException {
 
         if(data == null)
             throw  new CryptoException("Data is null");
@@ -263,7 +263,7 @@ public class Crypto {
             // Initialize the signature with the private key
             signAlg.initSign(signingKey);
             // Load the data
-            signAlg.update(toByteArray(data));
+            signAlg.update(data);
             // Sign data
             return toString(signAlg.sign());
 
@@ -285,7 +285,7 @@ public class Crypto {
      * @return true if valid, false otherwise
      * @throws CryptoException
      */
-    public static boolean verifySignature(String signature, String data, PublicKey key) throws CryptoException {
+    public static boolean verifySignature(String signature, byte[] data, PublicKey key) throws CryptoException {
         if(data == null)
             throw  new CryptoException("Data is null");
         if(signature == null)
@@ -293,7 +293,7 @@ public class Crypto {
         try {
             Signature signAlg = Signature.getInstance("SHA256withRSA", "BC");
             signAlg.initVerify(key);
-            signAlg.update(toByteArray(data));
+            signAlg.update(data);
             return  signAlg.verify(toByteArray(signature));
         } catch (InvalidKeyException e) {
             e.printStackTrace();
@@ -489,6 +489,8 @@ public class Crypto {
          */
     public static String computeMAC(byte[] key, byte[] message, String alg) throws CryptoException {
 
+        if(message == null)
+            throw  new CryptoException("Message cannot be null");
         try {
             SecretKeySpec keyParam = new SecretKeySpec(key, alg);
             Mac mac = Mac.getInstance(alg, "BC");
@@ -515,6 +517,9 @@ public class Crypto {
      * @return true if matches; false otherwise
      */
     public static boolean validateMAC(byte[] key, byte[] message, String mac, String alg){
+
+
+
         String computedMac = null;
         try {
             computedMac = computeMAC(key, message, alg);
