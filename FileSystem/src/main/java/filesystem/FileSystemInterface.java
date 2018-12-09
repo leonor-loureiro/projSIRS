@@ -31,7 +31,7 @@ public class FileSystemInterface {
 
     } */
 
-    public static boolean validateToken(String username, String token){
+  /*  public static boolean validateToken(String username, String token){
         PublicKey key = null;
         try {
             key = Crypto.getPublicKey(keystoreFile, keystorePwd, myAlias);
@@ -39,7 +39,7 @@ public class FileSystemInterface {
             return false;
         }
         return TokenManager.validateJTW(token, "authServer", username, key);
-    }
+    } */
     public static EncryptedFileWrapper[] download(String name) throws IOException, ClassNotFoundException {
         System.out.println("Downloading files");
 
