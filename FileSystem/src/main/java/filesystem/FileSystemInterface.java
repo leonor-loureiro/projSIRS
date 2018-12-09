@@ -1,12 +1,16 @@
 package filesystem;
 
+import crypto.Crypto;
+import crypto.TokenManager;
+import crypto.exception.CryptoException;
+import filesystem.data.EncryptedFileWrapper;
+
 import java.io.*;
-import java.lang.reflect.Array;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.security.PublicKey;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 
 public class FileSystemInterface {
@@ -27,6 +31,15 @@ public class FileSystemInterface {
 
     } */
 
+    public static boolean validateToken(String username, String token){
+        PublicKey key = null;
+        try {
+            key = Crypto.getPublicKey(keystoreFile, keystorePwd, myAlias);
+        } catch (CryptoException e) {
+            return false;
+        }
+        return TokenManager.validateJTW(token, "authServer", username, key);
+    }
     public static EncryptedFileWrapper[] download(String name) throws IOException, ClassNotFoundException {
         System.out.println("Downloading files");
 

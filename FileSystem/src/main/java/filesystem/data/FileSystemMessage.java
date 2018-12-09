@@ -1,10 +1,7 @@
-package filesystem;
+package filesystem.data;
 
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Class used for communication with File System server
@@ -19,7 +16,7 @@ public class FileSystemMessage {
 
     private String userName;
 
-    FileSystemMessage(){
+    public FileSystemMessage(){
     }
 
     public EncryptedFileWrapper[] getFiles() {
