@@ -5,8 +5,12 @@ import crypto.Crypto;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.security.PublicKey;
 import java.util.Arrays;
+import java.util.Properties;
 import java.util.Random;
 
 @SpringBootApplication
@@ -17,12 +21,29 @@ public class Application {
     private static final String keystorePwd = "password";
     private static final String keyPwd = "password";
     private static final String myAlias = "server-keypair";
+    public static Properties properties;
 
     public static void main(String[] args) {
 
         Crypto.init();
 
-        DBConnection db = new DBConnection("root", "nino_1500");
+        properties = new Properties();
+        InputStream input = null;
+
+        try{
+            input = new FileInputStream("./" + "\\src\\main\\resources\\config.properties");
+            properties.load(input);
+
+            System.out.println(properties.getProperty("database"));
+            System.out.println(properties.getProperty("dbuser"));
+            System.out.println(properties.getProperty("dbpassword"));
+        }catch (IOException e){
+            e.printStackTrace();
+        }
+
+
+
+        //DBConnection db = new DBConnection("root", "nino_1500");
 
         /* String key = null;
         try {
@@ -38,7 +59,7 @@ public class Application {
         }*/
 
 
-        try {
+        /*try {
 
             PublicKey publicKey = Crypto.generateRSAKeys().getPublic();
             String publicKeyStr = Crypto.toString(publicKey.getEncoded());
@@ -133,12 +154,12 @@ public class Application {
             else
                 System.out.println("Not Equals");
 
-*/
+
 
         } catch (Exception e) {
             e.printStackTrace();
         }
-
+*/
 
         /*AuthService authService = AuthService.getInstance();
         try {

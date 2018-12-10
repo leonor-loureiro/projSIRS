@@ -12,8 +12,6 @@ public class DBConnection {
 
     //JDBC driver name
     private static final String JDBC_DRIVER = "com.mysql.jdbc.Driver";
-    // Database URL
-    private static final String DB_URL = "jdbc:mysql://localhost/sirs";
     // Select user SQL
     private static final String SELECT_USER_SQL = "Select saltedPwd from users where username = ?";
     // Insert user SQL
@@ -21,7 +19,8 @@ public class DBConnection {
     // Select public key SQL
     private static final String SELECT_KEY_SQL = "Select kpub from users where username = ?";
 
-
+    // Database URL
+    private final String DB_URL;// = "jdbc:mysql://localhost/sirs";
     //Database credentials
     private final String USER;
     private final String PASS;
@@ -40,9 +39,10 @@ public class DBConnection {
      * @param user database username
      * @param pass database password
      */
-    public DBConnection(String user, String pass) {
+    public DBConnection(String user, String pass, String database) {
         USER = user;
         PASS = pass;
+        DB_URL = "jdbc:mysql://" + database;
 
         // Register JDBC driver
         try {
