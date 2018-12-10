@@ -18,7 +18,7 @@ public class FileSystemInterface {
 
     private static final String keystoreFile = "./" + "\\src\\main\\resources\\serverkeystore.jks";
     private static final String keystorePwd = "password";
-    private static final String authServerAlias = "authServer";
+    private static final String authServerAlias = "auth-public-key";
 
     // f* this not necessary
 
@@ -45,6 +45,8 @@ public class FileSystemInterface {
         }
         return TokenManager.validateJTW(token, "authServer", username, key);
     }
+
+
     public static EncryptedFileWrapper[] download(String name) throws IOException, ClassNotFoundException {
         System.out.println("Downloading files");
 

@@ -36,7 +36,7 @@ public class AuthService {
     private static final String myAlias = "server-keypair";
 
     // Token Validity
-    private  static final int VALID_PERIOD = 120000; //2min
+    private  static final int VALID_PERIOD = 500000;//120000; //2min
 
     //Singleton instance
     private static AuthService instance = null;
