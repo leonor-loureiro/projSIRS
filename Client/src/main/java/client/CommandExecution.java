@@ -3,10 +3,52 @@ package client;
 import client.localFileHandler.FileManager;
 import client.localFileHandler.FileWrapper;
 import client.security.Login;
+import crypto.Crypto;
+import crypto.exception.CryptoException;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.CertificateException;
 import java.util.List;
+
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.math.BigInteger;
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
+import java.security.KeyStore;
+import java.security.KeyStore.Entry;
+import java.security.KeyStore.PrivateKeyEntry;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
+import java.security.Provider;
+import java.security.PublicKey;
+import java.security.SecureRandom;
+import java.security.Security;
+import java.security.UnrecoverableEntryException;
+import java.security.cert.Certificate;
+import java.security.cert.CertificateException;
+import java.security.interfaces.RSAPrivateKey;
+import java.security.interfaces.RSAPublicKey;
+import java.util.Calendar;
+import java.util.Date;
+
+import org.bouncycastle.asn1.x500.X500Name;
+import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
+import org.bouncycastle.cert.X509CertificateHolder;
+import org.bouncycastle.cert.X509v3CertificateBuilder;
+import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.bouncycastle.operator.ContentSigner;
+import org.bouncycastle.operator.OperatorCreationException;
+import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
 
 public class CommandExecution {
 
@@ -23,9 +65,68 @@ public class CommandExecution {
 
     private void setUser(User user) {this.user = user; }
 
-    public void login(Login login){
+    public void login(Login login) throws KeyStoreException, CertificateException, NoSuchAlgorithmException, IOException, CryptoException, OperatorCreationException {
         setUser(new User(login.getUsername(), login.getPassword()));
         communication.login(user);
+
+        KeyStore ks = KeyStore.getInstance("jks");
+
+        char[] pwdArray = login.getPassword();
+
+        ks.load(null,pwdArray);
+
+        Certificate selfSignedCertificate = selfSign(Crypto.generateRSAKeys(), "CN=esketit");
+        KeyStore.PrivateKeyEntry secret = new KeyStore.PrivateKeyEntry(Crypto.generateRSAKeys().getPrivate(),new Certificate[] { selfSignedCertificate });
+        KeyStore.ProtectionParameter password
+                = new KeyStore.PasswordProtection(pwdArray);
+        ks.setEntry(login.getUsername(), secret, password);
+
+        try (FileOutputStream fos = new FileOutputStream("./" + login.getUsername() + "keys" + ".jks")) {
+            ks.store(fos, pwdArray);
+        }
+
+
+    }
+
+    public  Certificate selfSign(KeyPair keyPair, String subjectDN)
+            throws OperatorCreationException, CertificateException, IOException
+    {
+        Provider bcProvider = new BouncyCastleProvider();
+        Security.addProvider(bcProvider);
+
+        long now = System.currentTimeMillis();
+        Date startDate = new Date(now);
+
+        X500Name dnName = new X500Name(subjectDN);
+
+        // Using the current timestamp as the certificate serial number
+        BigInteger certSerialNumber = new BigInteger(Long.toString(now));
+
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(startDate);
+        // 1 Yr validity
+        calendar.add(Calendar.YEAR, 1);
+
+        Date endDate = calendar.getTime();
+
+        // Use appropriate signature algorithm based on your keyPair algorithm.
+        String signatureAlgorithm = "SHA256WithRSA";
+
+        SubjectPublicKeyInfo subjectPublicKeyInfo = SubjectPublicKeyInfo.getInstance(keyPair
+                .getPublic().getEncoded());
+
+        X509v3CertificateBuilder certificateBuilder = new X509v3CertificateBuilder(dnName,
+                certSerialNumber, startDate, endDate, dnName, subjectPublicKeyInfo);
+
+        ContentSigner contentSigner = new JcaContentSignerBuilder(signatureAlgorithm).setProvider(
+                bcProvider).build(keyPair.getPrivate());
+
+        X509CertificateHolder certificateHolder = certificateBuilder.build(contentSigner);
+
+        Certificate selfSignedCert = new JcaX509CertificateConverter()
+                .getCertificate(certificateHolder);
+
+        return selfSignedCert;
     }
 
     public void register(Login login){

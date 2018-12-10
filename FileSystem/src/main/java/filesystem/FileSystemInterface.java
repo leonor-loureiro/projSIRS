@@ -16,6 +16,10 @@ import java.util.Map;
 public class FileSystemInterface {
 
 
+    private static final String keystoreFile = "./" + "\\src\\main\\resources\\serverkeystore.jks";
+    private static final String keystorePwd = "password";
+    private static final String authServerAlias = "auth-public-key";
+
     // f* this not necessary
 
  /*   public static void newfile(FileWrapper file){
@@ -31,15 +35,17 @@ public class FileSystemInterface {
 
     } */
 
-    public static boolean validateToken(String username, String token){
+   public static boolean validateToken(String username, String token){
+
         PublicKey key = null;
         try {
-            key = Crypto.getPublicKey(keystoreFile, keystorePwd, myAlias);
+            key = Crypto.getPublicKey(keystoreFile, keystorePwd, authServerAlias);
         } catch (CryptoException e) {
             return false;
         }
         return TokenManager.validateJTW(token, "authServer", username, key);
     }
+    
     public static EncryptedFileWrapper[] download(String name) throws IOException, ClassNotFoundException {
         System.out.println("Downloading files");
 

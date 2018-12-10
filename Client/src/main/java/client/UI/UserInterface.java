@@ -2,8 +2,14 @@ package client.UI;
 
 import client.CommandExecution;
 import client.security.Login;
+import crypto.exception.CryptoException;
+import org.bouncycastle.operator.OperatorCreationException;
 
 import java.io.Console;
+import java.io.IOException;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.CertificateException;
 import java.util.EnumSet;
 import java.util.Scanner;
 
@@ -52,7 +58,7 @@ public interface UserInterface {
      * Requests the user to input login info
      * @return array with username[0] and password [1]
      */
-    static Login requestLogin(){
+    static Login requestLogin() throws CertificateException, NoSuchAlgorithmException, KeyStoreException, OperatorCreationException, CryptoException, IOException {
         Login login = new Login();
 
         System.out.println();
