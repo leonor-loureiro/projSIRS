@@ -45,7 +45,7 @@ public class FileSystemInterface {
         }
         return TokenManager.validateJTW(token, "authServer", username, key);
     }
-    
+
     public static EncryptedFileWrapper[] download(String name) throws IOException, ClassNotFoundException {
         System.out.println("Downloading files");
 
