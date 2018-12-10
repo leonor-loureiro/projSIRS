@@ -24,9 +24,7 @@ import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 
 public class Communication {
@@ -44,9 +42,10 @@ public class Communication {
         this.loginToken = loginToken;
     }
 
-    public void register(User user){
+    public boolean register(User user){
 
-        throw new UnsupportedOperationException();
+        Map<String, String> msg = new HashMap<String, String>();
+        return true;
     }
 
     public void login(User user) {
@@ -61,7 +60,6 @@ public class Communication {
         FileSystemMessage obj = new FileSystemMessage();
 
         obj.setName(user.getUsername());
-
 
         //set headers
         HttpHeaders headers = new HttpHeaders();

@@ -129,6 +129,11 @@ public class CommandExecution {
         return selfSignedCert;
     }
 
+    public void register(Login login){
+        // TODO: Generate KeyPair and add to user
+        setUser(new User(login.getUsername(), login.getPassword()));
+        communication.register(user);
+    }
 
     /**
      * adds a file to staging file Lists, allowing it to be pushed
@@ -227,6 +232,5 @@ public class CommandExecution {
         System.exit(0);
 
     }
-
 
 }
