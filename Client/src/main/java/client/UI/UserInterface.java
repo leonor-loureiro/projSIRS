@@ -56,7 +56,11 @@ public interface UserInterface {
         Login login = new Login();
 
         System.out.println();
-        System.out.println("Please insert login information:");
+        System.out.println("login or register?");
+        String loginOrRegister = requestInput();
+
+        System.out.println();
+        System.out.println("Please insert your information:");
 
         System.out.println("Username: ");
         login.setUsername(requestInput());
@@ -66,7 +70,11 @@ public interface UserInterface {
 
         System.out.println();
 
-        commandExec.login(login);
+        if(loginOrRegister.equals("login"))
+            commandExec.login(login);
+        else
+            commandExec.register(login);
+
         return login;
     }
 
@@ -81,6 +89,8 @@ public interface UserInterface {
         System.out.println();
         System.out.println("*************************************************************************************");
     }
+
+
 
     /**
      * Lists all available commands

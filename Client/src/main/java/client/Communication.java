@@ -44,9 +44,10 @@ public class Communication {
         this.loginToken = loginToken;
     }
 
-    public void register(User user){
+    public boolean register(User user){
 
-        throw new UnsupportedOperationException();
+
+        return true;
     }
 
     public void login(User user) {
