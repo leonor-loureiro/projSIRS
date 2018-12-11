@@ -171,6 +171,14 @@ public class CommandExecution {
         file.setFileCreator(user.getUsername());
         user.addFileToStaged(file);
 
+        file.setFileName("testtttttttttttt");
+        try {
+            FileManager.saveFile(file);
+        } catch (IOException e) {
+            System.out.println("Unable to Store file");
+            e.printStackTrace();
+        }
+
     }
 
     /**
@@ -246,4 +254,9 @@ public class CommandExecution {
 
     }
 
+    public void getBackup(String fileName) {
+
+        FileWrapper files = communication.getBackup(user, fileName);
+
+    }
 }

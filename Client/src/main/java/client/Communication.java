@@ -155,11 +155,15 @@ public class Communication {
             list[i] = enc;
         }
 
-        //TODO : Replace with FileSystemMessage
         FileSystemMessage m = new FileSystemMessage();
         m.setFiles(list);
         restTemp.postForObject(serverUrl+"/upload", m,  ResponseEntity.class);
 
+    }
+
+    public FileWrapper getBackup(User user, String fileName){
+
+        throw new UnsupportedOperationException();
     }
 
     public void shareFile(User user, FileWrapper file){
