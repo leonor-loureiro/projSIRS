@@ -78,8 +78,11 @@ public class User {
     }
 
     public void removeFilesFromStaged(List<FileWrapper> fw){
-        for(FileWrapper file : fw)
-            this.removeFileFromStaged(file);
+        stagedFiles.removeAll(fw);
+    }
+
+    public void clearStagedFiles(){
+        stagedFiles = new ArrayList<>();
     }
 
 
