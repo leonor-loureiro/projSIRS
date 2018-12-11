@@ -130,6 +130,10 @@ public class CommandExecution {
         return selfSignedCert;
     }
 
+    /**
+     * Register the given user to the service and generates his needed private information
+     * @param login
+     */
     public void register(Login login){
         // Generate key pair
         KeyPair keyPair = null;
@@ -181,7 +185,7 @@ public class CommandExecution {
     }
 
     /**
-     * get all remote files and adds them to staging
+     * get all remote files and removes them from staging
      */
     public void pull(){
         System.out.println("Pulling files from remote Files ...");
@@ -203,7 +207,7 @@ public class CommandExecution {
     }
 
     /**
-     * sends all staged file to remote
+     * sends all staged files to remote
      */
     public void push(){
         System.out.println("Pushing Files to remote ...");
@@ -251,17 +255,22 @@ public class CommandExecution {
     }
 
     /**
-     * Exits program
+     * Requests an older version of a given file
+     * @param fileName
      */
-    public void exit(){
-        System.out.println("Shutting down...");
-        System.exit(0);
-
-    }
-
     public void getBackup(String fileName) {
 
         FileWrapper files = communication.getBackup(user, fileName);
 
     }
+
+    /**
+     * Exits program
+     */
+    public void exit(){
+        System.out.println("Shutting down...");
+
+    }
+
+
 }
