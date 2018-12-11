@@ -35,7 +35,7 @@ public class CreateAndStoreCertificateTest {
 
         KeystoreManager.CreateAndStoreCertificate(keyPair,keystoreFileName, alias, passwordArray);
         PublicKey pubKey = KeystoreManager.getPublicKey(keystoreFileName, alias + "-certificate", passwordArray);
-        PrivateKey privateKey = (PrivateKey) KeystoreManager.getPrivateKey(keystoreFileName, alias + "-privateKey", passwordArray, passwordArray);
+        PrivateKey privateKey = (PrivateKey) KeystoreManager.getPrivateKey(keystoreFileName, alias + "-privateKey", passwordArray);
 
         Assert.assertTrue(pubKey.equals(keyPair.getPublic()));
         Assert.assertTrue(privateKey.equals(keyPair.getPrivate()));

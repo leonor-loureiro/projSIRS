@@ -404,6 +404,13 @@ public class Crypto {
         return keyGen.generateKey();
     }
 
+    public static SecretKey extractSecretKey(byte[] encoded, String alg){
+        return new SecretKeySpec(encoded, 0, encoded.length, alg);
+    }
+
+    public static SecretKey extractSecretKey(byte[] encoded){
+        return new SecretKeySpec(encoded, 0, encoded.length, "AES");
+    }
 
     public static byte[] encryptAES(byte[] key, byte[] data) throws CryptoException {
         //Create secret key

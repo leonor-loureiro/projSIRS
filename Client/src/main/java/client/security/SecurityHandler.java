@@ -8,6 +8,7 @@ import crypto.Crypto;
 import crypto.exception.CryptoException;
 
 import java.security.Key;
+import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.util.ArrayList;
 import java.util.List;
@@ -80,21 +81,20 @@ public interface SecurityHandler {
 
     /**
      * Decrypts a list of files
-     * @param encyptedFiles
+     * @param encryptedFiles
      * @return decrypted files
      */
-    static List<FileWrapper> decryptFileWrappers(List<EncryptedFileWrapper> encyptedFiles){
+    static List<FileWrapper> decryptFileWrappers(List<EncryptedFileWrapper> encryptedFiles, PrivateKey privateKey){
 
         List<FileWrapper> list = new ArrayList<>();
 
-        //TODO: descomentar
-        /*for(EncryptedFileWrapper enc : encriptedFiles){
+        for(EncryptedFileWrapper enc : encryptedFiles){
             try {
-                list.add(decryptFileWrapper(enc));
+                list.add(decryptFileWrapper(enc, privateKey));
             } catch (FileCorrupted fileCorrupted) {
                 System.out.println("File " + enc.getFileName() + " is corrupted.");
             }
-        }*/
+        }
         return list;
     }
 

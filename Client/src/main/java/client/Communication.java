@@ -6,7 +6,6 @@ import client.exception.TokenInvalid;
 import client.exception.UserAlreadyExists;
 import client.localFileHandler.FileWrapper;
 import client.security.EncryptedFileWrapper;
-import client.security.SecurityHandler;
 
 import crypto.Crypto;
 import crypto.exception.CryptoException;
@@ -123,7 +122,7 @@ public class Communication {
 
     }
 
-    public List<FileWrapper> getFiles(User user){
+    public EncryptedFileWrapper[] getFiles(User user){
         RestTemplate restTemplate = restTemplate();
 
         //make the object
@@ -145,11 +144,12 @@ public class Communication {
 
         EncryptedFileWrapper[] files = out.getBody().getFiles();
 
+        System.out.println("Downloaded files:");
         for (EncryptedFileWrapper file : files) {
-            System.out.println("got this file " + file.getFileName());
+            System.out.println("- " + file.getFileName());
         }
 
-        return SecurityHandler.decryptFileWrappers(Arrays.asList(files));
+        return files;
     }
 
     public PublicKey getUserKey(String username1, String username2) throws CryptoException, BadArgument, TokenInvalid {

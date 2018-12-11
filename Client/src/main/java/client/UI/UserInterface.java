@@ -194,10 +194,9 @@ public interface UserInterface {
         } catch (IllegalArgumentException e) {
             e.printStackTrace();
             System.out.println("Unknown Command!");
-        } catch (BadArgument badArgument) {
-            badArgument.printStackTrace();
-        } catch (TokenInvalid tokenInvalid) {
-            tokenInvalid.printStackTrace();
+        } catch (BadArgument | TokenInvalid e) {
+            e.printStackTrace();
+            System.out.println(e.getMessage());
         }
 
         System.out.println();
