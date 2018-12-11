@@ -245,4 +245,8 @@ public interface UserInterface {
         for(int i = 0; i < 2; i++)
             System.out.println();
     }
+
+    static boolean validateInputNames(String input){
+        return false;
+    }
 }

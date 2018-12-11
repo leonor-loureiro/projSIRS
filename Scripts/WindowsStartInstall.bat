@@ -14,5 +14,5 @@ rem -- Start FileSystem
 start cmd /c "title FileSystem & cd .. & cd FileSystem & mvn clean install spring-boot:run"
 
 rem -- Start FileSystem
-start cmd /c "title Client & cd .. & cd Client & mvn clean install exec:java"
+start cmd /k "title Client & cd .. & cd Client & mvn clean install exec:java"
 
