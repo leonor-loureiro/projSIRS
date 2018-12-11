@@ -36,7 +36,7 @@ public class AuthService {
     private static final String myAlias = "server-keypair";
 
     // Token Validity
-    private  static final int VALID_PERIOD = 500000;//120000; //2min
+    private  static final int VALID_PERIOD = 1800000;
 
     //Singleton instance
     private static AuthService instance = null;
@@ -48,20 +48,6 @@ public class AuthService {
     private static Random random = new Random();
 
     private AuthService(){
-
-        /*Properties properties = new Properties();
-        InputStream input = null;
-
-        try {
-            input = new FileInputStream("./" + "\\src\\main\\resources\\config.properties");
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
-        try {
-            properties.load(input);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }*/
 
         db = new DBConnection(Application.properties.getProperty("dbuser"),
                Application.properties.getProperty("dbpassword"),
@@ -138,18 +124,6 @@ public class AuthService {
             // Get public key
             return db.getPublicKey(username);
 
-            /*
-            // Encrypt public key with secret key
-            Key Ks = Crypto.generateSecretKey(256, "AES");
-            String cipheredKpub = Crypto.encryptAES(Ks, Kpub);
-
-            // Encrypt secret key with authServer Kpriv
-            Key Kpriv = Crypto.getPrivateKey(keystoreFile, keystorePwd, myAlias, keyPwd);
-            String cipheredKs = Crypto.encryptRSA(Ks.getEncoded(), Kpriv);
-
-            return cipheredKpub + "|" + cipheredKs;
-            */
-
         } catch (SQLException e) {
             throw new InvalidUserException("Invalid user");
         }
@@ -165,42 +139,5 @@ public class AuthService {
         }
         String id = "" + random.nextInt(9000000) + 1000000;
         return TokenManager.createJTW(id, "authServer", username, VALID_PERIOD, signingKey);
-    }
-
-
-    /***********************************************************
-     * For the client
-     */
-
-    public static PublicKey recoverPublicKey(String cipher){
-        //Extract ciphered keys
-        String cipheredKpub = cipher.substring(0, cipher.indexOf("|"));
-        String cipheredKs = cipher.substring(cipher.indexOf("|") + 1);
-
-        try {
-            // Get public key from authserver
-            PublicKey publicKeyAuth = Crypto.getPublicKey(keystoreFile, keystorePwd, myAlias);
-
-            // Decipher Ks
-            byte[] Ks = Crypto.decryptRSA(Crypto.toByteArray(cipheredKs), publicKeyAuth);
-
-            //Decrypt Kpub
-            byte[] publicKeyBytes = Crypto.decryptAES(Ks, cipheredKpub.getBytes());
-
-            // Convert to public key
-            PublicKey publicKey = KeyFactory.getInstance("RSA").generatePublic(new X509EncodedKeySpec(publicKeyBytes));
-
-            return publicKey;
-
-        } catch (InvalidKeySpecException e) {
-            e.printStackTrace();
-        } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
-        } catch (CryptoException e) {
-            e.printStackTrace();
-        }
-
-        return null;
-
     }
 }
