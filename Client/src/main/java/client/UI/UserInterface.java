@@ -1,6 +1,10 @@
 package client.UI;
 
 import client.CommandExecution;
+import client.exception.BadArgument;
+import client.exception.InvalidUser;
+import client.exception.TokenInvalid;
+import client.exception.UserAlreadyExists;
 import client.security.Login;
 import crypto.exception.CryptoException;
 import org.bouncycastle.operator.OperatorCreationException;
@@ -58,7 +62,7 @@ public interface UserInterface {
      * Requests the user to input login info
      * @return array with username[0] and password [1]
      */
-    static Login requestLogin() throws CertificateException, NoSuchAlgorithmException, KeyStoreException, OperatorCreationException, CryptoException, IOException {
+    static Login requestLogin() throws InvalidUser, BadArgument, UserAlreadyExists {
         Login login = new Login();
 
         System.out.println();
@@ -122,6 +126,7 @@ public interface UserInterface {
         System.out.println(Command.pull + "  - get files from remote server");
         System.out.println(Command.push + "  - send file to remote server");
         System.out.println(Command.share + " - share file with another user");
+        System.out.println(Command.getBackup + "  - retrieves the last auto back-uped version of the file");
         System.out.println(Command.list + "  - lists all files");
         System.out.println(Command.exit + "  - exit program");
         System.out.println();
@@ -130,7 +135,7 @@ public interface UserInterface {
     /**
      * Parses input from user and associates right command
      */
-    static void parseCommand(){
+    static boolean parseCommand(){
         String command;
         String fileName;
         String user;
@@ -167,6 +172,11 @@ public interface UserInterface {
                 case list:
                     commandExec.list();
                     break;
+                case getBackup:
+                    System.out.println("Insert filename you want to get backup for");
+                    fileName = requestInput();
+                    commandExec.getBackup(fileName);
+                    break;
 
                 case help:
                     help();
@@ -174,7 +184,7 @@ public interface UserInterface {
 
                 case exit:
                     commandExec.exit();
-                    break;
+                    return false;
 
                 default:
                     System.out.println();
@@ -184,9 +194,14 @@ public interface UserInterface {
         } catch (IllegalArgumentException e) {
             e.printStackTrace();
             System.out.println("Unknown Command!");
+        } catch (BadArgument badArgument) {
+            badArgument.printStackTrace();
+        } catch (TokenInvalid tokenInvalid) {
+            tokenInvalid.printStackTrace();
         }
 
         System.out.println();
+        return true;
     }
 
 

@@ -1,11 +1,16 @@
 package client;
 
+import client.exception.BadArgument;
+import client.exception.InvalidUser;
+import client.exception.TokenInvalid;
+import client.exception.UserAlreadyExists;
 import client.localFileHandler.FileWrapper;
 import client.security.EncryptedFileWrapper;
 import client.security.SecurityHandler;
 import client.security.Token;
 
 import crypto.Crypto;
+import crypto.exception.CryptoException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.conn.ssl.NoopHostnameVerifier;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
@@ -24,6 +29,7 @@ import java.io.IOException;
 import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
+import java.security.PublicKey;
 import java.security.cert.CertificateException;
 import java.util.*;
 
@@ -44,7 +50,7 @@ public class Communication {
         this.loginToken = loginToken;
     }
 
-    public boolean register(User user){
+    public boolean register(User user) throws UserAlreadyExists, BadArgument {
 
         RestTemplate restTemplate = restTemplate();
 
@@ -69,10 +75,18 @@ public class Communication {
             loginToken = response.getBody();
             return true;
         }
-         return false;
+        //User already exists
+        if(response.getStatusCode() == HttpStatus.CONFLICT)
+            throw new UserAlreadyExists(response.getBody());
+
+        //Invalid arguments
+        if(response.getStatusCode() == HttpStatus.BAD_REQUEST)
+            throw new BadArgument(response.getBody());
+
+        return false;
     }
 
-    public boolean login(User user) {
+    public boolean login(User user) throws InvalidUser, BadArgument {
 
         RestTemplate restTemplate = restTemplate();
 
@@ -100,7 +114,15 @@ public class Communication {
             System.out.println("Login successful");
             return true;
         }
-        System.out.println("Login failed");
+
+        //User does not exist
+        if(response.getStatusCode() == HttpStatus.CONFLICT)
+            throw new InvalidUser(response.getBody());
+
+        //Invalid arguments
+        if(response.getStatusCode() == HttpStatus.BAD_REQUEST)
+            throw new BadArgument(response.getBody());
+
         return false;
 
     }
@@ -127,11 +149,46 @@ public class Communication {
 
         EncryptedFileWrapper[] files = out.getBody().getFiles();
 
-        for(int i = 0;i < files.length;i++){
-            System.out.println("got this file " + files[i].getFileName());
+        for (EncryptedFileWrapper file : files) {
+            System.out.println("got this file " + file.getFileName());
         }
 
         return SecurityHandler.decryptFileWrappers(Arrays.asList(files));
+    }
+
+    public PublicKey getUserKey(String username1, String username2) throws CryptoException, BadArgument, TokenInvalid {
+        RestTemplate restTemplate = restTemplate();
+
+        //create the params
+        Map<String, String> msg = new HashMap<String, String>();
+        msg.put("username1", username1);
+        msg.put("username2", username2);
+        msg.put("token", loginToken);
+
+        //set headers
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+
+        //set entity to send
+        HttpEntity request = new HttpEntity(msg, headers);
+
+        // send
+        ResponseEntity<String> response = restTemplate.postForEntity(authServerUrl + "/getPublicKey", request, String.class);
+
+        if (response.getStatusCode() == HttpStatus.OK) {
+            byte[] encoded = Crypto.toByteArray((response.getBody()));
+            return Crypto.recoverPublicKey(encoded);
+        }
+
+        if (response.getStatusCode() == HttpStatus.BAD_REQUEST) {
+            throw new BadArgument(response.getBody());
+        }
+
+        if (response.getStatusCode() == HttpStatus.BAD_REQUEST) {
+            throw new TokenInvalid(response.getBody());
+        }
+
+        return null;
     }
 
     /**
@@ -155,14 +212,18 @@ public class Communication {
             list[i] = enc;
         }
 
-        //TODO : Replace with FileSystemMessage
         FileSystemMessage m = new FileSystemMessage();
         m.setFiles(list);
         restTemp.postForObject(serverUrl+"/upload", m,  ResponseEntity.class);
 
     }
 
-    public void shareFile(User user, FileWrapper file){
+    public FileWrapper getBackup(User user, String fileName){
+
+        throw new UnsupportedOperationException();
+    }
+
+    public void shareFile(User user, EncryptedFileWrapper file, String destUser){
         throw new UnsupportedOperationException();
     }
 

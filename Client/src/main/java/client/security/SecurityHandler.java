@@ -1,9 +1,9 @@
 package client.security;
 
 import client.localFileHandler.FileWrapper;
-import client.security.exception.BadEncryption;
-import client.security.exception.FileCorrupted;
-import client.security.exception.BadArgument;
+import client.exception.BadEncryption;
+import client.exception.FileCorrupted;
+import client.exception.BadArgument;
 import crypto.Crypto;
 import crypto.exception.CryptoException;
 
@@ -14,10 +14,10 @@ import java.util.List;
 
 public interface SecurityHandler {
 
-    String keystoreFile = "./" + "\\src\\main\\resources\\trustkeystore.jks";
+    String keystoreFile = "./" + "\\src\\main\\resources\\clienttruststore.jks";
     String keystorePwd = "password";
     String keyPwd = "password";
-    String myAlias = "server-keypair";
+    String authServerAlias = "auth-public-key";
 
     //TODO: init that sets keystore variables
 
@@ -135,13 +135,10 @@ public interface SecurityHandler {
             e.printStackTrace();
         }
 
-            // Encrypt file key
+        // Encrypt file key
         try {
-            //TODO: get public key from keystore
-            //PublicKey publicKey = Crypto.getPublicKey(keystoreFile, keystorePwd, myAlias);
             byte[] cipheredFileKey = Crypto.encryptRSA(fileKey, publicKey);
             enc.setFileKey(cipheredFileKey);
-
 
         } catch (CryptoException e) {
             e.printStackTrace();
@@ -201,8 +198,6 @@ public interface SecurityHandler {
         if(secretKey == null)
             throw new BadArgument("Invalid secret key");
 
-        //TODO: get public key from keystore
-        //PublicKey publicKey = Crypto.getPublicKey(keystoreFile, keystorePwd, myAlias);
 
         try {
             return Crypto.encryptRSA(secretKey, publicKey);

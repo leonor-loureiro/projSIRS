@@ -1,18 +1,25 @@
 package client;
 
+import client.exception.BadArgument;
+import client.exception.InvalidUser;
+import client.exception.TokenInvalid;
+import client.exception.UserAlreadyExists;
 import client.localFileHandler.FileManager;
 import client.localFileHandler.FileWrapper;
+import client.security.EncryptedFileWrapper;
 import client.security.Login;
+import client.security.SecurityHandler;
+import crypto.CertificateManager;
 import crypto.Crypto;
 import crypto.exception.CryptoException;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.security.KeyStore;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
+import java.lang.reflect.Array;
+import java.security.*;
 import java.security.cert.CertificateException;
+import java.util.Arrays;
 import java.util.List;
 
 import java.io.FileInputStream;
@@ -20,19 +27,11 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.math.BigInteger;
-import java.security.KeyPair;
-import java.security.KeyPairGenerator;
 import java.security.KeyStore;
 import java.security.KeyStore.Entry;
 import java.security.KeyStore.PrivateKeyEntry;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
-import java.security.PrivateKey;
-import java.security.Provider;
-import java.security.PublicKey;
-import java.security.SecureRandom;
-import java.security.Security;
-import java.security.UnrecoverableEntryException;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.interfaces.RSAPrivateKey;
@@ -50,6 +49,8 @@ import org.bouncycastle.operator.ContentSigner;
 import org.bouncycastle.operator.OperatorCreationException;
 import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
 
+import javax.sound.midi.Soundbank;
+
 public class CommandExecution {
 
     /**
@@ -65,87 +66,58 @@ public class CommandExecution {
 
     private void setUser(User user) {this.user = user; }
 
-    public void login(Login login) throws KeyStoreException, CertificateException, NoSuchAlgorithmException, IOException, CryptoException, OperatorCreationException {
+    public void login(Login login) throws BadArgument, InvalidUser {
         setUser(new User(login.getUsername(), login.getPassword()));
         communication.login(user);
-
-        KeyStore ks = KeyStore.getInstance("jks");
-
-        char[] pwdArray = login.getPassword();
-
-        ks.load(null,pwdArray);
-
-        Certificate selfSignedCertificate = selfSign(Crypto.generateRSAKeys(), "CN=esketit");
-        KeyStore.PrivateKeyEntry secret = new KeyStore.PrivateKeyEntry(Crypto.generateRSAKeys().getPrivate(),new Certificate[] { selfSignedCertificate });
-        KeyStore.ProtectionParameter password
-                = new KeyStore.PasswordProtection(pwdArray);
-        ks.setEntry(login.getUsername(), secret, password);
-
-        try (FileOutputStream fos = new FileOutputStream("./" + login.getUsername() + "keys" + ".jks")) {
-            ks.store(fos, pwdArray);
-        }
-
-
     }
 
-    public  Certificate selfSign(KeyPair keyPair, String subjectDN)
-            throws OperatorCreationException, CertificateException, IOException
-    {
-        Provider bcProvider = new BouncyCastleProvider();
-        Security.addProvider(bcProvider);
 
-        long now = System.currentTimeMillis();
-        Date startDate = new Date(now);
+    /**
+     * Register the given user to the service and generates his needed private information
+     * @param login
+     */
+    public boolean register(Login login) throws BadArgument, UserAlreadyExists {
+        //Create the user
+        User user = new User(login.getUsername(), login.getPassword());
 
-        X500Name dnName = new X500Name(subjectDN);
-
-        // Using the current timestamp as the certificate serial number
-        BigInteger certSerialNumber = new BigInteger(Long.toString(now));
-
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTime(startDate);
-        // 1 Yr validity
-        calendar.add(Calendar.YEAR, 1);
-
-        Date endDate = calendar.getTime();
-
-        // Use appropriate signature algorithm based on your keyPair algorithm.
-        String signatureAlgorithm = "SHA256WithRSA";
-
-        SubjectPublicKeyInfo subjectPublicKeyInfo = SubjectPublicKeyInfo.getInstance(keyPair
-                .getPublic().getEncoded());
-
-        X509v3CertificateBuilder certificateBuilder = new X509v3CertificateBuilder(dnName,
-                certSerialNumber, startDate, endDate, dnName, subjectPublicKeyInfo);
-
-        ContentSigner contentSigner = new JcaContentSignerBuilder(signatureAlgorithm).setProvider(
-                bcProvider).build(keyPair.getPrivate());
-
-        X509CertificateHolder certificateHolder = certificateBuilder.build(contentSigner);
-
-        Certificate selfSignedCert = new JcaX509CertificateConverter()
-                .getCertificate(certificateHolder);
-
-        return selfSignedCert;
-    }
-
-    public void register(Login login){
         // Generate key pair
         KeyPair keyPair = null;
         try {
             keyPair = Crypto.generateRSAKeys();
+            user.setPrivateKey(keyPair.getPrivate());
+            user.setPublicKey(keyPair.getPublic());
 
         } catch (CryptoException e) {
             e.printStackTrace();
+            return false;
         }
 
-        //Create the user
-        User user = new User(login.getUsername(), login.getPassword());
-        user.setPrivateKey(keyPair.getPrivate());
-        user.setPublicKey(keyPair.getPublic());
-
+        // Send register request
         setUser(user);
-        communication.register(user);
+        if(!communication.register(user)){
+            return false;
+        }
+
+        // Create keystore and store key pair
+        char[] pwdArray = login.getPassword();
+
+        try {
+            CertificateManager.CreateAndStoreCertificate(keyPair,
+                    "./" + login.getUsername() + "keys" + ".jks",
+                    user.getUsername(),
+                    pwdArray);
+
+        }catch (Exception e){
+            e.printStackTrace();
+            return false;
+        }
+
+        try {
+            share("ups", "test.txt");
+        } catch (TokenInvalid tokenInvalid) {
+            tokenInvalid.printStackTrace();
+        }
+        return true;
     }
 
     /**
@@ -161,7 +133,7 @@ public class CommandExecution {
 
         System.out.println("Adding File ..." + filename);
 
-        FileWrapper file = FileManager.loadFile(filename);
+        FileWrapper file = getFileWrapper(filename);
 
         if(file == null){
             System.out.println("File " + filename + " not found.");
@@ -173,8 +145,19 @@ public class CommandExecution {
 
     }
 
+    private FileWrapper getFileWrapper(String filename) {
+        FileWrapper file = null;
+        try {
+            file = FileManager.loadFile(filename);
+        } catch (IOException e) {
+            System.out.println("Unable to read file. Wrong filename or no permission.");
+            e.printStackTrace();
+        }
+        return file;
+    }
+
     /**
-     * get all remote files and adds them to staging
+     * get all remote files and removes them from staging
      */
     public void pull(){
         System.out.println("Pulling files from remote Files ...");
@@ -185,12 +168,18 @@ public class CommandExecution {
 
         List<FileWrapper> files = communication.getFiles(user);
 
-        user.addFilesToStaged(files);
+        user.removeFilesFromStaged(files);
+        try {
+            FileManager.saveFiles(files);
+        } catch (IOException e) {
+            System.out.println("Unable to save pulled files");
+            e.printStackTrace();
+        }
 
     }
 
     /**
-     * sends all staged file to remote
+     * sends all staged files to remote
      */
     public void push(){
         System.out.println("Pushing Files to remote ...");
@@ -199,19 +188,40 @@ public class CommandExecution {
             return;
         }
 
-        communication.putFiles(user, user.getstagedFiles());
+        communication.putFiles(user, user.getStagedFiles());
     }
 
     /**
      * Shares a user's file with a given user
      */
-    public void share(String dest, String fileName){
-        System.out.println("Sharing file with user ...");
-        System.out.println("It doesn't work yet! :P");
-        if(user == null){
-            System.out.println("User must be logged for this operation!!");
-            return;
+    public void share(String dest, String fileName) throws TokenInvalid, BadArgument {
+
+        //Get user's public key
+        PublicKey publicKey = null;
+        try {
+            publicKey = communication.getUserKey(user.getUsername(), dest);
+        } catch (CryptoException e) {
+            e.printStackTrace();
         }
+
+        //Get file key and encrypt it
+        FileWrapper fileWrapper = getFileWrapper(fileName);
+
+        //TODO: Remove this set when wrapper already has key
+        try {
+            fileWrapper.setFileName(fileName);
+            fileWrapper.setFileCreator(dest);
+            fileWrapper.setFileKey(Crypto.generateSecretKey().getEncoded());
+        } catch (CryptoException e) {
+            e.printStackTrace();
+        }
+
+        EncryptedFileWrapper encFile = SecurityHandler.encryptFileWrapper(fileWrapper, publicKey);
+
+        System.out.println("File shared with success");
+
+        //Share file
+        //communication.shareFile(user, encFile, dest );
     }
 
     /**
@@ -238,12 +248,22 @@ public class CommandExecution {
     }
 
     /**
+     * Requests an older version of a given file
+     * @param fileName
+     */
+    public void getBackup(String fileName) {
+
+        FileWrapper files = communication.getBackup(user, fileName);
+
+    }
+
+    /**
      * Exits program
      */
     public void exit(){
         System.out.println("Shutting down...");
-        System.exit(0);
 
     }
+
 
 }

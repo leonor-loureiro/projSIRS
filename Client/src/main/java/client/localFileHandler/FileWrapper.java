@@ -30,9 +30,6 @@ public class FileWrapper {
      */
     private String fileCreator;
 
-
-    // TODO: add version
-
     /**
      * Empty Default Constructor
      */
