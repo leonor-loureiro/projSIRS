@@ -15,25 +15,20 @@ import java.util.Map;
 @RequestMapping("/operations")
 public class FileSystemController {
 
- /*   @PostMapping(path = "/newfile")
-    public void newFile(@Valid @RequestBody FileWrapper file){
-        System.out.println("Got to restcontroller");
-        FileSystemInterface.newfile(file);
-    } */
     @RequestMapping(value = "/download")
     public ResponseEntity<FileSystemMessage> download(@Valid @RequestBody FileSystemMessage fMsg) throws IOException, ClassNotFoundException {
 
         if(checkInput(fMsg))
             throw new IOException();
 
-        FileSystemMessage m = new FileSystemMessage();
+        FileSystemMessage message = new FileSystemMessage();
 
         //Check if the token is valid
-        if(FileSystemInterface.validateToken(fMsg.getName(), fMsg.getToken()))
+        if(FileSystemInterface.validateToken(fMsg.getUserName(), fMsg.getToken()))
             return new ResponseEntity<FileSystemMessage>(HttpStatus.PRECONDITION_FAILED);
 
-        m.setFiles(FileSystemInterface.download(fMsg.getName()));
-        return new ResponseEntity<FileSystemMessage>(m, HttpStatus.OK);
+        message.setFiles(FileSystemInterface.download(fMsg.getUserName()));
+        return new ResponseEntity<FileSystemMessage>(message, HttpStatus.OK);
     }
 
     @PostMapping(value = "/upload")
@@ -45,7 +40,7 @@ public class FileSystemController {
         //Check if the token is valid
         FileSystemMessage m = new FileSystemMessage();
 
-        if(FileSystemInterface.validateToken(fMsg.getName(), fMsg.getToken()))
+        if(FileSystemInterface.validateToken(fMsg.getUserName(), fMsg.getToken()))
             return new ResponseEntity(HttpStatus.PRECONDITION_FAILED);
 
         FileSystemInterface.upload(fMsg.getFiles());
@@ -54,14 +49,23 @@ public class FileSystemController {
 
     @RequestMapping(value = "/share")
     public ResponseEntity share(@Valid@RequestBody FileSystemMessage fMsg) throws IOException, ClassNotFoundException {
-        FileSystemMessage m = new FileSystemMessage();
+        FileSystemMessage message = new FileSystemMessage();
 
         checkInput(fMsg);
-        if(FileSystemInterface.validateToken(m.getName(), m.getToken()))
+        if(FileSystemInterface.validateToken(fMsg.getUserName(), fMsg.getToken()))
             return new ResponseEntity(HttpStatus.PRECONDITION_FAILED);
 
-        FileSystemInterface.share(fMsg.getName(),fMsg.getUserToShareWith(),fMsg.getFiles()[0]);
+        FileSystemInterface.share(fMsg.getUserName(),fMsg.getUserToShareWith(),fMsg.getFiles()[0]);
         return new ResponseEntity(HttpStatus.OK);
+    }
+
+    @RequestMapping(value = "/getoldversion")
+    public ResponseEntity getoldversion(@Valid@RequestBody FileSystemMessage fMsg) throws IOException, ClassNotFoundException {
+        FileSystemMessage message = new FileSystemMessage();
+        if(FileSystemInterface.validateToken(fMsg.getUserName(), fMsg.getToken()))
+            return new ResponseEntity(HttpStatus.PRECONDITION_FAILED);
+        message.setFiles(new EncryptedFileWrapper[]{ FileSystemInterface.getOldVersion(fMsg.getUserName(),fMsg.getBackUpFileName(),fMsg.getCorrupted())});
+        return new ResponseEntity<FileSystemMessage>(message , HttpStatus.OK);
     }
 
     @RequestMapping(value = "/test")
@@ -70,14 +74,22 @@ public class FileSystemController {
     }
 
     public Boolean checkInput(FileSystemMessage fMsg){
-        if (fMsg.getName()!= null & !fMsg.getName().matches("[a-zA-Z0-9]*")) {
-            System.out.println("Bad username");
-            return false;
+        if (fMsg.getUserName()!= null ) {
+            if(!fMsg.getUserName().matches("[a-zA-Z0-9]*")) {
+                System.out.println("Bad username");
+                return false;
+            }
         }
-        if (fMsg.getUserToShareWith()!= null &!fMsg.getUserToShareWith().matches("[a-zA-Z0-9]*")) {
-            System.out.println("Bad username");
-            return false;
-
+        if (fMsg.getUserToShareWith()!= null){
+            if(!fMsg.getUserToShareWith().matches("[a-zA-Z0-9]*")) {
+                System.out.println("Bad username to share with");
+                return false;
+            }
+        }
+        if(fMsg.getBackUpFileName()!=null){
+            if(!fMsg.getUserName().matches("[a-zA-Z0-9]*"))
+                System.out.println("Bad filename for backup");
+                return false;
         }
         EncryptedFileWrapper[] files = fMsg.getFiles();
         for(int i = 0;i < files.length;i++){

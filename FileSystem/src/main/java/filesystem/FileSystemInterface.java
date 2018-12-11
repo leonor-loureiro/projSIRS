@@ -171,7 +171,7 @@ public class FileSystemInterface {
         return true;
     }
 
-    public EncryptedFileWrapper getOldVersion(String fileCreator,String fileName,Boolean corrupted) throws IOException, ClassNotFoundException {
+    public static EncryptedFileWrapper getOldVersion(String fileCreator,String fileName,Boolean corrupted) throws IOException, ClassNotFoundException {
         File file = new File(fileCreator + "\\" + fileName + ".file");
         if (corrupted){
             int versionumber = 0;

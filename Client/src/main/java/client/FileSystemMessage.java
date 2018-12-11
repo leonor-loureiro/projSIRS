@@ -21,7 +21,13 @@ public class FileSystemMessage {
 
     private String userToShareWith;
 
-    FileSystemMessage(){
+    private String fileName;
+
+    private int version;
+
+    private Boolean corrupted = false;
+
+    public FileSystemMessage(){
     }
 
     public EncryptedFileWrapper[] getFiles() {
@@ -44,11 +50,32 @@ public class FileSystemMessage {
         return userName;
     }
 
-    public void setName(String user){
+    public void setUserName(String user){
         userName = user;
     }
 
     public void setUserToShareWith(String user){userToShareWith = user;}
 
     public String getUserToShareWith(){return userToShareWith;}
+
+    public void setFileName(String filename) {
+        fileName = filename;
+    }
+
+    public String getBackUpFileName() {
+        return fileName;
+    }
+
+    public void setVersion(int _version) {
+        version = _version;
+    }
+
+    public int getVersion() {
+        return version;
+    }
+
+    public void setCorrupted(){
+        corrupted = true;
+    }
+
 }
