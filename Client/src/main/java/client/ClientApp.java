@@ -24,16 +24,27 @@ public class ClientApp {
 
     public static void main(String[] args) throws Exception {
         Login login;
-        UserInterface.home();
-        login = UserInterface.requestLogin();
-        UserInterface.welcome(login.getUsername());
+        boolean running = true;
 
 
+        while(running) {
+            UserInterface.home();
 
-        while (true) {
-            UserInterface.listCommands();
-            UserInterface.parseCommand();
-            UserInterface.clearScreen();
+            try{
+                login = UserInterface.requestLogin();
+
+                UserInterface.welcome(login.getUsername());
+
+
+                while (running) {
+                    UserInterface.listCommands();
+                    running = UserInterface.parseCommand();
+                    UserInterface.clearScreen();
+                }
+            }catch(Exception e){
+                System.out.println(e.getMessage());
+                continue;
+            }
         }
 
     }

@@ -13,10 +13,10 @@ import crypto.exception.CryptoException;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.security.KeyStore;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
+import java.lang.reflect.Array;
+import java.security.*;
 import java.security.cert.CertificateException;
+import java.util.Arrays;
 import java.util.List;
 
 import java.io.FileInputStream;
@@ -24,19 +24,11 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.math.BigInteger;
-import java.security.KeyPair;
-import java.security.KeyPairGenerator;
 import java.security.KeyStore;
 import java.security.KeyStore.Entry;
 import java.security.KeyStore.PrivateKeyEntry;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
-import java.security.PrivateKey;
-import java.security.Provider;
-import java.security.PublicKey;
-import java.security.SecureRandom;
-import java.security.Security;
-import java.security.UnrecoverableEntryException;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.interfaces.RSAPrivateKey;
@@ -53,6 +45,8 @@ import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.operator.ContentSigner;
 import org.bouncycastle.operator.OperatorCreationException;
 import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
+
+import javax.sound.midi.Soundbank;
 
 public class CommandExecution {
 
@@ -75,7 +69,10 @@ public class CommandExecution {
     }
 
 
-
+    /**
+     * Register the given user to the service and generates his needed private information
+     * @param login
+     */
     public boolean register(Login login) throws BadArgument, UserAlreadyExists {
         //Create the user
         User user = new User(login.getUsername(), login.getPassword());
@@ -92,6 +89,12 @@ public class CommandExecution {
             return false;
         }
 
+        // Send register request
+        setUser(user);
+        if(!communication.register(user)){
+            return false;
+        }
+
         // Create keystore and store key pair
         char[] pwdArray = login.getPassword();
 
@@ -105,9 +108,7 @@ public class CommandExecution {
             e.printStackTrace();
             return false;
         }
-
-        setUser(user);
-        return communication.register(user);
+        return true;
     }
 
     /**
@@ -142,7 +143,7 @@ public class CommandExecution {
     }
 
     /**
-     * get all remote files and adds them to staging
+     * get all remote files and removes them from staging
      */
     public void pull(){
         System.out.println("Pulling files from remote Files ...");
@@ -164,7 +165,7 @@ public class CommandExecution {
     }
 
     /**
-     * sends all staged file to remote
+     * sends all staged files to remote
      */
     public void push(){
         System.out.println("Pushing Files to remote ...");
@@ -212,17 +213,22 @@ public class CommandExecution {
     }
 
     /**
-     * Exits program
+     * Requests an older version of a given file
+     * @param fileName
      */
-    public void exit(){
-        System.out.println("Shutting down...");
-        System.exit(0);
-
-    }
-
     public void getBackup(String fileName) {
 
         FileWrapper files = communication.getBackup(user, fileName);
 
     }
+
+    /**
+     * Exits program
+     */
+    public void exit(){
+        System.out.println("Shutting down...");
+
+    }
+
+
 }

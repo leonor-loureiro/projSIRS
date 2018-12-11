@@ -44,7 +44,7 @@ public interface FileManager {
     }
 
     /**
-     * loads a file with a given name (should include extension
+     * loads a local file with a given name (should include extension)
      * @param name name should include extension
      * @return FileWrapper with name found
      */
@@ -54,8 +54,6 @@ public interface FileManager {
         // Will be null if path is invalid
 
         File[] files = new File(path).listFiles();
-
-
 
         if (files != null) {
             for (File file : files) {

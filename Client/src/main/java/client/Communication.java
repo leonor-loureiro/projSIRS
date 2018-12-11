@@ -146,8 +146,8 @@ public class Communication {
 
         EncryptedFileWrapper[] files = out.getBody().getFiles();
 
-        for(int i = 0;i < files.length;i++){
-            System.out.println("got this file " + files[i].getFileName());
+        for (EncryptedFileWrapper file : files) {
+            System.out.println("got this file " + file.getFileName());
         }
 
         return SecurityHandler.decryptFileWrappers(Arrays.asList(files));

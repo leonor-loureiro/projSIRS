@@ -134,7 +134,7 @@ public interface UserInterface {
     /**
      * Parses input from user and associates right command
      */
-    static void parseCommand(){
+    static boolean parseCommand(){
         String command;
         String fileName;
         String user;
@@ -183,7 +183,7 @@ public interface UserInterface {
 
                 case exit:
                     commandExec.exit();
-                    break;
+                    return false;
 
                 default:
                     System.out.println();
@@ -196,6 +196,7 @@ public interface UserInterface {
         }
 
         System.out.println();
+        return true;
     }
 
 

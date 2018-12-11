@@ -40,7 +40,9 @@ public class CertificateManager {
         long now = System.currentTimeMillis();
         Date startDate = new Date(now);
 
-        X500Name dnName = new X500Name(subjectDN);
+        String cn = "CN="+subjectDN;
+        System.out.println(cn);
+        X500Name dnName = new X500Name(cn);
 
         // Using the current timestamp as the certificate serial number
         BigInteger certSerialNumber = new BigInteger(Long.toString(now));
@@ -73,20 +75,24 @@ public class CertificateManager {
     }
 
     public static Certificate CreateAndStoreCertificate(KeyPair keyPair, String keystoreFileName, String alias, char[] passwordArray)
-            throws CryptoException, CertificateException, OperatorCreationException, IOException, KeyStoreException, NoSuchAlgorithmException {
+            throws CertificateException, OperatorCreationException, IOException, KeyStoreException, NoSuchAlgorithmException {
 
         KeyStore ks = KeyStore.getInstance("jks");
         ks.load(null,passwordArray);
 
         //Create self signed exception
-        Certificate selfSignedCertificate = selfSign(Crypto.generateRSAKeys(), alias);
+        Certificate selfSignedCertificate = selfSign(keyPair, alias);
 
         //Create private key entry
-        KeyStore.PrivateKeyEntry secret = new KeyStore.PrivateKeyEntry(keyPair.getPrivate(),new Certificate[] { selfSignedCertificate });
+        KeyStore.PrivateKeyEntry privateKeyEntry = new KeyStore.PrivateKeyEntry(keyPair.getPrivate(),new Certificate[] { selfSignedCertificate });
 
         //Create a protection parameter used to protect the contents of the keystore
         KeyStore.ProtectionParameter password = new KeyStore.PasswordProtection(passwordArray);
-        ks.setEntry(alias, secret, password);
+        ks.setEntry(alias + "-privateKey", privateKeyEntry, password);
+
+        //Create certificate entry
+        ks.setCertificateEntry(alias + "-certificate", selfSignedCertificate);
+
 
         //Stores the entry in the keystore
         try (FileOutputStream fos = new FileOutputStream( keystoreFileName)){
@@ -95,4 +101,5 @@ public class CertificateManager {
 
         return selfSignedCertificate;
     }
+
 }
