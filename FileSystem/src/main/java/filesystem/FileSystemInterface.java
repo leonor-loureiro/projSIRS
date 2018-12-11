@@ -71,6 +71,7 @@ public class FileSystemInterface {
         ArrayList<EncryptedFileWrapper> files = new ArrayList<EncryptedFileWrapper>();
 
         for(int i = 0; i<listOfFiles.length; i++){
+            if(listOfFiles[i].getName().endsWith("oldv.file"));
             System.out.println("Adding file " + " " + listOfFiles[i].getName() + " " + "to be downloaded");
             FileInputStream f = new FileInputStream(listOfFiles[i]);
             ObjectInputStream o = new ObjectInputStream(f);
@@ -154,7 +155,7 @@ public class FileSystemInterface {
         loop:
         if(f.exists() && !f.isDirectory()) {
             for(int i = 0;true;i++){
-                File oldbackup = new File(file + "oldv" + i + ".file");
+                File oldbackup = new File(file + i + "oldv" + ".file");
                 System.out.println(oldbackup.getAbsolutePath());
                 if(oldbackup.exists()) {
                     System.out.println("Version" + " " + versionumber + " " + "alreadyexists" + "of file " + " " + file);
@@ -169,7 +170,7 @@ public class FileSystemInterface {
         }
         else
             return false;
-        File newfile  = new File(file + "oldv" + versionumber++ + ".file");
+        File newfile  = new File(file + (versionumber++) + "oldv"  + ".file");
         f.renameTo(newfile);
         return true;
     }
@@ -181,7 +182,7 @@ public class FileSystemInterface {
             file.delete();
             loop:
             for(int i = 0;true;i++){
-                File oldbackup = new File(fileCreator + "\\" + fileName + "oldv" + i + ".file");
+                File oldbackup = new File(fileCreator + "\\" + fileName +  i + "oldv" + ".file");
                 versionumber++;
                 if(oldbackup.exists()) {
                     continue;
@@ -193,7 +194,7 @@ public class FileSystemInterface {
             }
 
             File newMainFile = new File(fileCreator + "\\" + fileName + ".file");
-            File higherVersionFile = new File(fileCreator + "\\" + fileName + "oldv" + versionumber + ".file");
+            File higherVersionFile = new File(fileCreator + "\\" + fileName +  versionumber +"oldv"  + ".file");
             higherVersionFile.renameTo(newMainFile);
 
             FileInputStream f = new FileInputStream(newMainFile);
@@ -205,7 +206,7 @@ public class FileSystemInterface {
             int versionumber = 0;
             loop:
             for(int i = 0;true;i++){
-                File oldbackup = new File(fileCreator + "\\" + fileName + "oldv" + i + ".file");
+                File oldbackup = new File(fileCreator + "\\" + fileName + i + "oldv"  + ".file");
                 versionumber++;
                 if(oldbackup.exists()) {
                     continue;
@@ -216,7 +217,7 @@ public class FileSystemInterface {
                 }
             }
 
-            File higherVersionFile = new File(fileCreator + "\\" + fileName + "oldv" + versionumber + ".file");
+            File higherVersionFile = new File(fileCreator + "\\" + fileName + versionumber + "oldv"  + ".file");
 
             FileInputStream f = new FileInputStream(higherVersionFile);
             ObjectInputStream o = new ObjectInputStream(f);
