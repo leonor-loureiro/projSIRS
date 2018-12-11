@@ -1,7 +1,7 @@
 import client.localFileHandler.FileWrapper;
 import client.security.EncryptedFileWrapper;
 import client.security.SecurityHandler;
-import client.security.exception.FileCorrupted;
+import client.exception.FileCorrupted;
 import crypto.Crypto;
 import crypto.exception.CryptoException;
 import org.junit.After;

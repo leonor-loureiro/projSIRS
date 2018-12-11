@@ -1,9 +1,9 @@
 package client.security;
 
 import client.localFileHandler.FileWrapper;
-import client.security.exception.BadEncryption;
-import client.security.exception.FileCorrupted;
-import client.security.exception.BadArgument;
+import client.exception.BadEncryption;
+import client.exception.FileCorrupted;
+import client.exception.BadArgument;
 import crypto.Crypto;
 import crypto.exception.CryptoException;
 

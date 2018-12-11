@@ -1,4 +1,4 @@
-package client.security.exception;
+package client.exception;
 
 public class BadEncryption extends Exception {
 

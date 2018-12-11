@@ -1,6 +1,9 @@
 package client.UI;
 
 import client.CommandExecution;
+import client.exception.BadArgument;
+import client.exception.InvalidUser;
+import client.exception.UserAlreadyExists;
 import client.security.Login;
 import crypto.exception.CryptoException;
 import org.bouncycastle.operator.OperatorCreationException;
@@ -58,7 +61,7 @@ public interface UserInterface {
      * Requests the user to input login info
      * @return array with username[0] and password [1]
      */
-    static Login requestLogin() throws CertificateException, NoSuchAlgorithmException, KeyStoreException, OperatorCreationException, CryptoException, IOException {
+    static Login requestLogin() throws InvalidUser, BadArgument, UserAlreadyExists {
         Login login = new Login();
 
         System.out.println();

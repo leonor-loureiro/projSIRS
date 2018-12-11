@@ -1,8 +1,12 @@
 package client;
 
+import client.exception.BadArgument;
+import client.exception.InvalidUser;
+import client.exception.UserAlreadyExists;
 import client.localFileHandler.FileManager;
 import client.localFileHandler.FileWrapper;
 import client.security.Login;
+import crypto.CertificateManager;
 import crypto.Crypto;
 import crypto.exception.CryptoException;
 
@@ -65,88 +69,45 @@ public class CommandExecution {
 
     private void setUser(User user) {this.user = user; }
 
-    public void login(Login login) throws KeyStoreException, CertificateException, NoSuchAlgorithmException, IOException, CryptoException, OperatorCreationException {
+    public void login(Login login) throws BadArgument, InvalidUser {
         setUser(new User(login.getUsername(), login.getPassword()));
         communication.login(user);
-
-        KeyStore ks = KeyStore.getInstance("jks");
-
-        char[] pwdArray = login.getPassword();
-
-        ks.load(null,pwdArray);
-
-        // TODO: Remove esketit?
-        Certificate selfSignedCertificate = selfSign(Crypto.generateRSAKeys(), "CN=esketit");
-        KeyStore.PrivateKeyEntry secret = new KeyStore.PrivateKeyEntry(Crypto.generateRSAKeys().getPrivate(),new Certificate[] { selfSignedCertificate });
-        KeyStore.ProtectionParameter password
-                = new KeyStore.PasswordProtection(pwdArray);
-        ks.setEntry(login.getUsername(), secret, password);
-
-        try (FileOutputStream fos = new FileOutputStream("./" + login.getUsername() + "keys" + ".jks")) {
-            ks.store(fos, pwdArray);
-        }
-
-
     }
 
-    public  Certificate selfSign(KeyPair keyPair, String subjectDN)
-            throws OperatorCreationException, CertificateException, IOException
-    {
-        Provider bcProvider = new BouncyCastleProvider();
-        Security.addProvider(bcProvider);
 
-        long now = System.currentTimeMillis();
-        Date startDate = new Date(now);
 
-        X500Name dnName = new X500Name(subjectDN);
+    public boolean register(Login login) throws BadArgument, UserAlreadyExists {
+        //Create the user
+        User user = new User(login.getUsername(), login.getPassword());
 
-        // Using the current timestamp as the certificate serial number
-        BigInteger certSerialNumber = new BigInteger(Long.toString(now));
-
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTime(startDate);
-        // 1 Yr validity
-        calendar.add(Calendar.YEAR, 1);
-
-        Date endDate = calendar.getTime();
-
-        // Use appropriate signature algorithm based on your keyPair algorithm.
-        String signatureAlgorithm = "SHA256WithRSA";
-
-        SubjectPublicKeyInfo subjectPublicKeyInfo = SubjectPublicKeyInfo.getInstance(keyPair
-                .getPublic().getEncoded());
-
-        X509v3CertificateBuilder certificateBuilder = new X509v3CertificateBuilder(dnName,
-                certSerialNumber, startDate, endDate, dnName, subjectPublicKeyInfo);
-
-        ContentSigner contentSigner = new JcaContentSignerBuilder(signatureAlgorithm).setProvider(
-                bcProvider).build(keyPair.getPrivate());
-
-        X509CertificateHolder certificateHolder = certificateBuilder.build(contentSigner);
-
-        Certificate selfSignedCert = new JcaX509CertificateConverter()
-                .getCertificate(certificateHolder);
-
-        return selfSignedCert;
-    }
-
-    public void register(Login login){
         // Generate key pair
         KeyPair keyPair = null;
         try {
             keyPair = Crypto.generateRSAKeys();
+            user.setPrivateKey(keyPair.getPrivate());
+            user.setPublicKey(keyPair.getPublic());
 
         } catch (CryptoException e) {
             e.printStackTrace();
+            return false;
         }
 
-        //Create the user
-        User user = new User(login.getUsername(), login.getPassword());
-        user.setPrivateKey(keyPair.getPrivate());
-        user.setPublicKey(keyPair.getPublic());
+        // Create keystore and store key pair
+        char[] pwdArray = login.getPassword();
+
+        try {
+            CertificateManager.CreateAndStoreCertificate(keyPair,
+                    "./" + login.getUsername() + "keys" + ".jks",
+                    user.getUsername(),
+                    pwdArray);
+
+        }catch (Exception e){
+            e.printStackTrace();
+            return false;
+        }
 
         setUser(user);
-        communication.register(user);
+        return communication.register(user);
     }
 
     /**

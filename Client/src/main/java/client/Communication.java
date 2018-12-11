@@ -1,5 +1,8 @@
 package client;
 
+import client.exception.BadArgument;
+import client.exception.InvalidUser;
+import client.exception.UserAlreadyExists;
 import client.localFileHandler.FileWrapper;
 import client.security.EncryptedFileWrapper;
 import client.security.SecurityHandler;
@@ -44,7 +47,7 @@ public class Communication {
         this.loginToken = loginToken;
     }
 
-    public boolean register(User user){
+    public boolean register(User user) throws UserAlreadyExists, BadArgument {
 
         RestTemplate restTemplate = restTemplate();
 
@@ -69,10 +72,18 @@ public class Communication {
             loginToken = response.getBody();
             return true;
         }
-         return false;
+        //User already exists
+        if(response.getStatusCode() == HttpStatus.CONFLICT)
+            throw new UserAlreadyExists(response.getBody());
+
+        //Invalid arguments
+        if(response.getStatusCode() == HttpStatus.BAD_REQUEST)
+            throw new BadArgument(response.getBody());
+
+        return false;
     }
 
-    public boolean login(User user) {
+    public boolean login(User user) throws InvalidUser, BadArgument {
 
         RestTemplate restTemplate = restTemplate();
 
@@ -101,7 +112,14 @@ public class Communication {
             return true;
         }
 
-        System.out.println("Login failed");
+        //User does not exist
+        if(response.getStatusCode() == HttpStatus.CONFLICT)
+            throw new InvalidUser(response.getBody());
+
+        //Invalid arguments
+        if(response.getStatusCode() == HttpStatus.BAD_REQUEST)
+            throw new BadArgument(response.getBody());
+
         return false;
 
     }
