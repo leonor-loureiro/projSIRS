@@ -42,6 +42,7 @@ public class ClientApp {
                     UserInterface.clearScreen();
                 }
             }catch(Exception e){
+                e.printStackTrace();
                 System.out.println(e.getMessage());
                 continue;
             }

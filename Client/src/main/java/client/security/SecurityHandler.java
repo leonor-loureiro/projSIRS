@@ -135,13 +135,10 @@ public interface SecurityHandler {
             e.printStackTrace();
         }
 
-            // Encrypt file key
+        // Encrypt file key
         try {
-            //TODO: get public key from keystore
-            //PublicKey publicKey = Crypto.getPublicKey(keystoreFile, keystorePwd, myAlias);
             byte[] cipheredFileKey = Crypto.encryptRSA(fileKey, publicKey);
             enc.setFileKey(cipheredFileKey);
-
 
         } catch (CryptoException e) {
             e.printStackTrace();

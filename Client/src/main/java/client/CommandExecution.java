@@ -2,10 +2,13 @@ package client;
 
 import client.exception.BadArgument;
 import client.exception.InvalidUser;
+import client.exception.TokenInvalid;
 import client.exception.UserAlreadyExists;
 import client.localFileHandler.FileManager;
 import client.localFileHandler.FileWrapper;
+import client.security.EncryptedFileWrapper;
 import client.security.Login;
+import client.security.SecurityHandler;
 import crypto.CertificateManager;
 import crypto.Crypto;
 import crypto.exception.CryptoException;
@@ -108,6 +111,12 @@ public class CommandExecution {
             e.printStackTrace();
             return false;
         }
+
+        try {
+            share("ups", "test.txt");
+        } catch (TokenInvalid tokenInvalid) {
+            tokenInvalid.printStackTrace();
+        }
         return true;
     }
 
@@ -124,13 +133,7 @@ public class CommandExecution {
 
         System.out.println("Adding File ..." + filename);
 
-        FileWrapper file = null;
-        try {
-            file = FileManager.loadFile(filename);
-        } catch (IOException e) {
-            System.out.println("Unable to read file. Wrong filename or no permission.");
-            e.printStackTrace();
-        }
+        FileWrapper file = getFileWrapper(filename);
 
         if(file == null){
             System.out.println("File " + filename + " not found.");
@@ -140,6 +143,17 @@ public class CommandExecution {
         file.setFileCreator(user.getUsername());
         user.addFileToStaged(file);
 
+    }
+
+    private FileWrapper getFileWrapper(String filename) {
+        FileWrapper file = null;
+        try {
+            file = FileManager.loadFile(filename);
+        } catch (IOException e) {
+            System.out.println("Unable to read file. Wrong filename or no permission.");
+            e.printStackTrace();
+        }
+        return file;
     }
 
     /**
@@ -180,13 +194,34 @@ public class CommandExecution {
     /**
      * Shares a user's file with a given user
      */
-    public void share(String dest, String fileName){
-        System.out.println("Sharing file with user ...");
-        System.out.println("It doesn't work yet! :P");
-        if(user == null){
-            System.out.println("User must be logged for this operation!!");
-            return;
+    public void share(String dest, String fileName) throws TokenInvalid, BadArgument {
+
+        //Get user's public key
+        PublicKey publicKey = null;
+        try {
+            publicKey = communication.getUserKey(user.getUsername(), dest);
+        } catch (CryptoException e) {
+            e.printStackTrace();
         }
+
+        //Get file key and encrypt it
+        FileWrapper fileWrapper = getFileWrapper(fileName);
+
+        //TODO: Remove this set when wrapper already has key
+        try {
+            fileWrapper.setFileName(fileName);
+            fileWrapper.setFileCreator(dest);
+            fileWrapper.setFileKey(Crypto.generateSecretKey().getEncoded());
+        } catch (CryptoException e) {
+            e.printStackTrace();
+        }
+
+        EncryptedFileWrapper encFile = SecurityHandler.encryptFileWrapper(fileWrapper, publicKey);
+
+        System.out.println("File shared with success");
+
+        //Share file
+        //communication.shareFile(user, encFile, dest );
     }
 
     /**

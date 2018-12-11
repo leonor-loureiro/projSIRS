@@ -2,6 +2,7 @@ package client;
 
 import client.exception.BadArgument;
 import client.exception.InvalidUser;
+import client.exception.TokenInvalid;
 import client.exception.UserAlreadyExists;
 import client.localFileHandler.FileWrapper;
 import client.security.EncryptedFileWrapper;
@@ -9,6 +10,7 @@ import client.security.SecurityHandler;
 import client.security.Token;
 
 import crypto.Crypto;
+import crypto.exception.CryptoException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.conn.ssl.NoopHostnameVerifier;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
@@ -27,6 +29,7 @@ import java.io.IOException;
 import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
+import java.security.PublicKey;
 import java.security.cert.CertificateException;
 import java.util.*;
 
@@ -153,6 +156,41 @@ public class Communication {
         return SecurityHandler.decryptFileWrappers(Arrays.asList(files));
     }
 
+    public PublicKey getUserKey(String username1, String username2) throws CryptoException, BadArgument, TokenInvalid {
+        RestTemplate restTemplate = restTemplate();
+
+        //create the params
+        Map<String, String> msg = new HashMap<String, String>();
+        msg.put("username1", username1);
+        msg.put("username2", username2);
+        msg.put("token", loginToken);
+
+        //set headers
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+
+        //set entity to send
+        HttpEntity request = new HttpEntity(msg, headers);
+
+        // send
+        ResponseEntity<String> response = restTemplate.postForEntity(authServerUrl + "/getPublicKey", request, String.class);
+
+        if (response.getStatusCode() == HttpStatus.OK) {
+            byte[] encoded = Crypto.toByteArray((response.getBody()));
+            return Crypto.recoverPublicKey(encoded);
+        }
+
+        if (response.getStatusCode() == HttpStatus.BAD_REQUEST) {
+            throw new BadArgument(response.getBody());
+        }
+
+        if (response.getStatusCode() == HttpStatus.BAD_REQUEST) {
+            throw new TokenInvalid(response.getBody());
+        }
+
+        return null;
+    }
+
     /**
      * Sends the staged files to the server
      * @param user the user sending the files
@@ -185,7 +223,7 @@ public class Communication {
         throw new UnsupportedOperationException();
     }
 
-    public void shareFile(User user, FileWrapper file){
+    public void shareFile(User user, EncryptedFileWrapper file, String destUser){
         throw new UnsupportedOperationException();
     }
 

@@ -3,6 +3,7 @@ package client.UI;
 import client.CommandExecution;
 import client.exception.BadArgument;
 import client.exception.InvalidUser;
+import client.exception.TokenInvalid;
 import client.exception.UserAlreadyExists;
 import client.security.Login;
 import crypto.exception.CryptoException;
@@ -193,6 +194,10 @@ public interface UserInterface {
         } catch (IllegalArgumentException e) {
             e.printStackTrace();
             System.out.println("Unknown Command!");
+        } catch (BadArgument badArgument) {
+            badArgument.printStackTrace();
+        } catch (TokenInvalid tokenInvalid) {
+            tokenInvalid.printStackTrace();
         }
 
         System.out.println();

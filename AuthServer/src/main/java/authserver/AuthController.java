@@ -96,7 +96,9 @@ public class AuthController {
 
         if(authService.authenticate(username1, token)) {
             try {
-                return new ResponseEntity<String>(authService.getPublicKey(username2), HttpStatus.OK);
+                String publicKey = authService.getPublicKey(username2);
+                System.out.println(publicKey);
+                return new ResponseEntity<String>( publicKey, HttpStatus.OK);
 
             } catch (InvalidUserException e) {
                 return new ResponseEntity<String>("Username " + username2 +" does not exist", HttpStatus.CONFLICT);
