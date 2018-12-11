@@ -14,10 +14,10 @@ import java.util.List;
 
 public interface SecurityHandler {
 
-    String keystoreFile = "./" + "\\src\\main\\resources\\trustkeystore.jks";
+    String keystoreFile = "./" + "\\src\\main\\resources\\clienttruststore.jks";
     String keystorePwd = "password";
     String keyPwd = "password";
-    String myAlias = "server-keypair";
+    String authServerAlias = "auth-public-key";
 
     //TODO: init that sets keystore variables
 
@@ -201,8 +201,6 @@ public interface SecurityHandler {
         if(secretKey == null)
             throw new BadArgument("Invalid secret key");
 
-        //TODO: get public key from keystore
-        //PublicKey publicKey = Crypto.getPublicKey(keystoreFile, keystorePwd, myAlias);
 
         try {
             return Crypto.encryptRSA(secretKey, publicKey);

@@ -2,7 +2,8 @@ package authserver;
 
 import authserver.exception.InvalidUserException;
 import authserver.exception.UserAlreadyExistsException;
-import crypto.exception.CryptoException;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -22,7 +23,7 @@ public class AuthController {
     }
 
     @RequestMapping(value = "/login")
-    public String login(@RequestBody Map<String, String> credentials) throws ServletException {
+    public ResponseEntity<String> login(@RequestBody Map<String, String> credentials) {
 
         //Extract params
         String username = credentials.get("username");
@@ -30,24 +31,24 @@ public class AuthController {
 
         // Validate params
         if(username == null || username.isEmpty())
-            throw new ServletException("Invalid username");
+            return new ResponseEntity<String>("Invalid username", HttpStatus.BAD_REQUEST);
 
         if(password == null || password.isEmpty())
-            throw new ServletException("Invalid password");
+            return new ResponseEntity<String>("Invalid password", HttpStatus.BAD_REQUEST);
 
         String jwtToken = null;
 
         try {
             jwtToken = authService.login(username, password);
         } catch (InvalidUserException iue) {
-            throw new ServletException(iue.getMessage());
+            return new ResponseEntity<String>(iue.getMessage(), HttpStatus.CONFLICT);
         }
 
-        return jwtToken;
+        return new ResponseEntity<String>(jwtToken, HttpStatus.OK);
     }
 
     @RequestMapping(value = "/register")
-    public String register(@RequestBody Map<String, String> credentials) throws ServletException {
+    public ResponseEntity<String> register(@RequestBody Map<String, String> credentials) {
 
         //Extract params
         String username = credentials.get("username");
@@ -56,52 +57,52 @@ public class AuthController {
 
         //Validate params
         if(username == null || username.isEmpty())
-            throw new ServletException("Invalid username");
+            return new ResponseEntity<String>("Invalid username", HttpStatus.BAD_REQUEST);
 
         if(password == null || password.isEmpty())
-            throw new ServletException("Invalid password");
+            return new ResponseEntity<String>("Invalid password", HttpStatus.BAD_REQUEST);
 
         if(Kpub == null || Kpub.isEmpty())
-            throw new ServletException("Invalid public key");
+            return new ResponseEntity<String>("Invalid public key", HttpStatus.BAD_REQUEST);
 
         String jwtToken = null;
 
         try {
             jwtToken = authService.register(username, password, Kpub);
         } catch (UserAlreadyExistsException uaee) {
-            throw new ServletException(uaee.getMessage());
+            return new ResponseEntity<String>(uaee.getMessage(), HttpStatus.CONFLICT);
         }
 
-        return jwtToken;
+        return new ResponseEntity<String>(jwtToken, HttpStatus.OK);
     }
 
     @RequestMapping(value = "/getPublicKey")
-    public String getPublicKey(@RequestBody Map<String, String> params) throws ServletException {
+    public ResponseEntity<String> getPublicKey(@RequestBody Map<String, String> params) {
         String username1 = params.get("username1");
         String username2 = params.get("username2");
         String token = params.get("token");
 
         if(username1 == null || username1.isEmpty())
-            throw new ServletException("Username1 is invalid");
+            return new ResponseEntity<String>("Username1 is invalid", HttpStatus.BAD_REQUEST);
 
 
         if(username2 == null || username2.isEmpty())
-            throw new ServletException("Username 2 is invalid");
+            return new ResponseEntity<String>("Username2 is invalid", HttpStatus.BAD_REQUEST);
 
 
         if(token == null || token.isEmpty())
-            throw new ServletException("Token is invalid");
+            return new ResponseEntity<String>("Token is invalid", HttpStatus.BAD_REQUEST);
 
 
         if(authService.authenticate(username1, token)) {
             try {
-                return authService.getPublicKey(username2);
+                return new ResponseEntity<String>(authService.getPublicKey(username2), HttpStatus.OK);
+
             } catch (InvalidUserException e) {
-                throw  new ServletException("Username " + username2 +" does not exist");
+                return new ResponseEntity<String>("Username " + username2 +" does not exist", HttpStatus.CONFLICT);
             }
         }
 
-        throw new ServletException("Token expired");
-
+        return new ResponseEntity<String>("Token expired", HttpStatus.PRECONDITION_FAILED);
     }
 }
