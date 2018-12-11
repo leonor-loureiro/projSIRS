@@ -220,7 +220,16 @@ public class Communication {
     }
 
     public void shareFile(User user, EncryptedFileWrapper file, String destUser){
-        //TODO: share file
+        RestTemplate restTemp = restTemplate();
+
+        FileSystemMessage message = new FileSystemMessage();
+
+        message.setName(user.getUsername());
+
+        message.setUserToShareWith(destUser);
+
+        message.setFiles(new EncryptedFileWrapper[]{ file });
+        restTemp.postForObject(serverUrl+"/share", message,  ResponseEntity.class);
     }
 
     /**

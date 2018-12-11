@@ -16,6 +16,8 @@ public class FileSystemMessage {
 
     private String userName;
 
+    private String userToShareWith;
+
     public FileSystemMessage(){
     }
 
@@ -42,4 +44,8 @@ public class FileSystemMessage {
     public void setName(String user){
         userName = user;
     }
+
+    public void setUserToShareWith(String user){userToShareWith = user;}
+
+    public String getUserToShareWith(){return userToShareWith;}
 }
