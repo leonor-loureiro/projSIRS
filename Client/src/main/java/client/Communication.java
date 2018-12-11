@@ -5,6 +5,7 @@ import client.security.EncryptedFileWrapper;
 import client.security.SecurityHandler;
 import client.security.Token;
 
+import crypto.Crypto;
 import org.apache.http.client.HttpClient;
 import org.apache.http.conn.ssl.NoopHostnameVerifier;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
@@ -28,28 +29,79 @@ import java.util.*;
 
 
 public class Communication {
-    private Token loginToken;
+    private String loginToken;
     private String serverUrl = "https://localhost:8080/operations";
+    private String authServerUrl = "https://localhost:8081/auth";
     public void ping(){
 
     }
 
-    public Token getLoginToken() {
+    public String getLoginToken() {
         return loginToken;
     }
 
-    public void setLoginToken(Token loginToken) {
+    public void setLoginToken(String  loginToken) {
         this.loginToken = loginToken;
     }
 
     public boolean register(User user){
 
+        RestTemplate restTemplate = restTemplate();
+
+        //create the params
         Map<String, String> msg = new HashMap<String, String>();
-        return true;
+        msg.put("username", user.getUsername());
+        msg.put("password", String.valueOf(user.getPassword()));
+        String kpub = Crypto.toString(user.getPublicKey().getEncoded());
+        msg.put("Kpub", kpub);
+
+        //set headers
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+
+        //set entity to send
+        HttpEntity request = new HttpEntity(msg,headers);
+
+        // send
+        ResponseEntity<String> response = restTemplate.postForEntity(authServerUrl + "/register", request, String.class);
+
+        if(response.getStatusCode() == HttpStatus.OK){
+            loginToken = response.getBody();
+            return true;
+        }
+         return false;
     }
 
-    public void login(User user) {
-        System.out.println("Pretending to login...");
+    public boolean login(User user) {
+
+        RestTemplate restTemplate = restTemplate();
+
+        //create the params
+        Map<String, String> msg = new HashMap<String, String>();
+        msg.put("username", user.getUsername());
+        msg.put("password", String.valueOf(user.getPassword()));
+
+        //set headers
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+
+        //set entity to send
+        HttpEntity request = new HttpEntity(msg,headers);
+
+        // send
+        ResponseEntity<String> response = restTemplate.postForEntity(authServerUrl + "/login", request, String.class);
+
+        System.out.println("Status: " + response.getStatusCode().toString());
+
+
+        if(response.getStatusCode() == HttpStatus.OK){
+            loginToken =  response.getBody();
+            System.out.println("Token: " + loginToken);
+            System.out.println("Login successful");
+            return true;
+        }
+        System.out.println("Login failed");
+        return false;
 
     }
 
@@ -103,11 +155,15 @@ public class Communication {
             list[i] = enc;
         }
 
-        //TODO : Replace with FileSystemMessage
         FileSystemMessage m = new FileSystemMessage();
         m.setFiles(list);
         restTemp.postForObject(serverUrl+"/upload", m,  ResponseEntity.class);
 
+    }
+
+    public FileWrapper getBackup(User user, String fileName){
+
+        throw new UnsupportedOperationException();
     }
 
     public void shareFile(User user, FileWrapper file){

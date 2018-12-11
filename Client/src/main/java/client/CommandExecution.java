@@ -130,8 +130,21 @@ public class CommandExecution {
     }
 
     public void register(Login login){
-        // TODO: Generate KeyPair and add to user
-        setUser(new User(login.getUsername(), login.getPassword()));
+        // Generate key pair
+        KeyPair keyPair = null;
+        try {
+            keyPair = Crypto.generateRSAKeys();
+
+        } catch (CryptoException e) {
+            e.printStackTrace();
+        }
+
+        //Create the user
+        User user = new User(login.getUsername(), login.getPassword());
+        user.setPrivateKey(keyPair.getPrivate());
+        user.setPublicKey(keyPair.getPublic());
+
+        setUser(user);
         communication.register(user);
     }
 
@@ -157,6 +170,14 @@ public class CommandExecution {
 
         file.setFileCreator(user.getUsername());
         user.addFileToStaged(file);
+
+        file.setFileName("testtttttttttttt");
+        try {
+            FileManager.saveFile(file);
+        } catch (IOException e) {
+            System.out.println("Unable to Store file");
+            e.printStackTrace();
+        }
 
     }
 
@@ -233,4 +254,9 @@ public class CommandExecution {
 
     }
 
+    public void getBackup(String fileName) {
+
+        FileWrapper files = communication.getBackup(user, fileName);
+
+    }
 }
