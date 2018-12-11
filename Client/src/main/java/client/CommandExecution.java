@@ -13,8 +13,10 @@ import crypto.KeystoreManager;
 import crypto.Crypto;
 import crypto.exception.CryptoException;
 
+import javax.crypto.SecretKey;
 import java.io.IOException;
 import java.security.*;
+import java.security.cert.CertificateException;
 import java.util.List;
 
 public class CommandExecution {
@@ -30,7 +32,7 @@ public class CommandExecution {
      */
     private Communication communication = new Communication();
 
-    private void setUser(User user) {this.user = user; }
+    public void setUser(User user) {this.user = user; }
 
     public void login(Login login) throws BadArgument, InvalidUser {
         setUser(new User(login.getUsername(), login.getPassword()));
@@ -69,7 +71,7 @@ public class CommandExecution {
 
         try {
             KeystoreManager.CreateAndStoreCertificate(keyPair,
-                    "./" + login.getUsername() + "keys" + ".jceks",
+                    getKeystoreFileName(login.getUsername()),
                     user.getUsername(),
                     pwdArray);
 
@@ -79,6 +81,10 @@ public class CommandExecution {
         }
 
         return true;
+    }
+
+    private String getKeystoreFileName(String username) {
+        return "./" + username + "keys" + ".jceks";
     }
 
     /**
@@ -106,14 +112,40 @@ public class CommandExecution {
 
     }
 
-    private FileWrapper getFileWrapper(String filename) {
+    /**
+     * Gets file and generates a file wrapper by filename
+     * @param filename file's name
+     * @return file wrapper
+     */
+    public FileWrapper getFileWrapper(String filename) {
         FileWrapper file = null;
         try {
+            // Reading File
             file = FileManager.loadFile(filename, user.getUsername());
+            // Get file's key (if it exists)
+            SecretKey key  = KeystoreManager.getSecretKey(getKeystoreFileName(user.getUsername()), filename, user.getPassword());
+
+            // If key doesn't exist, generate it
+            if(key == null){
+                try {
+                    System.out.println("Generating File Key...");
+                    key = Crypto.generateSecretKey();
+                    KeystoreManager.StoreSecretKey(key, getKeystoreFileName(user.getUsername()), filename, user.getPassword());
+                } catch (CryptoException e) {e.printStackTrace();}
+            }
+
+            if(file == null || key == null)
+                return null;
+
+            file.setFileKey(key.getEncoded());
+
         } catch (IOException e) {
+            e.printStackTrace();
             System.out.println("Unable to read file. Wrong filename or no permission.");
+        } catch (CertificateException | UnrecoverableKeyException | KeyStoreException | NoSuchAlgorithmException e) {
             e.printStackTrace();
         }
+
         return file;
     }
 

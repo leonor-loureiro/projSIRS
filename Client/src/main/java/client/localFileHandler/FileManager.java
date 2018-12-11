@@ -26,7 +26,6 @@ public interface FileManager {
             dest.createNewFile();
         }
 
-        System.out.println(Arrays.toString(file.getFile()));
         try (FileOutputStream stream = new FileOutputStream(dest)) {
             stream.write(file.getFile());
         }
@@ -64,9 +63,6 @@ public interface FileManager {
                     temp.setFile(Files.readAllBytes(file.toPath()));
                     temp.setFileName(file.getName());
                     temp.setFileCreator(username);
-
-                    //TODO: get FileKey if it's stored
-
                     return temp;
                 }
             }
