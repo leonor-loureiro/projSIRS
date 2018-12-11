@@ -33,16 +33,6 @@ public interface FileManager {
         // Store the key
     }
 
-    /**
-     * Stores locally all the files given in the list
-     * @param files list of files to be saved
-     * @throws IOException if it was impossible to write any of the files
-     */
-    static void saveFiles(List<FileWrapper> files) throws IOException {
-        for(FileWrapper file : files){
-            saveFile(file);
-        }
-    }
 
     /**
      * loads a local file with a given name (should include extension)

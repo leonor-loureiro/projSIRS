@@ -12,7 +12,6 @@ import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
 
 import javax.crypto.SecretKey;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.math.BigInteger;
@@ -148,12 +147,12 @@ public class KeystoreManager {
         return cer.getPublicKey();
     }
 
-    public static Key getPrivateKey(String keystoreFileName, String alias, char[] keystorePasswordArray, char[] passwordArray)
+    public static Key getPrivateKey(String keystoreFileName, String alias, char[] passwordArray)
             throws IOException, KeyStoreException, CertificateException, NoSuchAlgorithmException, UnrecoverableKeyException {
 
         //Load the keystore
         KeyStore ks = KeyStore.getInstance(KEYSTORE_TYPE);
-        ks.load(new FileInputStream(keystoreFileName), keystorePasswordArray);
+        ks.load(new FileInputStream(keystoreFileName), passwordArray);
 
         return ks.getKey(alias, passwordArray);
     }
