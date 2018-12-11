@@ -12,6 +12,7 @@ import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
 
 import javax.crypto.SecretKey;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.math.BigInteger;
@@ -23,6 +24,7 @@ import java.util.Date;
 
 public class KeystoreManager {
 
+    public static final String KEYSTORE_TYPE = "JCEKS";
     /**
      * Generates a self signed certificate
      * @param keyPair private and public key
@@ -77,7 +79,7 @@ public class KeystoreManager {
             throws CertificateException, OperatorCreationException, IOException, KeyStoreException, NoSuchAlgorithmException {
 
         //Create a keystore
-        KeyStore ks = KeyStore.getInstance("jks");
+        KeyStore ks = KeyStore.getInstance(KEYSTORE_TYPE);
         ks.load(null,passwordArray);
 
         //Create self signed exception
@@ -106,7 +108,7 @@ public class KeystoreManager {
             throws KeyStoreException, IOException, CertificateException, NoSuchAlgorithmException {
 
         //Load the keystore
-        KeyStore ks = KeyStore.getInstance("jks");
+        KeyStore ks = KeyStore.getInstance(KEYSTORE_TYPE);
         ks.load(new FileInputStream(keystoreFileName), passwordArray);
 
         //Create a protection parameter used to protect the contents of the keystore
@@ -124,6 +126,39 @@ public class KeystoreManager {
         }
     }
 
-    //public static void GetSecretKey()
+    public static SecretKey getSecretKey(String keystoreFileName, String alias, char[] passwordArray)
+            throws KeyStoreException, IOException, CertificateException, NoSuchAlgorithmException, UnrecoverableKeyException {
+
+        //Load the keystore
+        KeyStore ks = KeyStore.getInstance(KEYSTORE_TYPE);
+        ks.load(new FileInputStream(keystoreFileName), passwordArray);
+
+
+        return (SecretKey) ks.getKey(alias + "-secretKey", passwordArray);
+    }
+
+    public static PublicKey getPublicKey(String keystoreFileName, String alias, char[] passwordArray)
+            throws IOException, KeyStoreException, CertificateException, NoSuchAlgorithmException {
+
+        //Load the keystore
+        KeyStore ks = KeyStore.getInstance(KEYSTORE_TYPE);
+        ks.load(new FileInputStream(keystoreFileName), passwordArray);
+
+        Certificate cer = ks.getCertificate(alias);
+        return cer.getPublicKey();
+    }
+
+    public static Key getPrivateKey(String keystoreFileName, String alias, char[] keystorePasswordArray, char[] passwordArray)
+            throws IOException, KeyStoreException, CertificateException, NoSuchAlgorithmException, UnrecoverableKeyException {
+
+        //Load the keystore
+        KeyStore ks = KeyStore.getInstance(KEYSTORE_TYPE);
+        ks.load(new FileInputStream(keystoreFileName), keystorePasswordArray);
+
+        return ks.getKey(alias, passwordArray);
+    }
+
+
+
 
 }

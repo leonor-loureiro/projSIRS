@@ -69,7 +69,7 @@ public class CommandExecution {
 
         try {
             KeystoreManager.CreateAndStoreCertificate(keyPair,
-                    "./" + login.getUsername() + "keys" + ".jks",
+                    "./" + login.getUsername() + "keys" + ".jceks",
                     user.getUsername(),
                     pwdArray);
 
