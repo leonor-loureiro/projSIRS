@@ -224,7 +224,7 @@ public class Communication {
     }
 
     public void shareFile(User user, EncryptedFileWrapper file, String destUser){
-        throw new UnsupportedOperationException();
+        //TODO: share file
     }
 
     /**

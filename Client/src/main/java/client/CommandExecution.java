@@ -9,47 +9,13 @@ import client.localFileHandler.FileWrapper;
 import client.security.EncryptedFileWrapper;
 import client.security.Login;
 import client.security.SecurityHandler;
-import crypto.CertificateManager;
+import crypto.KeystoreManager;
 import crypto.Crypto;
 import crypto.exception.CryptoException;
 
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.lang.reflect.Array;
 import java.security.*;
-import java.security.cert.CertificateException;
-import java.util.Arrays;
 import java.util.List;
-
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.math.BigInteger;
-import java.security.KeyStore;
-import java.security.KeyStore.Entry;
-import java.security.KeyStore.PrivateKeyEntry;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.cert.Certificate;
-import java.security.cert.CertificateException;
-import java.security.interfaces.RSAPrivateKey;
-import java.security.interfaces.RSAPublicKey;
-import java.util.Calendar;
-import java.util.Date;
-
-import org.bouncycastle.asn1.x500.X500Name;
-import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
-import org.bouncycastle.cert.X509CertificateHolder;
-import org.bouncycastle.cert.X509v3CertificateBuilder;
-import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter;
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.bouncycastle.operator.ContentSigner;
-import org.bouncycastle.operator.OperatorCreationException;
-import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
-
-import javax.sound.midi.Soundbank;
 
 public class CommandExecution {
 
@@ -102,7 +68,7 @@ public class CommandExecution {
         char[] pwdArray = login.getPassword();
 
         try {
-            CertificateManager.CreateAndStoreCertificate(keyPair,
+            KeystoreManager.CreateAndStoreCertificate(keyPair,
                     "./" + login.getUsername() + "keys" + ".jks",
                     user.getUsername(),
                     pwdArray);
@@ -112,11 +78,6 @@ public class CommandExecution {
             return false;
         }
 
-        try {
-            share("ups", "test.txt");
-        } catch (TokenInvalid tokenInvalid) {
-            tokenInvalid.printStackTrace();
-        }
         return true;
     }
 
@@ -222,7 +183,7 @@ public class CommandExecution {
         System.out.println("File shared with success");
 
         //Share file
-        //communication.shareFile(user, encFile, dest );
+        communication.shareFile(user, encFile, dest );
     }
 
     /**

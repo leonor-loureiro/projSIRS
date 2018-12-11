@@ -88,11 +88,8 @@ public class FileSystemInterface {
             vectorEnc[i] = files.get(i);
         }
         return vectorEnc;
-        // get list of files add mac of file to the list
 
-        // add {Kcs}pubuser of each file to the list
 
-        // return the list
     }
 
     public static void upload(EncryptedFileWrapper[] files) throws IOException {
@@ -102,7 +99,6 @@ public class FileSystemInterface {
 
         String fileCreator = files[0].getFileCreator();
 
-        // check sessiontoken
 
         // check if user has a folder if not create it
 
@@ -232,14 +228,11 @@ public class FileSystemInterface {
 
         System.out.println("Share file");
 
-        // check sessiontoken
 
         // check if user exists and user exists
 
-        // check mac and compare to the mac(file)
 
         // add file to user2 folder
-
         String user1 = information.get("user1");
         String user2 = information.get("user2");
         String filename = information.get("filename");
