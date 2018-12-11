@@ -5,7 +5,7 @@ set "auth=%cd%\AuthServer"
 rem  -- installs project
 
 start cmd /c "title INSTALLING & cd .. & mvn clean install"
-timeout /t 30
+timeout /t 50
 
 rem -- Start Auth Server
 start cmd /c "title AuthServer & cd .. & cd AuthServer & mvn clean install spring-boot:run"

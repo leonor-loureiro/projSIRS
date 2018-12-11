@@ -224,7 +224,7 @@ public class FileSystemInterface {
 
     }
 
-    public static void share(Map<String,String> information, EncryptedFileWrapper file) throws IOException, ClassNotFoundException {
+    public static void share(String user1,String user2,EncryptedFileWrapper file) throws IOException, ClassNotFoundException {
 
         System.out.println("Share file");
 
@@ -233,15 +233,14 @@ public class FileSystemInterface {
 
 
         // add file to user2 folder
-        String user1 = information.get("user1");
-        String user2 = information.get("user2");
-        String filename = information.get("filename");
+
+        String filename = file.getFileName();
 
         Path pathuser2 = Paths.get("./" + user2);
 
 
         if (!Files.exists(pathuser2)){
-            //do stuff
+            System.out.println("User" + " " + pathuser2 + " " + "doesnt exist");
         }
 
         FileOutputStream writer = new FileOutputStream(user2 + "\\" + filename + ".file");

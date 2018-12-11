@@ -1,5 +1,0 @@
-this is a text.txt
-hopefully is readable
-line 3
-line 4
-line 5
