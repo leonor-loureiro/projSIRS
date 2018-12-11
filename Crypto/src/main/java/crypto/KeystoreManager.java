@@ -1,6 +1,5 @@
 package crypto;
 
-import crypto.exception.CryptoException;
 import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.cert.X509CertificateHolder;
@@ -11,6 +10,8 @@ import org.bouncycastle.operator.ContentSigner;
 import org.bouncycastle.operator.OperatorCreationException;
 import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
 
+import javax.crypto.SecretKey;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.math.BigInteger;
@@ -20,7 +21,7 @@ import java.security.cert.CertificateException;
 import java.util.Calendar;
 import java.util.Date;
 
-public class CertificateManager {
+public class KeystoreManager {
 
     /**
      * Generates a self signed certificate
@@ -29,11 +30,9 @@ public class CertificateManager {
      * @return self signed certificate
      * @throws OperatorCreationException
      * @throws CertificateException
-     * @throws IOException
      */
     public static Certificate selfSign(KeyPair keyPair, String subjectDN)
-            throws OperatorCreationException, CertificateException, IOException
-    {
+            throws OperatorCreationException, CertificateException {
         Provider bcProvider = new BouncyCastleProvider();
         Security.addProvider(bcProvider);
 
@@ -77,6 +76,7 @@ public class CertificateManager {
     public static Certificate CreateAndStoreCertificate(KeyPair keyPair, String keystoreFileName, String alias, char[] passwordArray)
             throws CertificateException, OperatorCreationException, IOException, KeyStoreException, NoSuchAlgorithmException {
 
+        //Create a keystore
         KeyStore ks = KeyStore.getInstance("jks");
         ks.load(null,passwordArray);
 
@@ -101,5 +101,29 @@ public class CertificateManager {
 
         return selfSignedCertificate;
     }
+
+    public static void  StoreSecretKey(SecretKey key, String keystoreFileName, String alias, char[] passwordArray)
+            throws KeyStoreException, IOException, CertificateException, NoSuchAlgorithmException {
+
+        //Load the keystore
+        KeyStore ks = KeyStore.getInstance("jks");
+        ks.load(new FileInputStream(keystoreFileName), passwordArray);
+
+        //Create a protection parameter used to protect the contents of the keystore
+        KeyStore.ProtectionParameter passwordParam = new KeyStore.PasswordProtection(passwordArray);
+
+        //Create secret key entry
+        KeyStore.SecretKeyEntry secretKeyEntry = new KeyStore.SecretKeyEntry(key);
+
+        //Set keystore entry
+        ks.setEntry(alias + "-secretKey", secretKeyEntry, passwordParam);
+
+        //Stores the entry in the keystore
+        try (FileOutputStream fos = new FileOutputStream( keystoreFileName)){
+            ks.store(fos, passwordArray);
+        }
+    }
+
+    //public static void GetSecretKey()
 
 }

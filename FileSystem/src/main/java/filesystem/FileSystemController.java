@@ -24,7 +24,7 @@ public class FileSystemController {
         FileSystemMessage m = new FileSystemMessage();
 
         //Check if the token is valid
-        if(FileSystemInterface.validateToken(m.getName(), m.getToken()))
+        if(FileSystemInterface.validateToken(fMsg.getName(), fMsg.getToken()))
             return new ResponseEntity<FileSystemMessage>(HttpStatus.PRECONDITION_FAILED);
 
         m.setFiles(FileSystemInterface.download(fMsg.getName()));
@@ -39,7 +39,7 @@ public class FileSystemController {
         //Check if the token is valid
         FileSystemMessage m = new FileSystemMessage();
 
-        if(FileSystemInterface.validateToken(m.getName(), m.getToken()))
+        if(FileSystemInterface.validateToken(fMsg.getName(), fMsg.getToken()))
             return new ResponseEntity(HttpStatus.PRECONDITION_FAILED);
 
         FileSystemInterface.upload(fMsg.getFiles());
