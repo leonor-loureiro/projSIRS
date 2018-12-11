@@ -150,6 +150,7 @@ public class CommandExecution {
         }
 
         communication.putFiles(user, user.getStagedFiles());
+        user.removeFilesFromStaged(user.getStagedFiles());
     }
 
     /**

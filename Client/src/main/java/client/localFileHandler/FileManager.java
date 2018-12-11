@@ -14,7 +14,7 @@ public interface FileManager {
     String path ="./";
 
     /**
-     * Stores locally the given file
+     * Stores locally the given file and it's encrypting key
      * @param file the fileWrapper to be saved
      * @throws IOException an IOException maybe thrown if file already exists with that name
      */
@@ -30,6 +30,8 @@ public interface FileManager {
         try (FileOutputStream stream = new FileOutputStream(dest)) {
             stream.write(file.getFile());
         }
+
+        // Store the key
     }
 
     /**
@@ -61,6 +63,10 @@ public interface FileManager {
                     //temp.setFile(getFileC ontent(file));
                     temp.setFile(Files.readAllBytes(file.toPath()));
                     temp.setFileName(file.getName());
+
+
+                    //TODO: get FileKey if it's stored
+
                     return temp;
                 }
             }
