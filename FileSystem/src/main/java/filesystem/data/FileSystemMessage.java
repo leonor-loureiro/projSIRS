@@ -20,8 +20,6 @@ public class FileSystemMessage {
 
     private String fileName;
 
-    private int version;
-
     private Boolean corrupted = false;
 
     public FileSystemMessage(){
@@ -63,13 +61,6 @@ public class FileSystemMessage {
         return fileName;
     }
 
-    public void setVersion(int _version) {
-        version = _version;
-    }
-
-    public int getVersion() {
-        return version;
-    }
 
     public void setCorrupted(){
         corrupted = true;

@@ -17,6 +17,7 @@ import javax.crypto.SecretKey;
 import java.io.IOException;
 import java.security.*;
 import java.security.cert.CertificateException;
+import java.util.ArrayList;
 import java.util.List;
 
 public class CommandExecution {
@@ -247,7 +248,24 @@ public class CommandExecution {
      */
     public void getBackup(String fileName) {
 
-        FileWrapper files = communication.getBackup(user, fileName);
+
+        System.out.println(user.getUsername());
+        System.out.println(fileName);
+        FileWrapper file = communication.getOldVersion(user, fileName);
+
+
+        ArrayList<FileWrapper> files = new ArrayList<FileWrapper>();
+        files.add(file);
+        try {
+            FileManager.saveFiles(files);
+        } catch (IOException e) {
+            System.out.println("Unable to save pulled files");
+            e.printStackTrace();
+        }
+
+    }
+
+    public void getBackupCorrupted(String fileName){
 
     }
 

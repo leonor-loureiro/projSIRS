@@ -232,7 +232,7 @@ public class Communication {
         restTemp.postForObject(serverUrl+"/share", message,  ResponseEntity.class);
     }
 
-    public FileWrapper getOldVersion(User user,String filename, int version){
+    public FileWrapper getOldVersion(User user,String filename){
         RestTemplate restTemp = restTemplate();
 
         FileSystemMessage message = new FileSystemMessage();
@@ -241,7 +241,6 @@ public class Communication {
 
         message.setFileName(filename);
 
-        message.setVersion(version);
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
