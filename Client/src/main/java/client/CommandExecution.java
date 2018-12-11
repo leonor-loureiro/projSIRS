@@ -75,6 +75,7 @@ public class CommandExecution {
 
         ks.load(null,pwdArray);
 
+        // TODO: Remove esketit?
         Certificate selfSignedCertificate = selfSign(Crypto.generateRSAKeys(), "CN=esketit");
         KeyStore.PrivateKeyEntry secret = new KeyStore.PrivateKeyEntry(Crypto.generateRSAKeys().getPrivate(),new Certificate[] { selfSignedCertificate });
         KeyStore.ProtectionParameter password
@@ -161,7 +162,13 @@ public class CommandExecution {
 
         System.out.println("Adding File ..." + filename);
 
-        FileWrapper file = FileManager.loadFile(filename);
+        FileWrapper file = null;
+        try {
+            file = FileManager.loadFile(filename);
+        } catch (IOException e) {
+            System.out.println("Unable to read file. Wrong filename or no permission.");
+            e.printStackTrace();
+        }
 
         if(file == null){
             System.out.println("File " + filename + " not found.");
@@ -170,14 +177,6 @@ public class CommandExecution {
 
         file.setFileCreator(user.getUsername());
         user.addFileToStaged(file);
-
-        file.setFileName("testtttttttttttt");
-        try {
-            FileManager.saveFile(file);
-        } catch (IOException e) {
-            System.out.println("Unable to Store file");
-            e.printStackTrace();
-        }
 
     }
 
@@ -193,7 +192,13 @@ public class CommandExecution {
 
         List<FileWrapper> files = communication.getFiles(user);
 
-        user.addFilesToStaged(files);
+        user.removeFilesFromStaged(files);
+        try {
+            FileManager.saveFiles(files);
+        } catch (IOException e) {
+            System.out.println("Unable to save pulled files");
+            e.printStackTrace();
+        }
 
     }
 
@@ -207,7 +212,7 @@ public class CommandExecution {
             return;
         }
 
-        communication.putFiles(user, user.getstagedFiles());
+        communication.putFiles(user, user.getStagedFiles());
     }
 
     /**

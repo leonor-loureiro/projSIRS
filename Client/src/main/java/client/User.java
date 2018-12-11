@@ -51,7 +51,7 @@ public class User {
 
     public void setPublicKey(PublicKey publicKey) { this.publicKey = publicKey; }
 
-    public List<FileWrapper> getstagedFiles() {
+    public List<FileWrapper> getStagedFiles() {
         return stagedFiles;
     }
 
@@ -72,7 +72,17 @@ public class User {
         for(FileWrapper file : fw)
             this.addFileToStaged(file);
     }
-    
+
+    public void removeFileFromStaged(FileWrapper fw){
+        stagedFiles.remove(fw);
+    }
+
+    public void removeFilesFromStaged(List<FileWrapper> fw){
+        for(FileWrapper file : fw)
+            this.removeFileFromStaged(file);
+    }
+
+
     public List<String> getStagedFilesNames(){
         List<String> result = new ArrayList<>();
         for(FileWrapper fw : stagedFiles){

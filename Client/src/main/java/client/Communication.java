@@ -100,6 +100,7 @@ public class Communication {
             System.out.println("Login successful");
             return true;
         }
+
         System.out.println("Login failed");
         return false;
 
