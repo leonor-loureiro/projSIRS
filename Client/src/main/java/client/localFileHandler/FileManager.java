@@ -50,7 +50,7 @@ public interface FileManager {
      * @param name name should include extension
      * @return FileWrapper with name found
      */
-    static FileWrapper loadFile(String name) throws IOException {
+    static FileWrapper loadFile(String name, String username) throws IOException {
 
         FileWrapper temp = new FileWrapper();
         // Will be null if path is invalid
@@ -63,7 +63,7 @@ public interface FileManager {
                     //temp.setFile(getFileC ontent(file));
                     temp.setFile(Files.readAllBytes(file.toPath()));
                     temp.setFileName(file.getName());
-
+                    temp.setFileCreator(username);
 
                     //TODO: get FileKey if it's stored
 

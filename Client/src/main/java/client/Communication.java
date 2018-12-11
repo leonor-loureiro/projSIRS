@@ -7,7 +7,6 @@ import client.exception.UserAlreadyExists;
 import client.localFileHandler.FileWrapper;
 import client.security.EncryptedFileWrapper;
 import client.security.SecurityHandler;
-import client.security.Token;
 
 import crypto.Crypto;
 import crypto.exception.CryptoException;
@@ -16,11 +15,8 @@ import org.apache.http.conn.ssl.NoopHostnameVerifier;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.ssl.SSLContextBuilder;
-import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.*;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
 import javax.net.ssl.SSLContext;

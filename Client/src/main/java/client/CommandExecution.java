@@ -109,7 +109,7 @@ public class CommandExecution {
     private FileWrapper getFileWrapper(String filename) {
         FileWrapper file = null;
         try {
-            file = FileManager.loadFile(filename);
+            file = FileManager.loadFile(filename, user.getUsername());
         } catch (IOException e) {
             System.out.println("Unable to read file. Wrong filename or no permission.");
             e.printStackTrace();
