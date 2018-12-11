@@ -232,7 +232,7 @@ public class Communication {
         restTemp.postForObject(serverUrl+"/share", message,  ResponseEntity.class);
     }
 
-    public FileWrapper getOldVersion(User user,String filename){
+    public EncryptedFileWrapper[] getOldVersion(User user,String filename){
         RestTemplate restTemp = restTemplate();
 
         FileSystemMessage message = new FileSystemMessage();
@@ -240,6 +240,10 @@ public class Communication {
         message.setUserName(user.getUsername());
 
         message.setFileName(filename);
+
+        System.out.println(user.getUsername());
+
+        System.out.println(filename);
 
 
         HttpHeaders headers = new HttpHeaders();
@@ -258,7 +262,7 @@ public class Communication {
             System.out.println("got this file " + file.getFileName());
         }
 
-        return SecurityHandler.decryptFileWrappers(Arrays.asList(files)).get(0);
+        return files;
 
     }
     /**

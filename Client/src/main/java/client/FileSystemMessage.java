@@ -23,7 +23,6 @@ public class FileSystemMessage {
 
     private String fileName;
 
-
     private Boolean corrupted = false;
 
     public FileSystemMessage(){
@@ -45,7 +44,7 @@ public class FileSystemMessage {
         this.token = token;
     }
 
-    public String getName() {
+    public String getUserName() {
         return userName;
     }
 
@@ -69,5 +68,10 @@ public class FileSystemMessage {
     public void setCorrupted(){
         corrupted = true;
     }
+
+    public Boolean getCorrupted() {
+        return corrupted;
+    }
+
 
 }

@@ -62,9 +62,12 @@ public class FileSystemController {
     @RequestMapping(value = "/getoldversion")
     public ResponseEntity getoldversion(@Valid@RequestBody FileSystemMessage fMsg) throws IOException, ClassNotFoundException {
         FileSystemMessage message = new FileSystemMessage();
+        System.out.println(fMsg.getUserName());
+        System.out.println(fMsg.getBackUpFileName());
         if(FileSystemInterface.validateToken(fMsg.getUserName(), fMsg.getToken()))
             return new ResponseEntity(HttpStatus.PRECONDITION_FAILED);
         message.setFiles(new EncryptedFileWrapper[]{ FileSystemInterface.getOldVersion(fMsg.getUserName(),fMsg.getBackUpFileName(),fMsg.getCorrupted())});
+        message.setUserName(fMsg.getUserName());
         return new ResponseEntity<FileSystemMessage>(message , HttpStatus.OK);
     }
 

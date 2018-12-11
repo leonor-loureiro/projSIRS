@@ -309,17 +309,13 @@ public class CommandExecution {
 
         System.out.println(user.getUsername());
         System.out.println(fileName);
-        FileWrapper file = communication.getOldVersion(user, fileName);
+        EncryptedFileWrapper[] file = communication.getOldVersion(user, fileName);
+
+        List<FileWrapper> files = SecurityHandler.decryptFileWrappers(Arrays.asList(file), user.getPrivateKey());
+
+        saveFileWrappers(files);
 
 
-        ArrayList<FileWrapper> files = new ArrayList<FileWrapper>();
-        files.add(file);
-        try {
-            FileManager.saveFiles(files);
-        } catch (IOException e) {
-            System.out.println("Unable to save pulled files");
-            e.printStackTrace();
-        }
 
     }
 
