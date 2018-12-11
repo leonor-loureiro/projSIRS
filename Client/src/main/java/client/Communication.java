@@ -129,7 +129,7 @@ public class Communication {
         //make the object
         FileSystemMessage obj = new FileSystemMessage();
 
-        obj.setName(user.getUsername());
+        obj.setUserName(user.getUsername());
 
         //set headers
         HttpHeaders headers = new HttpHeaders();
@@ -224,7 +224,7 @@ public class Communication {
 
         FileSystemMessage message = new FileSystemMessage();
 
-        message.setName(user.getUsername());
+        message.setUserName(user.getUsername());
 
         message.setUserToShareWith(destUser);
 
@@ -232,6 +232,36 @@ public class Communication {
         restTemp.postForObject(serverUrl+"/share", message,  ResponseEntity.class);
     }
 
+    public FileWrapper getOldVersion(User user,String filename, int version){
+        RestTemplate restTemp = restTemplate();
+
+        FileSystemMessage message = new FileSystemMessage();
+
+        message.setUserName(user.getUsername());
+
+        message.setFileName(filename);
+
+        message.setVersion(version);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+
+        //set entity to send
+        HttpEntity entity = new HttpEntity(message,headers);
+
+        // send
+        ResponseEntity<FileSystemMessage> out = restTemp.exchange(serverUrl+"/getoldversion",HttpMethod.POST, entity
+                , FileSystemMessage.class);
+
+        EncryptedFileWrapper[] files = out.getBody().getFiles();
+
+        for (EncryptedFileWrapper file : files) {
+            System.out.println("got this file " + file.getFileName());
+        }
+
+        return SecurityHandler.decryptFileWrappers(Arrays.asList(files)).get(0);
+
+    }
     /**
      * Generates a rest template for https
      * @return https rest template
