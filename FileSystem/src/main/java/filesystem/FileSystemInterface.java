@@ -51,6 +51,9 @@ public class FileSystemInterface {
 
         File folder = new File(path.toString());
 
+        if(!folder.exists())
+            return null;
+
         //get all the files in the folder
         File[] listOfFiles = folder.listFiles();
 
@@ -65,6 +68,7 @@ public class FileSystemInterface {
             ObjectInputStream o = new ObjectInputStream(f);
             EncryptedFileWrapper file = (EncryptedFileWrapper)o.readObject();
             files.add(file);
+            f.close();
             o.close();
         }
 
@@ -118,6 +122,7 @@ public class FileSystemInterface {
             FileOutputStream writer = new FileOutputStream(fileCreator + "\\" + fileName + ".file");
             ObjectOutputStream outwriter = new ObjectOutputStream(writer );
             outwriter.writeObject(files[i]);
+            writer.close();
             outwriter.close();
 
         }
@@ -180,6 +185,7 @@ public class FileSystemInterface {
             FileInputStream f = new FileInputStream(newMainFile);
             ObjectInputStream o = new ObjectInputStream(f);
             EncryptedFileWrapper filetobereturned = (EncryptedFileWrapper)o.readObject();
+            f.close();
             o.close();
             return filetobereturned;
 
@@ -215,6 +221,7 @@ public class FileSystemInterface {
         FileOutputStream writer = new FileOutputStream(user2 + "\\" + filename + ".file");
         ObjectOutputStream outwriter = new ObjectOutputStream(writer);
         outwriter.writeObject(file);
+        writer.close();
         outwriter.close();
         return true;
 

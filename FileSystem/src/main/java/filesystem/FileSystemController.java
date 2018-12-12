@@ -32,6 +32,10 @@ public class FileSystemController {
         if(!FileSystemInterface.validateToken(fMsg.getUserName(), fMsg.getToken()))
             return new ResponseEntity<FileSystemMessage>(HttpStatus.PRECONDITION_FAILED);
 
+        EncryptedFileWrapper[] list = FileSystemInterface.download(fMsg.getUserName());
+
+        if(list == null)
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         message.setFiles(FileSystemInterface.download(fMsg.getUserName()));
         return new ResponseEntity<FileSystemMessage>(message, HttpStatus.OK);
     }
