@@ -81,6 +81,11 @@ public class AuthController {
         return new ResponseEntity<String>(jwtToken, HttpStatus.OK);
     }
 
+    /**
+     * Maps a public key request from an user
+     * @param params username1 (sharer of the file), username2 (destination of the file), token
+     * @return public key of username2
+     */
     @RequestMapping(value = "/getPublicKey")
     public ResponseEntity<String> getPublicKey(@RequestBody Map<String, String> params) {
         String username1 = params.get("username1");
