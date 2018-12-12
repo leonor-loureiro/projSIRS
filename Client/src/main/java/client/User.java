@@ -86,6 +86,10 @@ public class User {
     }
 
 
+    /**
+     * List all the current staged files' names
+     * @return list with all fileNames currently staged
+     */
     public List<String> getStagedFilesNames(){
         List<String> result = new ArrayList<>();
         for(FileWrapper fw : stagedFiles){

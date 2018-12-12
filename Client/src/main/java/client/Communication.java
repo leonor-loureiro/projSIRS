@@ -269,11 +269,8 @@ public class Communication {
         RestTemplate restTemp = restTemplate();
 
         FileSystemMessage message = new FileSystemMessage();
-
         message.setUserName(user.getUsername());
-
         message.setUserToShareWith(destUser);
-
         message.setToken(loginToken);
 
         message.setFiles(new EncryptedFileWrapper[]{ file });
@@ -323,7 +320,7 @@ public class Communication {
 
     /* ******************************************************************************
      *
-     *                      Auxiliar Communication Function
+     *                      Auxiliary Communication Function
      *
      * ******************************************************************************/
 
@@ -359,7 +356,6 @@ public class Communication {
         }
 
         HttpClient httpClient = HttpClients.custom().setSSLSocketFactory(socketFactory).build();
-
 
         HttpComponentsClientHttpRequestFactory factory = new HttpComponentsClientHttpRequestFactory(httpClient);
 

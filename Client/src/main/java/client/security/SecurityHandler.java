@@ -14,10 +14,11 @@ import java.util.List;
 public interface SecurityHandler {
 
     /**
-     * Decrypts a an encrypted file wrapper
-     * @param enc
-     * @return decrypted file wrapper
-     * @throws FileCorrupted
+     * turns a encrypted fileWrapper into a filewrapper by decrypting it
+     * @param enc encrypted File Wrapper
+     * @param privateKey the private key used to get the key to decrypt the filewrapper
+     * @return the decrypted file
+     * @throws FileCorrupted if the file was corrupted or its' integrity compromised
      */
     static FileWrapper decryptFileWrapper(EncryptedFileWrapper enc, Key privateKey) throws FileCorrupted {
         FileWrapper file = new FileWrapper();
@@ -29,9 +30,6 @@ public interface SecurityHandler {
 
         // Decipher file key
         try {
-            //TODO: get private key from keystore
-            //Key privateKey = Crypto.getPrivateKey(keystoreFile, keystorePwd, myAlias, keyPwd);
-
             byte[] cipheredFileKey = enc.getFileKey();
             byte[] fileKey = Crypto.decryptRSA(cipheredFileKey, privateKey);
 
@@ -71,9 +69,10 @@ public interface SecurityHandler {
     }
 
     /**
-     * Decrypts a list of files
-     * @param encryptedFiles
-     * @return decrypted files
+     * Decrypts a list of File Wrappers
+     * @param encryptedFiles encrypted
+     * @param privateKey private key to access key to decipher file wrapper
+     * @return list of decrypted file wrappers
      */
     static List<FileWrapper> decryptFileWrappers(List<EncryptedFileWrapper> encryptedFiles, PrivateKey privateKey){
 
@@ -90,9 +89,11 @@ public interface SecurityHandler {
     }
 
     /**
-     * Encrypts a file wrapper
-     * @param file
-     * @return encrypted file wrapper
+     * Encrypts a file with it's fileKey.
+     * Turns a FileWrapper into a encrypted file wrapper
+     * @param file file to be encrypted
+     * @param publicKey key to encrypt file encrypting key
+     * @return the encrypted file wrapper
      */
     static EncryptedFileWrapper encryptFileWrapper(FileWrapper file, PublicKey publicKey){
         EncryptedFileWrapper enc = new EncryptedFileWrapper();
@@ -162,7 +163,7 @@ public interface SecurityHandler {
 
     /**
      * Encrypts a list of files
-     * @param files
+     * @param files list of wrappers to be encrypted
      * @return encrypted files
      */
     static List<EncryptedFileWrapper> encryptFileWrappers(List<FileWrapper> files, PublicKey publicKey){

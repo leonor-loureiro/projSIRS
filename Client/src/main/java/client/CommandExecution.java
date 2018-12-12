@@ -194,6 +194,10 @@ public class CommandExecution {
 
         //Get file key and encrypt it
         FileWrapper fileWrapper = getFileWrapper(fileName);
+        if(fileWrapper == null) {
+            System.out.println("No file found with given name: " + fileName);
+            return;
+        }
 
         try {
             fileWrapper.setFileName("from" + user.getUsername() + fileName);
@@ -262,7 +266,7 @@ public class CommandExecution {
 
     /* ******************************************************************************
      *
-     *                      Auxiliar Communication Function
+     *                      Auxiliary Communication Function
      *
      * ******************************************************************************/
 
@@ -280,7 +284,7 @@ public class CommandExecution {
      * Stores files and their keys
      * @param fw file wrapper to be stored
      */
-    public void saveFileWrappers(List<FileWrapper> fw)  {
+    private void saveFileWrappers(List<FileWrapper> fw)  {
 
         for(FileWrapper f : fw){
             storeFileKey(f.getFileName(), f);
@@ -330,7 +334,7 @@ public class CommandExecution {
      * @param filename file's name
      * @return file wrapper
      */
-    public FileWrapper getFileWrapper(String filename) throws BadArgument {
+    private FileWrapper getFileWrapper(String filename) throws BadArgument {
         FileWrapper file = null;
         try {
             // Reading File
