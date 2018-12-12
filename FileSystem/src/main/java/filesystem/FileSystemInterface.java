@@ -50,6 +50,7 @@ public class FileSystemInterface {
 
         File folder = new File(path.toString());
 
+        //check if folder exists
         if(!folder.exists())
             return null;
 
@@ -59,10 +60,13 @@ public class FileSystemInterface {
         ArrayList<EncryptedFileWrapper> files = new ArrayList<EncryptedFileWrapper>();
 
         for(int i = 0; i<listOfFiles.length; i++){
+            //check if the file we want to download is an old version
             if(listOfFiles[i].getName().endsWith("oldv.file")){
                 continue;
             }
             System.out.println("Adding file " + " " + listOfFiles[i].getName() + " " + "to be downloaded");
+
+            //get the file from the system
             FileInputStream f = new FileInputStream(listOfFiles[i]);
             ObjectInputStream o = new ObjectInputStream(f);
             EncryptedFileWrapper file = (EncryptedFileWrapper)o.readObject();
@@ -76,6 +80,7 @@ public class FileSystemInterface {
         vectorEnc = new EncryptedFileWrapper[files.size()];
 
 
+        //build a vector of encryptedfilewrappers to return
         for(int i =0;i<files.size();i++){
             vectorEnc[i] = files.get(i);
         }
@@ -86,19 +91,28 @@ public class FileSystemInterface {
 
     }
 
+    /**
+     * Receives files from clients and stores them in the filesystem
+     * @param files list of encryptedfilewrappers to store
+     * @param username name of the user
+     * @throws IOException
+     */
     public static void upload(EncryptedFileWrapper[] files,String username) throws IOException {
 
         System.out.println("uploading");
 
 
+        //get the name of the user
         String fileCreator = username;
 
 
 
+        // get the path to his folder
         Path path = Paths.get("./" + fileCreator);
 
 
 
+        // if the folder doesnt exist create it (first upload)
         if (!Files.exists(path)) {
 
             System.out.println(fileCreator + " " + "doesnt exist ");
@@ -117,7 +131,11 @@ public class FileSystemInterface {
 
             System.out.println("Uploading file:" + " " + files[i].getFileName());
             String fileName  = files[i].getFileName();
+
+            //check if there is a need to create a backup
             System.out.println("Was there need to backup the file:" + " " + checkForBackup(fileCreator + "\\" + fileName));
+
+            //build the file in the system
             FileOutputStream writer = new FileOutputStream(fileCreator + "\\" + fileName + ".file");
             ObjectOutputStream outwriter = new ObjectOutputStream(writer );
             outwriter.writeObject(files[i]);
@@ -132,14 +150,21 @@ public class FileSystemInterface {
 
     }
 
+    /**
+     *
+     * @param file given this file, check if there is a need to create a backup
+     * @return
+     */
     private static Boolean checkForBackup(String file) {
         File f = new File(file + ".file");
         int versionumber = 0;
         loop:
+        //if the file already exists and isnt a directory
         if(f.exists() && !f.isDirectory()) {
             for(int i = 0;true;i++){
                 File oldbackup = new File(file + i + "oldv" + ".file");
                 System.out.println(oldbackup.getAbsolutePath());
+                //If a backup already exists we increment the number of the version
                 if(oldbackup.exists()) {
                     System.out.println("Version" + " " + versionumber + " " + "alreadyexists" + "of file " + " " + file);
                     versionumber++;
@@ -147,12 +172,15 @@ public class FileSystemInterface {
 
                 }
                 else {
+                    //when we already now the number of the version stop the cycle
                     break loop;
                 }
             }
         }
         else
             return false;
+
+        //rename the old file, to the newest version
         File newfile  = new File(file + (versionumber++) + "oldv"  + ".file");
         System.out.println(newfile.getAbsolutePath());
         f.renameTo(newfile);

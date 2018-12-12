@@ -228,6 +228,10 @@ public class Communication {
         //Invalid arguments
         if(out.getStatusCode() == HttpStatus.BAD_REQUEST)
             throw new BadArgument("Bad input, check filenames for special characters.");
+        if(out.getStatusCode() == HttpStatus.NOT_FOUND) {
+            System.out.println("ReThrew");
+            throw new BadArgument("No added file yet");
+        }
 
         // get Files
         EncryptedFileWrapper[] files = out.getBody().getFiles();
