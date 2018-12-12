@@ -47,7 +47,17 @@ public class AuthService {
     //Random generator for token IDs
     private static Random random = new Random();
 
-    private AuthService(){
+    private AuthService() {
+
+        if(Application.properties == null){
+            try {
+                Application.properties = new Properties();
+                InputStream input = new FileInputStream("./" + "\\src\\main\\resources\\config.properties");
+                Application.properties.load(input);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
 
         db = new DBConnection(Application.properties.getProperty("dbuser"),
                Application.properties.getProperty("dbpassword"),

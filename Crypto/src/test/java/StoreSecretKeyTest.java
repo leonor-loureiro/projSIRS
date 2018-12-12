@@ -48,6 +48,15 @@ public class StoreSecretKeyTest {
         Assert.assertTrue(extractedKey.equals(secretKey));
     }
 
+    @Test
+    public void invalidAlias() throws CertificateException, NoSuchAlgorithmException, KeyStoreException, IOException, UnrecoverableKeyException {
+
+        KeystoreManager.StoreSecretKey(secretKey, keystoreFileName, alias, passwordArray);
+        SecretKey extractedKey = KeystoreManager.getSecretKey(keystoreFileName, "invalidAlias", passwordArray);
+
+        Assert.assertTrue(extractedKey == null);
+    }
+
 
     @After
     public void cleanUp() throws IOException {
