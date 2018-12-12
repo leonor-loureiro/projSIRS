@@ -25,6 +25,10 @@ public class FileSystemController {
 
         //Check if the token is valid
 
+        if(fMsg.getUserName() == null || fMsg.getUserName().isEmpty())
+            return new ResponseEntity<FileSystemMessage>(HttpStatus.BAD_REQUEST);
+        if(fMsg.getToken() == null || fMsg.getToken().isEmpty())
+            return new ResponseEntity<FileSystemMessage>(HttpStatus.BAD_REQUEST);
         if(!FileSystemInterface.validateToken(fMsg.getUserName(), fMsg.getToken()))
             return new ResponseEntity<FileSystemMessage>(HttpStatus.PRECONDITION_FAILED);
 
@@ -34,27 +38,31 @@ public class FileSystemController {
 
     @PostMapping(value = "/upload")
     public ResponseEntity upload(@Valid @RequestBody FileSystemMessage fMsg) throws IOException {
-        System.out.println("RECEIVED");
+
+        if(fMsg.getUserName() == null || fMsg.getUserName().isEmpty())
+            return new ResponseEntity<FileSystemMessage>(HttpStatus.BAD_REQUEST);
+        if(fMsg.getToken() == null || fMsg.getToken().isEmpty())
+            return new ResponseEntity<FileSystemMessage>(HttpStatus.BAD_REQUEST);
+
         if(!checkInput(fMsg))
             new ResponseEntity(HttpStatus.BAD_REQUEST);
-//        System.out.println(file.get(0).getFileName());
-//        System.out.println(Arrays.toString(file.get(0).getFile()));
-        //Check if the token is valid
 
-        System.out.println(fMsg.getToken());
-        System.out.println(fMsg.getUserName());
         if(!FileSystemInterface.validateToken(fMsg.getUserName(), fMsg.getToken()))
             return new ResponseEntity(HttpStatus.PRECONDITION_FAILED);
 
-        System.out.println("Validated token");
         FileSystemInterface.upload(fMsg.getFiles());
-        System.out.println("DONE");
+
         return new ResponseEntity(HttpStatus.OK);
     }
 
     @RequestMapping(value = "/share")
     public ResponseEntity share(@Valid@RequestBody FileSystemMessage fMsg) throws IOException, ClassNotFoundException {
-        FileSystemMessage message = new FileSystemMessage();
+
+
+        if(fMsg.getUserName() == null || fMsg.getUserName().isEmpty())
+            return new ResponseEntity<FileSystemMessage>(HttpStatus.BAD_REQUEST);
+        if(fMsg.getToken() == null || fMsg.getToken().isEmpty())
+            return new ResponseEntity<FileSystemMessage>(HttpStatus.BAD_REQUEST);
 
         if(!checkInput(fMsg))
             new ResponseEntity(HttpStatus.BAD_REQUEST);
@@ -62,22 +70,28 @@ public class FileSystemController {
         if(!FileSystemInterface.validateToken(fMsg.getUserName(), fMsg.getToken()))
             return new ResponseEntity(HttpStatus.PRECONDITION_FAILED);
 
-        FileSystemInterface.share(fMsg.getUserName(),fMsg.getUserToShareWith(),fMsg.getFiles()[0]);
+        if(!FileSystemInterface.share(fMsg.getUserName(),fMsg.getUserToShareWith(),fMsg.getFiles()[0]))
+            return new ResponseEntity(HttpStatus.NOT_ACCEPTABLE);
+
         return new ResponseEntity(HttpStatus.OK);
     }
 
     @RequestMapping(value = "/getoldversion")
     public ResponseEntity getoldversion(@Valid@RequestBody FileSystemMessage fMsg) throws IOException, ClassNotFoundException {
 
+        if(fMsg.getUserName() == null || fMsg.getUserName().isEmpty())
+            return new ResponseEntity<FileSystemMessage>(HttpStatus.BAD_REQUEST);
+        if(fMsg.getToken() == null || fMsg.getToken().isEmpty())
+            return new ResponseEntity<FileSystemMessage>(HttpStatus.BAD_REQUEST);
+
         if(!checkInput(fMsg))
             new ResponseEntity(HttpStatus.BAD_REQUEST);
 
-        FileSystemMessage message = new FileSystemMessage();
-        System.out.println(fMsg.getUserName());
-        System.out.println(fMsg.getBackUpFileName());
-
         if(!FileSystemInterface.validateToken(fMsg.getUserName(), fMsg.getToken()))
             return new ResponseEntity(HttpStatus.PRECONDITION_FAILED);
+
+        FileSystemMessage message = new FileSystemMessage();
+
 
         message.setFiles(new EncryptedFileWrapper[]{ FileSystemInterface.getOldVersion(fMsg.getUserName(),fMsg.getBackUpFileName(),fMsg.getCorrupted())});
         if(message.getFiles()[0] == null)
@@ -86,10 +100,6 @@ public class FileSystemController {
         return new ResponseEntity<FileSystemMessage>(message , HttpStatus.OK);
     }
 
-    @RequestMapping(value = "/test")
-    public String test(){
-        return "works";
-    }
 
     public Boolean checkInput(FileSystemMessage fMsg){
         if (fMsg.getUserName()!= null ) {
@@ -105,7 +115,7 @@ public class FileSystemController {
             }
         }
         if(fMsg.getBackUpFileName()!=null){
-            if(!fMsg.getUserName().matches("[a-zA-Z0-9]*"))
+            if(!fMsg.getBackUpFileName().matches("[a-zA-Z0-9[.]_-]*"))
                 System.out.println("Bad filename for backup");
                 return false;
         }
@@ -117,7 +127,7 @@ public class FileSystemController {
                     System.out.println("Bad FileCreatorName");
                     return false;
                 }
-                if (!files[i].getFileName().matches("[a-zA-Z0-9._-]*")) {
+                if (!files[i].getFileName().matches("[a-zA-Z0-9 . _-]*")) {
                     System.out.println("Bad FileName");
                     return false;
                 }
