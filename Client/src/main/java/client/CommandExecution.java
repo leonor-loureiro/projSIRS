@@ -212,7 +212,7 @@ public class CommandExecution {
     /**
      * get all remote files and removes them from staging
      */
-    public void pull(){
+    public void pull() throws BadArgument {
         System.out.println("Pulling files from remote Files ...");
         if(user == null){
             System.out.println("User must be logged for this operation!!");
@@ -267,7 +267,7 @@ public class CommandExecution {
 
         //TODO: Remove this set when wrapper already has key
         try {
-            fileWrapper.setFileName(fileName);
+            fileWrapper.setFileName("from" + user.getUsername() + fileName);
             fileWrapper.setFileCreator(dest);
             fileWrapper.setFileKey(Crypto.generateSecretKey().getEncoded());
         } catch (CryptoException e) {
@@ -309,7 +309,7 @@ public class CommandExecution {
      * Requests an older version of a given file
      * @param fileName
      */
-    public void getBackup(String fileName) {
+    public void getBackup(String fileName) throws BadArgument {
 
 
         System.out.println(user.getUsername());
@@ -319,12 +319,6 @@ public class CommandExecution {
         List<FileWrapper> files = SecurityHandler.decryptFileWrappers(Arrays.asList(file), user.getPrivateKey());
 
         saveFileWrappers(files);
-
-
-
-    }
-
-    public void getBackupCorrupted(String fileName){
 
     }
 

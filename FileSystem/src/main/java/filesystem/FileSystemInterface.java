@@ -173,22 +173,22 @@ public class FileSystemInterface {
 
     public static EncryptedFileWrapper getOldVersion(String fileCreator,String fileName,Boolean corrupted) throws IOException, ClassNotFoundException {
         File file = new File(fileCreator + "\\" + fileName + ".file");
-        if (corrupted){
-            int versionumber = 0;
+        int versionumber = 0;
             file.delete();
             loop:
-            for(int i = 0;true;i++){
-                File oldbackup = new File(fileCreator + "\\" + fileName +  i + "oldv" + ".file");
-                versionumber++;
-                if(oldbackup.exists()) {
+            for (int i = 0; true; i++) {
+                File oldbackup = new File(fileCreator + "\\" + fileName + i + "oldv" + ".file");
+                if (oldbackup.exists()) {
+                    versionumber++;
                     continue;
 
-                }
-                else {
+                } else {
+                    if(i==0)
+                        return null;
+                    versionumber--;
                     break loop;
                 }
             }
-
             File newMainFile = new File(fileCreator + "\\" + fileName + ".file");
             File higherVersionFile = new File(fileCreator + "\\" + fileName +  versionumber +"oldv"  + ".file");
             higherVersionFile.renameTo(newMainFile);
@@ -197,30 +197,6 @@ public class FileSystemInterface {
             ObjectInputStream o = new ObjectInputStream(f);
             EncryptedFileWrapper filetobereturned = (EncryptedFileWrapper)o.readObject();
             return filetobereturned;
-        }
-        else{
-            int versionumber = 0;
-            loop:
-            for(int i = 0;true;i++){
-                File oldbackup = new File(fileCreator + "\\" + fileName + i + "oldv"  + ".file");
-                if(oldbackup.exists()) {
-                    versionumber++;
-                    continue;
-
-                }
-                else {
-                    versionumber--;
-                    break loop;
-                }
-            }
-
-            File higherVersionFile = new File(fileCreator + "\\" + fileName + (versionumber) + "oldv"  + ".file");
-
-            FileInputStream f = new FileInputStream(higherVersionFile);
-            ObjectInputStream o = new ObjectInputStream(f);
-            EncryptedFileWrapper filetobereturned = (EncryptedFileWrapper)o.readObject();
-            return filetobereturned;
-        }
 
 
     }

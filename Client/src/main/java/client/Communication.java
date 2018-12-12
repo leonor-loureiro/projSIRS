@@ -122,7 +122,7 @@ public class Communication {
 
     }
 
-    public EncryptedFileWrapper[] getFiles(User user){
+    public EncryptedFileWrapper[] getFiles(User user) throws BadArgument {
         RestTemplate restTemplate = restTemplate();
 
         //make the object
@@ -141,6 +141,11 @@ public class Communication {
         // send
         ResponseEntity<FileSystemMessage> out = restTemplate.exchange(serverUrl+"/download",HttpMethod.POST, entity
                 , FileSystemMessage.class);
+
+
+        //Invalid arguments
+        if(out.getStatusCode() == HttpStatus.BAD_REQUEST)
+            throw new BadArgument("Bad input, check filenames for special characters.");
 
 
         EncryptedFileWrapper[] files = out.getBody().getFiles();
@@ -216,12 +221,14 @@ public class Communication {
 
         message.setUserToShareWith(destUser);
 
+        message.setToken(loginToken);
+
         message.setFiles(new EncryptedFileWrapper[]{ file });
         restTemp.postForObject(serverUrl+"/share", message,  ResponseEntity.class);
     }
 
 
-    public EncryptedFileWrapper[] getOldVersion(User user,String filename){
+    public EncryptedFileWrapper[] getOldVersion(User user,String filename) throws BadArgument {
         RestTemplate restTemp = restTemplate();
 
         FileSystemMessage message = new FileSystemMessage();
@@ -246,6 +253,9 @@ public class Communication {
         // send
         ResponseEntity<FileSystemMessage> out = restTemp.exchange(serverUrl+"/getoldversion",HttpMethod.POST, entity
                 , FileSystemMessage.class);
+
+        if(out.getStatusCode() == HttpStatus.BAD_REQUEST)
+            throw new BadArgument("Backup doesn't exist");
 
         EncryptedFileWrapper[] files = out.getBody().getFiles();
 

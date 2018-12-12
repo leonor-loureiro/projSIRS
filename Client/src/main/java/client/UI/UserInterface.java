@@ -69,6 +69,10 @@ public interface UserInterface {
         System.out.println("login or register?");
         String loginOrRegister = requestInput();
 
+        if(!(loginOrRegister.equals("login") || loginOrRegister.equals("register")))
+            return null;
+
+
         System.out.println();
         System.out.println("Please insert your information:");
 

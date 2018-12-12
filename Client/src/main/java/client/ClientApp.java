@@ -25,7 +25,7 @@ public class ClientApp {
 
     public static void main(String[] args) throws Exception {
         Crypto.init();
-        Login login;
+        Login login = null;
         boolean running = true;
 
 
@@ -33,7 +33,8 @@ public class ClientApp {
             UserInterface.home();
 
             try{
-                login = UserInterface.requestLogin();
+                while(login == null)
+                    login = UserInterface.requestLogin();
 
                 UserInterface.welcome(login.getUsername());
 
