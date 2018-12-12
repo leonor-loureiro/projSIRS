@@ -229,23 +229,23 @@ public class FileSystemInterface {
 
         Path pathuser2 = Paths.get("./" + user2);
 
-        Path fileName = Paths.get("./" + user2 + "/" + filename + ".file");
+        Path fileName = Paths.get("./" + user1 + "/" + filename + ".file");
 
 
         if (!Files.exists(pathuser1)) {
             System.out.println("User" + " " + pathuser1 + " " + "doesnt exist");
             return false;
         }
-        if (!Files.exists(pathuser2)) {
-            System.out.println("User" + " " + pathuser2 + " " + "doesnt exist");
+        if (!Files.exists(fileName)) {
+            System.out.println("File" + " " + filename + " " + "doesnt exist");
             return false;
         }
-        if (!Files.exists(fileName)) {
-            System.out.println("User" + " " + filename + " " + "doesnt exist");
-            return false;
+        if (!Files.exists(pathuser2)) {
+            File folder = new File("./" + user2);
+            folder.mkdirs();
         }
 
-        FileOutputStream writer = new FileOutputStream(user2 + "\\" + filename + ".file");
+        FileOutputStream writer = new FileOutputStream(user2 + "\\" + "from-" + user1 + "_" + filename + ".file");
         ObjectOutputStream outwriter = new ObjectOutputStream(writer);
         outwriter.writeObject(file);
         writer.close();
