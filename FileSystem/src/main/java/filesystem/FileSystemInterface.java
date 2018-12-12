@@ -34,6 +34,14 @@ public class FileSystemInterface {
         return TokenManager.validateJTW(token, "authServer", username, key);
     }
 
+    /**
+     * Gets all files from the user
+     * @param name Name of the user
+     * @return a list of encrypted files
+     * @throws IOException
+     * @throws ClassNotFoundException
+     */
+
     public static EncryptedFileWrapper[] download(String name) throws IOException, ClassNotFoundException {
         System.out.println("Downloading files");
 
@@ -41,25 +49,27 @@ public class FileSystemInterface {
         System.out.println(name);
         Path path = Paths.get("./" + name);
 
-        if(!Files.exists(path)){
-            System.out.println(name + " " + "not registered");
-
-        }
-
-
         File folder = new File(path.toString());
 
+        if(!folder.exists())
+            return null;
+
+        //get all the files in the folder
         File[] listOfFiles = folder.listFiles();
 
         ArrayList<EncryptedFileWrapper> files = new ArrayList<EncryptedFileWrapper>();
 
         for(int i = 0; i<listOfFiles.length; i++){
-            if(listOfFiles[i].getName().endsWith("oldv.file"));
+            if(listOfFiles[i].getName().endsWith("oldv.file")){
+                continue;
+            }
             System.out.println("Adding file " + " " + listOfFiles[i].getName() + " " + "to be downloaded");
             FileInputStream f = new FileInputStream(listOfFiles[i]);
             ObjectInputStream o = new ObjectInputStream(f);
             EncryptedFileWrapper file = (EncryptedFileWrapper)o.readObject();
             files.add(file);
+            f.close();
+            o.close();
         }
 
         EncryptedFileWrapper[] vectorEnc;
@@ -77,12 +87,12 @@ public class FileSystemInterface {
 
     }
 
-    public static void upload(EncryptedFileWrapper[] files) throws IOException {
+    public static void upload(EncryptedFileWrapper[] files,String username) throws IOException {
 
         System.out.println("uploading");
 
 
-        String fileCreator = files[0].getFileCreator();
+        String fileCreator = username;
 
 
 
@@ -112,6 +122,7 @@ public class FileSystemInterface {
             FileOutputStream writer = new FileOutputStream(fileCreator + "\\" + fileName + ".file");
             ObjectOutputStream outwriter = new ObjectOutputStream(writer );
             outwriter.writeObject(files[i]);
+            writer.close();
             outwriter.close();
 
         }
@@ -144,6 +155,7 @@ public class FileSystemInterface {
         else
             return false;
         File newfile  = new File(file + (versionumber++) + "oldv"  + ".file");
+        System.out.println(newfile.getAbsolutePath());
         f.renameTo(newfile);
         return true;
     }
@@ -173,6 +185,8 @@ public class FileSystemInterface {
             FileInputStream f = new FileInputStream(newMainFile);
             ObjectInputStream o = new ObjectInputStream(f);
             EncryptedFileWrapper filetobereturned = (EncryptedFileWrapper)o.readObject();
+            f.close();
+            o.close();
             return filetobereturned;
 
 
@@ -207,6 +221,7 @@ public class FileSystemInterface {
         FileOutputStream writer = new FileOutputStream(user2 + "\\" + filename + ".file");
         ObjectOutputStream outwriter = new ObjectOutputStream(writer);
         outwriter.writeObject(file);
+        writer.close();
         outwriter.close();
         return true;
 
