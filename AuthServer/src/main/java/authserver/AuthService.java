@@ -42,6 +42,9 @@ public class AuthService {
     //Random generator for token IDs
     private static Random random = new Random();
 
+    /**
+     * Singleton constructor
+     */
     private AuthService() {
 
         if(Application.properties == null){
@@ -59,12 +62,24 @@ public class AuthService {
                Application.properties.getProperty("database"));
     }
 
+    /**
+     * Gets the AuthService instance. If not initialized, it's created
+     * @return AuthService instance
+     */
     public static AuthService getInstance(){
         if(instance == null)
             instance = new AuthService();
         return instance;
     }
 
+    /**
+     * Register a user
+     * @param username user's username
+     * @param password user's password
+     * @param Kpub user's public key
+     * @return authentication token
+     * @throws UserAlreadyExistsException already exists a user
+     */
     public String register(String username, String password, String Kpub) throws UserAlreadyExistsException {
         if(!validUsername(username))
             return null;
@@ -94,6 +109,13 @@ public class AuthService {
         throw new UserAlreadyExistsException();
     }
 
+    /**
+     * Login of a user
+     * @param username user's username
+     * @param password user's password
+     * @return authentication token
+     * @throws InvalidUserException user does not exist
+     */
     public String login(String username, String password) throws InvalidUserException {
         if(!validUsername(username))
             return null;
@@ -118,6 +140,12 @@ public class AuthService {
         }
     }
 
+    /**
+     * Validate the authentication token for the given user
+     * @param username user the token is authenticating
+     * @param token authentication toke
+     * @return true, if the token is valid for that user; false otherwise
+     */
     public boolean authenticate(String username, String token){
         if(!validUsername(username))
             return false;
@@ -131,6 +159,12 @@ public class AuthService {
         return TokenManager.validateJTW(token, "authServer", username, key);
     }
 
+    /**
+     * Retrieves a user's public key
+     * @param username user' username
+     * @return user's public key
+     * @throws InvalidUserException user does not exist
+     */
     public String getPublicKey(String username) throws InvalidUserException {
         if(!validUsername(username))
             return null;
@@ -146,6 +180,11 @@ public class AuthService {
         }
     }
 
+    /**
+     * Generate an authentication token for the user
+     * @param username user's username
+     * @return authentication token
+     */
     private String generateToken(String username){
         // Get the private key for the signature
         Key signingKey = null;
@@ -158,6 +197,11 @@ public class AuthService {
         return TokenManager.createJTW(id, "authServer", username, VALID_PERIOD, signingKey);
     }
 
+    /**
+     * Checks if the username format is valid
+     * @param username user' username
+     * @return true, if it's valid; false otherwise
+     */
     private boolean validUsername(String username){
         if (username!= null && username.matches("[a-zA-Z0-9]*")) {
                 return true;

@@ -12,6 +12,8 @@ public class ClientConfig {
 
     @Bean
     public static PropertySourcesPlaceholderConfigurer propertySourcesPlaceholderConfigurer() {
+
+
         return new PropertySourcesPlaceholderConfigurer();
     }
 
