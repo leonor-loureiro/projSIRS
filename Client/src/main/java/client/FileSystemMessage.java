@@ -4,13 +4,11 @@ import client.security.EncryptedFileWrapper;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 
-import java.util.ArrayList;
-import java.util.List;
-
 /**
  * Class used for communication with File System server
  */
 @JsonIdentityInfo(generator=ObjectIdGenerators.IntSequenceGenerator.class,property="@id", scope = FileSystemMessage.class)
+
 public class FileSystemMessage {
 
     private EncryptedFileWrapper[] files;
@@ -21,11 +19,23 @@ public class FileSystemMessage {
 
     private String userToShareWith;
 
-    private String fileName;
+    private String backUpFileName;
 
     private Boolean corrupted = false;
 
     public FileSystemMessage(){
+    }
+
+    public String getBackUpFileName() {
+        return backUpFileName;
+    }
+
+    public void setBackUpFileName(String backUpFileName) {
+        this.backUpFileName = backUpFileName;
+    }
+
+    public void setCorrupted(Boolean corrupted) {
+        this.corrupted = corrupted;
     }
 
     public EncryptedFileWrapper[] getFiles() {
@@ -55,14 +65,6 @@ public class FileSystemMessage {
     public void setUserToShareWith(String user){userToShareWith = user;}
 
     public String getUserToShareWith(){return userToShareWith;}
-
-    public void setFileName(String filename) {
-        fileName = filename;
-    }
-
-    public String getBackUpFileName() {
-        return fileName;
-    }
 
 
     public void setCorrupted(){

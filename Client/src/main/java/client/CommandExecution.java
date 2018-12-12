@@ -40,8 +40,10 @@ public class CommandExecution {
         setUser(new User(login.getUsername(), login.getPassword()));
 
         // Tries to login at auth server
-        if(!communication.login(user))
+        if(!communication.login(user)){
+            System.out.println("Login Failed");
             return;
+        }
 
         // Extract public key
         PublicKey publicKey = null;
@@ -240,7 +242,10 @@ public class CommandExecution {
             return;
         }
 
-        communication.putFiles(user, user.getStagedFiles());
+        EncryptedFileWrapper[] files = new EncryptedFileWrapper[user.getStagedFiles().size()];
+        files = SecurityHandler.encryptFileWrappers(user.getStagedFiles(),user.getPublicKey()).toArray(files);
+
+        communication.putFiles(user, files);
         user.removeFilesFromStaged(user.getStagedFiles());
     }
 

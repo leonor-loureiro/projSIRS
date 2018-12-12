@@ -129,6 +129,7 @@ public class Communication {
         FileSystemMessage obj = new FileSystemMessage();
 
         obj.setUserName(user.getUsername());
+        obj.setToken(loginToken);
 
         //set headers
         HttpHeaders headers = new HttpHeaders();
@@ -147,6 +148,7 @@ public class Communication {
         System.out.println("Downloaded files:");
         for (EncryptedFileWrapper file : files) {
             System.out.println("- " + file.getFileName());
+            System.out.println(file.getFile() == null);
         }
 
         return files;
@@ -192,32 +194,18 @@ public class Communication {
      * @param user the user sending the files
      * @param files the list of files to be sent
      */
-    public void putFiles(User user, List<FileWrapper> files){
+    public void putFiles(User user, EncryptedFileWrapper[] files){
         RestTemplate restTemp = restTemplate();
-        EncryptedFileWrapper[] list;
-        list = new EncryptedFileWrapper[files.size()];
-        EncryptedFileWrapper enc;
-        System.out.println(files.size());
-        for(int i = 0;i< files.size();i++){
-            System.out.println(files.get(i).getFileName());
-            //list.add(SecurityHandler.encryptFileWrapper(f, user.getPublicKey()));
-            enc = new EncryptedFileWrapper();
-            enc.setFileCreator(files.get(i).getFileCreator());
-            enc.setFileName(files.get(i).getFileName());
-            enc.setFileKey("Key".getBytes());
-            list[i] = enc;
-        }
 
-        FileSystemMessage m = new FileSystemMessage();
-        m.setFiles(list);
-        restTemp.postForObject(serverUrl+"/upload", m,  ResponseEntity.class);
+
+        FileSystemMessage message = new FileSystemMessage();
+        message.setFiles(files);
+        message.setUserName(user.getUsername());
+        message.setToken(loginToken);
+        restTemp.postForObject(serverUrl+"/upload", message,  ResponseEntity.class);
 
     }
 
-    public FileWrapper getBackup(User user, String fileName){
-
-        throw new UnsupportedOperationException();
-    }
 
     public void shareFile(User user, EncryptedFileWrapper file, String destUser){
         RestTemplate restTemp = restTemplate();
@@ -232,6 +220,7 @@ public class Communication {
         restTemp.postForObject(serverUrl+"/share", message,  ResponseEntity.class);
     }
 
+
     public EncryptedFileWrapper[] getOldVersion(User user,String filename){
         RestTemplate restTemp = restTemplate();
 
@@ -239,7 +228,9 @@ public class Communication {
 
         message.setUserName(user.getUsername());
 
-        message.setFileName(filename);
+        message.setBackUpFileName(filename);
+
+        message.setToken(loginToken);
 
         System.out.println(user.getUsername());
 

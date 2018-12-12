@@ -18,13 +18,14 @@ public class FileSystemController {
     @RequestMapping(value = "/download")
     public ResponseEntity<FileSystemMessage> download(@Valid @RequestBody FileSystemMessage fMsg) throws IOException, ClassNotFoundException {
 
-        if(checkInput(fMsg))
+        if(!checkInput(fMsg))
             throw new IOException();
 
         FileSystemMessage message = new FileSystemMessage();
 
         //Check if the token is valid
-        if(FileSystemInterface.validateToken(fMsg.getUserName(), fMsg.getToken()))
+
+        if(!FileSystemInterface.validateToken(fMsg.getUserName(), fMsg.getToken()))
             return new ResponseEntity<FileSystemMessage>(HttpStatus.PRECONDITION_FAILED);
 
         message.setFiles(FileSystemInterface.download(fMsg.getUserName()));
@@ -33,17 +34,21 @@ public class FileSystemController {
 
     @PostMapping(value = "/upload")
     public ResponseEntity upload(@Valid @RequestBody FileSystemMessage fMsg) throws IOException {
-
-        checkInput(fMsg);
+        System.out.println("RECEIVED");
+        if(!checkInput(fMsg))
+            throw new IOException();
 //        System.out.println(file.get(0).getFileName());
 //        System.out.println(Arrays.toString(file.get(0).getFile()));
         //Check if the token is valid
-        FileSystemMessage m = new FileSystemMessage();
 
-        if(FileSystemInterface.validateToken(fMsg.getUserName(), fMsg.getToken()))
+        System.out.println(fMsg.getToken());
+        System.out.println(fMsg.getUserName());
+        if(!FileSystemInterface.validateToken(fMsg.getUserName(), fMsg.getToken()))
             return new ResponseEntity(HttpStatus.PRECONDITION_FAILED);
 
+        System.out.println("Validated token");
         FileSystemInterface.upload(fMsg.getFiles());
+        System.out.println("DONE");
         return new ResponseEntity(HttpStatus.OK);
     }
 
@@ -52,7 +57,7 @@ public class FileSystemController {
         FileSystemMessage message = new FileSystemMessage();
 
         checkInput(fMsg);
-        if(FileSystemInterface.validateToken(fMsg.getUserName(), fMsg.getToken()))
+        if(!FileSystemInterface.validateToken(fMsg.getUserName(), fMsg.getToken()))
             return new ResponseEntity(HttpStatus.PRECONDITION_FAILED);
 
         FileSystemInterface.share(fMsg.getUserName(),fMsg.getUserToShareWith(),fMsg.getFiles()[0]);
@@ -61,11 +66,15 @@ public class FileSystemController {
 
     @RequestMapping(value = "/getoldversion")
     public ResponseEntity getoldversion(@Valid@RequestBody FileSystemMessage fMsg) throws IOException, ClassNotFoundException {
+
+        checkInput(fMsg);
         FileSystemMessage message = new FileSystemMessage();
         System.out.println(fMsg.getUserName());
         System.out.println(fMsg.getBackUpFileName());
-        if(FileSystemInterface.validateToken(fMsg.getUserName(), fMsg.getToken()))
+
+        if(!FileSystemInterface.validateToken(fMsg.getUserName(), fMsg.getToken()))
             return new ResponseEntity(HttpStatus.PRECONDITION_FAILED);
+
         message.setFiles(new EncryptedFileWrapper[]{ FileSystemInterface.getOldVersion(fMsg.getUserName(),fMsg.getBackUpFileName(),fMsg.getCorrupted())});
         message.setUserName(fMsg.getUserName());
         return new ResponseEntity<FileSystemMessage>(message , HttpStatus.OK);
@@ -95,16 +104,20 @@ public class FileSystemController {
                 return false;
         }
         EncryptedFileWrapper[] files = fMsg.getFiles();
-        for(int i = 0;i < files.length;i++){
-            if(!files[i].getFileCreator().matches("[a-zA-Z0-9]*")) {
-                System.out.println("Bad FileCreatorName");
-                return false;
-            }
-            if(!files[i].getFileName().matches("[a-zA-Z0-9._-]*")) {
-                System.out.println("Bad FileName");
-                return false;
+
+        if(files != null) {
+            for (int i = 0; i < files.length; i++) {
+                if (!files[i].getFileCreator().matches("[a-zA-Z0-9]*")) {
+                    System.out.println("Bad FileCreatorName");
+                    return false;
+                }
+                if (!files[i].getFileName().matches("[a-zA-Z0-9._-]*")) {
+                    System.out.println("Bad FileName");
+                    return false;
+                }
             }
         }
+        System.out.println("Passed validation");
         return true;
     }
 }

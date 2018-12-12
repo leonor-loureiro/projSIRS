@@ -203,17 +203,18 @@ public class FileSystemInterface {
             loop:
             for(int i = 0;true;i++){
                 File oldbackup = new File(fileCreator + "\\" + fileName + i + "oldv"  + ".file");
-                versionumber++;
                 if(oldbackup.exists()) {
+                    versionumber++;
                     continue;
 
                 }
                 else {
+                    versionumber--;
                     break loop;
                 }
             }
 
-            File higherVersionFile = new File(fileCreator + "\\" + fileName + versionumber + "oldv"  + ".file");
+            File higherVersionFile = new File(fileCreator + "\\" + fileName + (versionumber) + "oldv"  + ".file");
 
             FileInputStream f = new FileInputStream(higherVersionFile);
             ObjectInputStream o = new ObjectInputStream(f);
