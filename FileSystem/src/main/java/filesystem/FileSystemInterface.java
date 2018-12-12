@@ -151,8 +151,8 @@ public class FileSystemInterface {
     }
 
     /**
-     *
-     * @param file given this file, check if there is a need to create a backup
+     * Checks if a file needs to be backed up
+     * @param file to be checked
      * @return
      */
     private static Boolean checkForBackup(String file) {
@@ -187,6 +187,15 @@ public class FileSystemInterface {
         return true;
     }
 
+    /**
+     * Gets the most recent backed up version
+     * @param fileCreator name of the user
+     * @param fileName file requested
+     * @return the EncryptedFileWrapper containing the version
+     * @throws IOException
+     * @throws ClassNotFoundException
+     */
+
     public static EncryptedFileWrapper getOldVersion(String fileCreator, String fileName) throws IOException, ClassNotFoundException {
         File file = new File(fileCreator + "\\" + fileName + ".file");
         int versionNr = 0;
@@ -204,11 +213,15 @@ public class FileSystemInterface {
                     break loop;
                 }
             }
+            //delete the file
             file.delete();
+
+            //replace the current version with the previous one
             File newMainFile = new File(fileCreator + "\\" + fileName + ".file");
             File higherVersionFile = new File(fileCreator + "\\" + fileName + versionNr +"@oldv"  + ".file");
             higherVersionFile.renameTo(newMainFile);
 
+            //get the file from the filesystem to return
             FileInputStream f = new FileInputStream(newMainFile);
             ObjectInputStream o = new ObjectInputStream(f);
             EncryptedFileWrapper filetobereturned = (EncryptedFileWrapper)o.readObject();
@@ -219,6 +232,15 @@ public class FileSystemInterface {
 
     }
 
+
+    /**
+     * Share the file with user2 from user1.
+     * @param user1 origin user
+     * @param user2 destination user
+     * @param file
+     * @return a boolean returning if the operation was sucessful
+     * @throws IOException
+     */
     public static Boolean share(String user1,String user2,EncryptedFileWrapper file) throws IOException {
         System.out.println("Share file");
 
@@ -229,23 +251,29 @@ public class FileSystemInterface {
 
         Path pathuser2 = Paths.get("./" + user2);
 
-        Path fileName = Paths.get("./" + user2 + "/" + filename + ".file");
+        Path fileName = Paths.get("./" + user1 + "/" + filename + ".file");
 
 
+        //check if user1 folder exists
         if (!Files.exists(pathuser1)) {
             System.out.println("User" + " " + pathuser1 + " " + "doesnt exist");
             return false;
         }
-        if (!Files.exists(pathuser2)) {
-            System.out.println("User" + " " + pathuser2 + " " + "doesnt exist");
-            return false;
-        }
+
+        //check if file exists
         if (!Files.exists(fileName)) {
-            System.out.println("User" + " " + filename + " " + "doesnt exist");
+            System.out.println("File" + " " + filename + " " + "doesnt exist");
             return false;
         }
 
-        FileOutputStream writer = new FileOutputStream(user2 + "\\" + filename + ".file");
+        //check if user2 folders exists if not create it
+        if (!Files.exists(pathuser2)) {
+            File folder = new File("./" + user2);
+            folder.mkdirs();
+        }
+
+        //put the file in user2 folder
+        FileOutputStream writer = new FileOutputStream(user2 + "\\" + "from-" + user1 + "_" + filename + ".file");
         ObjectOutputStream outwriter = new ObjectOutputStream(writer);
         outwriter.writeObject(file);
         writer.close();
