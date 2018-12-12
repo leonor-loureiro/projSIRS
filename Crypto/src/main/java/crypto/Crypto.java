@@ -449,6 +449,7 @@ public class Crypto {
     public static byte[] decryptAES(byte[] key, byte[] cipherIVandData) throws CryptoException {
         //Extract IV
         byte iv[] = new byte[16];
+
         System.arraycopy(cipherIVandData, 0, iv, 0, iv.length);
         IvParameterSpec ivParam = new IvParameterSpec(iv);
 

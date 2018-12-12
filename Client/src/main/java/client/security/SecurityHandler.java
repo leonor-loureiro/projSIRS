@@ -174,13 +174,12 @@ public interface SecurityHandler {
      * @param files
      * @return encrypted files
      */
-    static List<EncryptedFileWrapper> encryptFileWrappers(List<FileWrapper> files){
+    static List<EncryptedFileWrapper> encryptFileWrappers(List<FileWrapper> files, PublicKey publicKey){
 
         List<EncryptedFileWrapper> encryptedFiles = new ArrayList<>();
 
-        //TODO: descomentar
         for(FileWrapper file : files){
-            //encryptedFiles.add(encryptFileWrapper(file));
+            encryptedFiles.add(encryptFileWrapper(file, publicKey));
         }
         return encryptedFiles;
     }
