@@ -181,7 +181,7 @@ public interface UserInterface {
                     break;
             }
         } catch (IllegalArgumentException e) {
-            e.printStackTrace();
+            //e.printStackTrace();
             System.out.println("Unknown Command!");
         } catch (BadArgument | TokenInvalid e) {
             //e.printStackTrace();
