@@ -586,8 +586,6 @@ public class Crypto {
      */
     public static boolean validateMAC(byte[] key, byte[] message, String mac, String alg){
 
-
-
         String computedMac = null;
         try {
             computedMac = computeMAC(key, message, alg);
