@@ -8,8 +8,6 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.io.IOException;
-import java.sql.SQLOutput;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/operations")
@@ -32,6 +30,10 @@ public class FileSystemController {
         if(!FileSystemInterface.validateToken(fMsg.getUserName(), fMsg.getToken()))
             return new ResponseEntity<FileSystemMessage>(HttpStatus.PRECONDITION_FAILED);
 
+        EncryptedFileWrapper[] list = FileSystemInterface.download(fMsg.getUserName());
+
+        if(list == null)
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         message.setFiles(FileSystemInterface.download(fMsg.getUserName()));
         return new ResponseEntity<FileSystemMessage>(message, HttpStatus.OK);
     }
@@ -50,7 +52,7 @@ public class FileSystemController {
         if(!FileSystemInterface.validateToken(fMsg.getUserName(), fMsg.getToken()))
             return new ResponseEntity(HttpStatus.PRECONDITION_FAILED);
 
-        FileSystemInterface.upload(fMsg.getFiles());
+        FileSystemInterface.upload(fMsg.getFiles(),fMsg.getUserName());
 
         return new ResponseEntity(HttpStatus.OK);
     }
@@ -93,7 +95,7 @@ public class FileSystemController {
         FileSystemMessage message = new FileSystemMessage();
 
 
-        message.setFiles(new EncryptedFileWrapper[]{ FileSystemInterface.getOldVersion(fMsg.getUserName(),fMsg.getBackUpFileName(),fMsg.getCorrupted())});
+        message.setFiles(new EncryptedFileWrapper[]{ FileSystemInterface.getOldVersion(fMsg.getUserName(),fMsg.getBackUpFileName())});
         if(message.getFiles()[0] == null)
             return new ResponseEntity(HttpStatus.CONFLICT);
         message.setUserName(fMsg.getUserName());
@@ -115,7 +117,7 @@ public class FileSystemController {
             }
         }
         if(fMsg.getBackUpFileName()!=null){
-            if(!fMsg.getBackUpFileName().matches("[a-zA-Z0-9[.]_-]*"))
+            if(!fMsg.getBackUpFileName().matches("[a-zA-Z0-9._-]*"))
                 System.out.println("Bad filename for backup");
                 return false;
         }

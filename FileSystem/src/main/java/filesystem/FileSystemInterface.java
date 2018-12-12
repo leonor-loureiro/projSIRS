@@ -11,7 +11,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.PublicKey;
 import java.util.ArrayList;
-import java.util.Map;
 
 public class FileSystemInterface {
 
@@ -34,6 +33,14 @@ public class FileSystemInterface {
         return TokenManager.validateJTW(token, "authServer", username, key);
     }
 
+    /**
+     * Gets all files from the user
+     * @param name Name of the user
+     * @return a list of encrypted files
+     * @throws IOException
+     * @throws ClassNotFoundException
+     */
+
     public static EncryptedFileWrapper[] download(String name) throws IOException, ClassNotFoundException {
         System.out.println("Downloading files");
 
@@ -41,25 +48,31 @@ public class FileSystemInterface {
         System.out.println(name);
         Path path = Paths.get("./" + name);
 
-        if(!Files.exists(path)){
-            System.out.println(name + " " + "not registered");
-
-        }
-
-
         File folder = new File(path.toString());
 
+        //check if folder exists
+        if(!folder.exists())
+            return null;
+
+        //get all the files in the folder
         File[] listOfFiles = folder.listFiles();
 
         ArrayList<EncryptedFileWrapper> files = new ArrayList<EncryptedFileWrapper>();
 
         for(int i = 0; i<listOfFiles.length; i++){
-            if(listOfFiles[i].getName().endsWith("oldv.file"));
+            //check if the file we want to download is an old version
+            if(listOfFiles[i].getName().endsWith("oldv.file")){
+                continue;
+            }
             System.out.println("Adding file " + " " + listOfFiles[i].getName() + " " + "to be downloaded");
+
+            //get the file from the system
             FileInputStream f = new FileInputStream(listOfFiles[i]);
             ObjectInputStream o = new ObjectInputStream(f);
             EncryptedFileWrapper file = (EncryptedFileWrapper)o.readObject();
             files.add(file);
+            f.close();
+            o.close();
         }
 
         EncryptedFileWrapper[] vectorEnc;
@@ -67,6 +80,7 @@ public class FileSystemInterface {
         vectorEnc = new EncryptedFileWrapper[files.size()];
 
 
+        //build a vector of encryptedfilewrappers to return
         for(int i =0;i<files.size();i++){
             vectorEnc[i] = files.get(i);
         }
@@ -77,19 +91,28 @@ public class FileSystemInterface {
 
     }
 
-    public static void upload(EncryptedFileWrapper[] files) throws IOException {
+    /**
+     * Receives files from clients and stores them in the filesystem
+     * @param files list of encryptedfilewrappers to store
+     * @param username name of the user
+     * @throws IOException
+     */
+    public static void upload(EncryptedFileWrapper[] files,String username) throws IOException {
 
         System.out.println("uploading");
 
 
-        String fileCreator = files[0].getFileCreator();
+        //get the name of the user
+        String fileCreator = username;
 
 
 
+        // get the path to his folder
         Path path = Paths.get("./" + fileCreator);
 
 
 
+        // if the folder doesnt exist create it (first upload)
         if (!Files.exists(path)) {
 
             System.out.println(fileCreator + " " + "doesnt exist ");
@@ -108,10 +131,15 @@ public class FileSystemInterface {
 
             System.out.println("Uploading file:" + " " + files[i].getFileName());
             String fileName  = files[i].getFileName();
+
+            //check if there is a need to create a backup
             System.out.println("Was there need to backup the file:" + " " + checkForBackup(fileCreator + "\\" + fileName));
+
+            //build the file in the system
             FileOutputStream writer = new FileOutputStream(fileCreator + "\\" + fileName + ".file");
             ObjectOutputStream outwriter = new ObjectOutputStream(writer );
             outwriter.writeObject(files[i]);
+            writer.close();
             outwriter.close();
 
         }
@@ -122,14 +150,21 @@ public class FileSystemInterface {
 
     }
 
+    /**
+     *
+     * @param file given this file, check if there is a need to create a backup
+     * @return
+     */
     private static Boolean checkForBackup(String file) {
         File f = new File(file + ".file");
         int versionumber = 0;
         loop:
+        //if the file already exists and isnt a directory
         if(f.exists() && !f.isDirectory()) {
             for(int i = 0;true;i++){
                 File oldbackup = new File(file + i + "oldv" + ".file");
                 System.out.println(oldbackup.getAbsolutePath());
+                //If a backup already exists we increment the number of the version
                 if(oldbackup.exists()) {
                     System.out.println("Version" + " " + versionumber + " " + "alreadyexists" + "of file " + " " + file);
                     versionumber++;
@@ -137,42 +172,48 @@ public class FileSystemInterface {
 
                 }
                 else {
+                    //when we already now the number of the version stop the cycle
                     break loop;
                 }
             }
         }
         else
             return false;
+
+        //rename the old file, to the newest version
         File newfile  = new File(file + (versionumber++) + "oldv"  + ".file");
+        System.out.println(newfile.getAbsolutePath());
         f.renameTo(newfile);
         return true;
     }
 
-    public static EncryptedFileWrapper getOldVersion(String fileCreator,String fileName,Boolean corrupted) throws IOException, ClassNotFoundException {
+    public static EncryptedFileWrapper getOldVersion(String fileCreator, String fileName) throws IOException, ClassNotFoundException {
         File file = new File(fileCreator + "\\" + fileName + ".file");
-        int versionumber = 0;
+        int versionNr = 0;
             file.delete();
             loop:
             for (int i = 0; true; i++) {
                 File oldbackup = new File(fileCreator + "\\" + fileName + i + "oldv" + ".file");
                 if (oldbackup.exists()) {
-                    versionumber++;
+                    versionNr++;
                     continue;
 
                 } else {
                     if(i==0)
                         return null;
-                    versionumber--;
+                    versionNr--;
                     break loop;
                 }
             }
             File newMainFile = new File(fileCreator + "\\" + fileName + ".file");
-            File higherVersionFile = new File(fileCreator + "\\" + fileName +  versionumber +"oldv"  + ".file");
+            File higherVersionFile = new File(fileCreator + "\\" + fileName + versionNr +"oldv"  + ".file");
             higherVersionFile.renameTo(newMainFile);
 
             FileInputStream f = new FileInputStream(newMainFile);
             ObjectInputStream o = new ObjectInputStream(f);
             EncryptedFileWrapper filetobereturned = (EncryptedFileWrapper)o.readObject();
+            f.close();
+            o.close();
             return filetobereturned;
 
 
@@ -207,6 +248,7 @@ public class FileSystemInterface {
         FileOutputStream writer = new FileOutputStream(user2 + "\\" + filename + ".file");
         ObjectOutputStream outwriter = new ObjectOutputStream(writer);
         outwriter.writeObject(file);
+        writer.close();
         outwriter.close();
         return true;
 
