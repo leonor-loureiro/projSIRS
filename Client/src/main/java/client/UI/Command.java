@@ -9,7 +9,7 @@ public enum Command {
     add,
     share,
     list,
-    getBackup,
     help,
+    getbackup,
     exit
 }
