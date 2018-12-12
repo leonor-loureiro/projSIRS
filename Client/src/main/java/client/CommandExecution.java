@@ -13,8 +13,12 @@ import crypto.KeystoreManager;
 import crypto.Crypto;
 import crypto.exception.CryptoException;
 
+import javax.crypto.SecretKey;
 import java.io.IOException;
 import java.security.*;
+import java.security.cert.CertificateException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class CommandExecution {
@@ -30,11 +34,29 @@ public class CommandExecution {
      */
     private Communication communication = new Communication();
 
-    private void setUser(User user) {this.user = user; }
+    public void setUser(User user) {this.user = user; }
 
     public void login(Login login) throws BadArgument, InvalidUser {
         setUser(new User(login.getUsername(), login.getPassword()));
-        communication.login(user);
+
+        // Tries to login at auth server
+        if(!communication.login(user))
+            return;
+
+        // Extract public key
+        PublicKey publicKey = null;
+        PrivateKey privateKey = null;
+        try {
+            publicKey = KeystoreManager.getPublicKey(getKeystoreFileName(user.getUsername()),
+                    user.getUsername() + "-certificate", user.getPassword());
+            privateKey = (PrivateKey) KeystoreManager.getPrivateKey(getKeystoreFileName(user.getUsername()),
+                    user.getUsername() + "-privateKey", user.getPassword());
+        } catch (IOException | KeyStoreException | CertificateException | NoSuchAlgorithmException | UnrecoverableKeyException e) {
+            e.printStackTrace();
+        }
+
+        user.setPublicKey(publicKey);
+        user.setPrivateKey(privateKey);
     }
 
 
@@ -69,7 +91,7 @@ public class CommandExecution {
 
         try {
             KeystoreManager.CreateAndStoreCertificate(keyPair,
-                    "./" + login.getUsername() + "keys" + ".jceks",
+                    getKeystoreFileName(login.getUsername()),
                     user.getUsername(),
                     pwdArray);
 
@@ -81,11 +103,15 @@ public class CommandExecution {
         return true;
     }
 
+    private String getKeystoreFileName(String username) {
+        return "./" + username + "keys" + ".jceks";
+    }
+
     /**
      * adds a file to staging file Lists, allowing it to be pushed
      * @param filename name of the file to be staged
      */
-    public void add(String filename){
+    public void add(String filename) throws BadArgument {
 
         if(user == null){
             System.out.println("User must be logged for this operation!!");
@@ -106,15 +132,79 @@ public class CommandExecution {
 
     }
 
-    private FileWrapper getFileWrapper(String filename) {
+    /**
+     * Gets file and generates a file wrapper by filename
+     * @param filename file's name
+     * @return file wrapper
+     */
+    public FileWrapper getFileWrapper(String filename) throws BadArgument {
         FileWrapper file = null;
         try {
+            // Reading File
             file = FileManager.loadFile(filename, user.getUsername());
+
+            if(file == null)
+                throw new BadArgument("No such file: " + filename);
+
+            // Get file's key (if it exists)
+            if (storeFileKey(filename, file)) return null;
+
         } catch (IOException e) {
-            System.out.println("Unable to read file. Wrong filename or no permission.");
             e.printStackTrace();
+            System.out.println("Unable to read file. Wrong filename or no permission.");
         }
         return file;
+    }
+
+    /**
+     * Verifies if file Key is in KeyStore, if not, adds it
+     * @param filename the file's name
+     * @param file the file's wrapper
+     * @return true if successfully stored
+     */
+    private boolean storeFileKey(String filename, FileWrapper file){
+        try{
+            SecretKey key  = KeystoreManager.getSecretKey(getKeystoreFileName(user.getUsername()), filename, user.getPassword());
+
+            // If key doesn't exist, generate it
+            if(key == null){
+                System.out.println("Generating File Key...");
+
+                if(file.getFileKey() == null)
+                    key = Crypto.generateSecretKey();
+
+                else
+                    key = Crypto.extractSecretKey(file.getFileKey());
+
+                KeystoreManager.StoreSecretKey(key, getKeystoreFileName(user.getUsername()), filename, user.getPassword());
+            }
+
+            if(file == null || key == null)
+                return true;
+
+            file.setFileKey(key.getEncoded());
+
+        } catch (CryptoException | CertificateException | UnrecoverableKeyException | KeyStoreException | NoSuchAlgorithmException | IOException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    /**
+     * Stores files and their keys
+     * @param fw file wrapper to be stored
+     */
+    public void saveFileWrappers(List<FileWrapper> fw)  {
+
+        for(FileWrapper f : fw){
+            storeFileKey(f.getFileName(), f);
+            try {
+                FileManager.saveFile(f);
+            } catch (IOException e) {
+                System.out.println("Unable to save file: " + f.getFileName());
+            }
+        }
+
     }
 
     /**
@@ -127,15 +217,11 @@ public class CommandExecution {
             return;
         }
 
-        List<FileWrapper> files = communication.getFiles(user);
+        List<FileWrapper> files = SecurityHandler.decryptFileWrappers(Arrays.asList(communication.getFiles(user)), user.getPrivateKey());
 
         user.removeFilesFromStaged(files);
-        try {
-            FileManager.saveFiles(files);
-        } catch (IOException e) {
-            System.out.println("Unable to save pulled files");
-            e.printStackTrace();
-        }
+
+        saveFileWrappers(files);
 
     }
 
@@ -146,6 +232,11 @@ public class CommandExecution {
         System.out.println("Pushing Files to remote ...");
         if(user == null){
             System.out.println("User must be logged for this operation!!");
+            return;
+        }
+
+        if(user.getStagedFiles().size() == 0){
+            System.out.println("No files staged");
             return;
         }
 
@@ -215,7 +306,20 @@ public class CommandExecution {
      */
     public void getBackup(String fileName) {
 
-        FileWrapper files = communication.getBackup(user, fileName);
+
+        System.out.println(user.getUsername());
+        System.out.println(fileName);
+        EncryptedFileWrapper[] file = communication.getOldVersion(user, fileName);
+
+        List<FileWrapper> files = SecurityHandler.decryptFileWrappers(Arrays.asList(file), user.getPrivateKey());
+
+        saveFileWrappers(files);
+
+
+
+    }
+
+    public void getBackupCorrupted(String fileName){
 
     }
 

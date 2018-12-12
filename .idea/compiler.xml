@@ -12,6 +12,13 @@
         <module name="FileSystem" />
       </profile>
     </annotationProcessing>
+    <bytecodeTargetLevel>
+      <module name="AuthServer" target="1.8" />
+      <module name="Client" target="1.8" />
+      <module name="Crypto" target="7" />
+      <module name="FileSystem" target="1.8" />
+      <module name="projSIRS" target="1.5" />
+    </bytecodeTargetLevel>
   </component>
   <component name="JavacSettings">
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">

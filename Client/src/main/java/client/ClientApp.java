@@ -3,6 +3,7 @@ package client;
 import client.UI.UserInterface;
 import client.security.Login;
 
+import crypto.Crypto;
 import org.apache.http.client.HttpClient;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.impl.client.HttpClients;
@@ -23,6 +24,7 @@ public class ClientApp {
 
 
     public static void main(String[] args) throws Exception {
+        Crypto.init();
         Login login;
         boolean running = true;
 

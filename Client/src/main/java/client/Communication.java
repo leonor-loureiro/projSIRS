@@ -6,7 +6,6 @@ import client.exception.TokenInvalid;
 import client.exception.UserAlreadyExists;
 import client.localFileHandler.FileWrapper;
 import client.security.EncryptedFileWrapper;
-import client.security.SecurityHandler;
 
 import crypto.Crypto;
 import crypto.exception.CryptoException;
@@ -123,13 +122,13 @@ public class Communication {
 
     }
 
-    public List<FileWrapper> getFiles(User user){
+    public EncryptedFileWrapper[] getFiles(User user){
         RestTemplate restTemplate = restTemplate();
 
         //make the object
         FileSystemMessage obj = new FileSystemMessage();
 
-        obj.setName(user.getUsername());
+        obj.setUserName(user.getUsername());
 
         //set headers
         HttpHeaders headers = new HttpHeaders();
@@ -145,11 +144,12 @@ public class Communication {
 
         EncryptedFileWrapper[] files = out.getBody().getFiles();
 
+        System.out.println("Downloaded files:");
         for (EncryptedFileWrapper file : files) {
-            System.out.println("got this file " + file.getFileName());
+            System.out.println("- " + file.getFileName());
         }
 
-        return SecurityHandler.decryptFileWrappers(Arrays.asList(files));
+        return files;
     }
 
     public PublicKey getUserKey(String username1, String username2) throws CryptoException, BadArgument, TokenInvalid {
@@ -220,9 +220,51 @@ public class Communication {
     }
 
     public void shareFile(User user, EncryptedFileWrapper file, String destUser){
-        //TODO: share file
+        RestTemplate restTemp = restTemplate();
+
+        FileSystemMessage message = new FileSystemMessage();
+
+        message.setUserName(user.getUsername());
+
+        message.setUserToShareWith(destUser);
+
+        message.setFiles(new EncryptedFileWrapper[]{ file });
+        restTemp.postForObject(serverUrl+"/share", message,  ResponseEntity.class);
     }
 
+    public EncryptedFileWrapper[] getOldVersion(User user,String filename){
+        RestTemplate restTemp = restTemplate();
+
+        FileSystemMessage message = new FileSystemMessage();
+
+        message.setUserName(user.getUsername());
+
+        message.setFileName(filename);
+
+        System.out.println(user.getUsername());
+
+        System.out.println(filename);
+
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+
+        //set entity to send
+        HttpEntity entity = new HttpEntity(message,headers);
+
+        // send
+        ResponseEntity<FileSystemMessage> out = restTemp.exchange(serverUrl+"/getoldversion",HttpMethod.POST, entity
+                , FileSystemMessage.class);
+
+        EncryptedFileWrapper[] files = out.getBody().getFiles();
+
+        for (EncryptedFileWrapper file : files) {
+            System.out.println("got this file " + file.getFileName());
+        }
+
+        return files;
+
+    }
     /**
      * Generates a rest template for https
      * @return https rest template

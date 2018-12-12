@@ -26,7 +26,6 @@ public interface FileManager {
             dest.createNewFile();
         }
 
-        System.out.println(Arrays.toString(file.getFile()));
         try (FileOutputStream stream = new FileOutputStream(dest)) {
             stream.write(file.getFile());
         }
@@ -34,16 +33,6 @@ public interface FileManager {
         // Store the key
     }
 
-    /**
-     * Stores locally all the files given in the list
-     * @param files list of files to be saved
-     * @throws IOException if it was impossible to write any of the files
-     */
-    static void saveFiles(List<FileWrapper> files) throws IOException {
-        for(FileWrapper file : files){
-            saveFile(file);
-        }
-    }
 
     /**
      * loads a local file with a given name (should include extension)
@@ -64,9 +53,6 @@ public interface FileManager {
                     temp.setFile(Files.readAllBytes(file.toPath()));
                     temp.setFileName(file.getName());
                     temp.setFileCreator(username);
-
-                    //TODO: get FileKey if it's stored
-
                     return temp;
                 }
             }
