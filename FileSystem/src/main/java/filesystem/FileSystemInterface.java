@@ -61,7 +61,7 @@ public class FileSystemInterface {
 
         for(int i = 0; i<listOfFiles.length; i++){
             //check if the file we want to download is an old version
-            if(listOfFiles[i].getName().endsWith("oldv.file")){
+            if(listOfFiles[i].getName().endsWith("@oldv.file")){
                 continue;
             }
             System.out.println("Adding file " + " " + listOfFiles[i].getName() + " " + "to be downloaded");
@@ -162,7 +162,7 @@ public class FileSystemInterface {
         //if the file already exists and isnt a directory
         if(f.exists() && !f.isDirectory()) {
             for(int i = 0;true;i++){
-                File oldbackup = new File(file + i + "oldv" + ".file");
+                File oldbackup = new File(file + i + "@oldv" + ".file");
                 System.out.println(oldbackup.getAbsolutePath());
                 //If a backup already exists we increment the number of the version
                 if(oldbackup.exists()) {
@@ -181,7 +181,7 @@ public class FileSystemInterface {
             return false;
 
         //rename the old file, to the newest version
-        File newfile  = new File(file + (versionumber++) + "oldv"  + ".file");
+        File newfile  = new File(file + (versionumber++) + "@oldv"  + ".file");
         System.out.println(newfile.getAbsolutePath());
         f.renameTo(newfile);
         return true;
@@ -190,10 +190,9 @@ public class FileSystemInterface {
     public static EncryptedFileWrapper getOldVersion(String fileCreator, String fileName) throws IOException, ClassNotFoundException {
         File file = new File(fileCreator + "\\" + fileName + ".file");
         int versionNr = 0;
-            file.delete();
             loop:
             for (int i = 0; true; i++) {
-                File oldbackup = new File(fileCreator + "\\" + fileName + i + "oldv" + ".file");
+                File oldbackup = new File(fileCreator + "\\" + fileName + i + "@oldv" + ".file");
                 if (oldbackup.exists()) {
                     versionNr++;
                     continue;
@@ -205,8 +204,9 @@ public class FileSystemInterface {
                     break loop;
                 }
             }
+            file.delete();
             File newMainFile = new File(fileCreator + "\\" + fileName + ".file");
-            File higherVersionFile = new File(fileCreator + "\\" + fileName + versionNr +"oldv"  + ".file");
+            File higherVersionFile = new File(fileCreator + "\\" + fileName + versionNr +"@oldv"  + ".file");
             higherVersionFile.renameTo(newMainFile);
 
             FileInputStream f = new FileInputStream(newMainFile);
@@ -229,23 +229,23 @@ public class FileSystemInterface {
 
         Path pathuser2 = Paths.get("./" + user2);
 
-        Path fileName = Paths.get("./" + user2 + "/" + filename + ".file");
+        Path fileName = Paths.get("./" + user1 + "/" + filename + ".file");
 
 
         if (!Files.exists(pathuser1)) {
             System.out.println("User" + " " + pathuser1 + " " + "doesnt exist");
             return false;
         }
-        if (!Files.exists(pathuser2)) {
-            System.out.println("User" + " " + pathuser2 + " " + "doesnt exist");
+        if (!Files.exists(fileName)) {
+            System.out.println("File" + " " + filename + " " + "doesnt exist");
             return false;
         }
-        if (!Files.exists(fileName)) {
-            System.out.println("User" + " " + filename + " " + "doesnt exist");
-            return false;
+        if (!Files.exists(pathuser2)) {
+            File folder = new File("./" + user2);
+            folder.mkdirs();
         }
 
-        FileOutputStream writer = new FileOutputStream(user2 + "\\" + filename + ".file");
+        FileOutputStream writer = new FileOutputStream(user2 + "\\" + "from-" + user1 + "_" + filename + ".file");
         ObjectOutputStream outwriter = new ObjectOutputStream(writer);
         outwriter.writeObject(file);
         writer.close();

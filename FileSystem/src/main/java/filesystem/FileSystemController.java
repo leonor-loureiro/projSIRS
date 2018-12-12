@@ -106,6 +106,7 @@ public class FileSystemController {
 
 
     public Boolean checkInput(FileSystemMessage fMsg){
+        System.out.println("Started Validation");
         if (fMsg.getUserName()!= null ) {
             if(!fMsg.getUserName().matches("[a-zA-Z0-9]*")) {
                 System.out.println("Bad username");

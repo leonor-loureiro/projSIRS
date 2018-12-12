@@ -62,7 +62,7 @@ public class FileSystemInterfaceTests {
         FileSystemInterface.upload(encFiles, CREATOR);
 
 
-        Path userFile = Paths.get(CREATOR + "\\" + FILENAME + 0 + "oldv" + ".file" );
+        Path userFile = Paths.get(CREATOR + "\\" + FILENAME + 0 + "@oldv" + ".file" );
         Assert.assertTrue(Files.exists(userFile));
     }
 
@@ -79,8 +79,8 @@ public class FileSystemInterfaceTests {
 
 
         Assert.assertTrue(Files.exists(Paths.get(CREATOR + "\\" + FILENAME + ".file" )));
-        Assert.assertTrue(Files.exists(Paths.get(CREATOR + "\\" + FILENAME + 0 + "oldv" + ".file" )));
-        Assert.assertTrue(Files.exists(Paths.get(CREATOR + "\\" + FILENAME + 1 + "oldv" + ".file" )));
+        Assert.assertTrue(Files.exists(Paths.get(CREATOR + "\\" + FILENAME + 0 + "@oldv" + ".file" )));
+        Assert.assertTrue(Files.exists(Paths.get(CREATOR + "\\" + FILENAME + 1 + "@oldv" + ".file" )));
 
 
     }
@@ -100,9 +100,9 @@ public class FileSystemInterfaceTests {
 
 
         Assert.assertTrue(Files.exists(Paths.get(CREATOR + "\\" + FILENAME + ".file" )));
-        Assert.assertTrue(Files.exists(Paths.get(CREATOR + "\\" + FILENAME + 0 + "oldv" + ".file" )));
-        Assert.assertTrue(Files.exists(Paths.get(CREATOR + "\\" + FILENAME + 1 + "oldv" + ".file" )));
-        Assert.assertTrue(Files.exists(Paths.get(CREATOR + "\\" + FILENAME + 2 + "oldv" + ".file" )));
+        Assert.assertTrue(Files.exists(Paths.get(CREATOR + "\\" + FILENAME + 0 + "@oldv" + ".file" )));
+        Assert.assertTrue(Files.exists(Paths.get(CREATOR + "\\" + FILENAME + 1 + "@oldv" + ".file" )));
+        Assert.assertTrue(Files.exists(Paths.get(CREATOR + "\\" + FILENAME + 2 + "@oldv" + ".file" )));
 
     }
 
@@ -136,7 +136,7 @@ public class FileSystemInterfaceTests {
         FileSystemInterface.upload(encFiles, CREATOR);           // backup
 
         Assert.assertTrue(Files.exists(Paths.get(CREATOR + "\\" + FILENAME + ".file" )));
-        Assert.assertTrue(Files.exists(Paths.get(CREATOR + "\\" + FILENAME + 0 + "oldv" + ".file" )));
+        Assert.assertTrue(Files.exists(Paths.get(CREATOR + "\\" + FILENAME + 0 + "@oldv" + ".file" )));
 
 
     }
@@ -160,6 +160,11 @@ public class FileSystemInterfaceTests {
         Assert.assertFalse(Files.exists(Paths.get("./" + CREATOR)));
         //Check if the file exists
         Assert.assertFalse(Files.exists(Paths.get(CREATOR + "\\" + FILENAME + ".file" )));
+
+        //Clean up
+        File index = new File("./" + diffCreator);
+        if(index.exists())
+            FileUtils.deleteDirectory(index);
     }
 
     /**
@@ -185,22 +190,108 @@ public class FileSystemInterfaceTests {
 
         //Check if the file is replaced by the old version
         Assert.assertTrue(Files.exists(Paths.get(CREATOR + "\\" + FILENAME + ".file" )));
-        Assert.assertFalse(Files.exists(Paths.get(CREATOR + "\\" + FILENAME + 0 + "oldv" + ".file" )));
+        Assert.assertFalse(Files.exists(Paths.get(CREATOR + "\\" + FILENAME + 0 + "@oldv" + ".file" )));
     }
 
+    /**
+     * Try to get an old version, when there is no backup
+     * @throws IOException
+     * @throws ClassNotFoundException
+     */
     @Test
     public void getOldVersionWithoutBackups() throws IOException, ClassNotFoundException {
         EncryptedFileWrapper[] encFiles = {encFile};
         FileSystemInterface.upload(encFiles, CREATOR);
 
-        Assert.assertFalse(Files.exists(Paths.get(CREATOR + "\\" + FILENAME + 0 + "oldv" + ".file" )));
+        Assert.assertFalse(Files.exists(Paths.get(CREATOR + "\\" + FILENAME + 0 + "@oldv" + ".file" )));
         Assert.assertTrue(FileSystemInterface.getOldVersion(CREATOR, FILENAME) == null);
+
+        Assert.assertTrue(Files.exists(Paths.get(CREATOR + "\\" + FILENAME + ".file" )));
+    }
+
+    /**
+     * Shares a file with a user that doesn't have any files yet
+     * @throws IOException
+     */
+    @Test
+    public void successfulShare() throws IOException {
+        EncryptedFileWrapper[] encFiles = {encFile};
+        FileSystemInterface.upload(encFiles, CREATOR);
+
+        String user2 = "user2";
+        FileSystemInterface.share(CREATOR, user2, encFile);
+
+        //Check if the folder exists
+        Assert.assertTrue(Files.exists(Paths.get("./" + user2)));
+        //Check if the file exists
+        Assert.assertTrue(Files.exists(Paths.get(user2 + "\\" + "from-" + CREATOR + "_" + FILENAME + ".file" )));
+
+        //Clean up
+        File index = new File("./" + user2);
+        if(index.exists())
+            FileUtils.deleteDirectory(index);
+
+    }
+
+    /**
+     * Shares a file with a user that already has files
+     * @throws IOException
+     */
+    @Test
+    public void successfulShare2() throws IOException {
+        EncryptedFileWrapper[] encFiles = {encFile};
+        FileSystemInterface.upload(encFiles, CREATOR);
+
+        String user2 = "user2";
+        encFile.setFileName("fileName2.txt");
+        FileSystemInterface.upload(encFiles, user2);
+
+        encFile.setFileName(FILENAME);
+        FileSystemInterface.share(CREATOR, user2, encFile);
+
+        //Check if the folder exists
+        Assert.assertTrue(Files.exists(Paths.get("./" + user2)));
+        //Check if the file exists
+        Assert.assertTrue(Files.exists(Paths.get(user2 + "\\" + "from-" + CREATOR + "_" + FILENAME + ".file" )));
+
+        //Clean up
+        File index = new File("./" + user2);
+        if(index.exists())
+            FileUtils.deleteDirectory(index);
+
+    }
+
+    /**
+     * Share a file with a user that already has a file with the same name
+     * @throws IOException
+     */
+    @Test
+    public void successfulShare3() throws IOException {
+        EncryptedFileWrapper[] encFiles = {encFile};
+        FileSystemInterface.upload(encFiles, CREATOR);
+        String user2 = "user2";
+        FileSystemInterface.upload(encFiles, user2);
+        FileSystemInterface.share(CREATOR, user2, encFile);
+
+        //Check if the folder exists
+        Assert.assertTrue(Files.exists(Paths.get("./" + user2)));
+        //Check if the file exists
+        Assert.assertTrue(Files.exists(Paths.get(user2 + "\\" + FILENAME + ".file" )));
+
+        //Check if the file exists
+        Assert.assertTrue(Files.exists(Paths.get(user2 + "\\" + "from-" + CREATOR + "_" + FILENAME + ".file" )));
+
+        //Clean up
+        File index = new File("./" + user2);
+        if(index.exists())
+            FileUtils.deleteDirectory(index);
+
     }
 
 
     @After
     public void cleanUp() throws IOException {
-        File index = new File("./" + CREATOR);
+       File index = new File("./" + CREATOR);
         if(index.exists())
             FileUtils.deleteDirectory(index);
     }

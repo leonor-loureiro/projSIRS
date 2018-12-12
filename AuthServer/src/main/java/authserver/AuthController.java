@@ -17,11 +17,11 @@ public class AuthController {
 
     private AuthService authService = AuthService.getInstance();
 
-    @RequestMapping(value = "/test")
-    public String test(){
-        return "works";
-    }
-
+    /**
+     * Maps a login request from an user
+     * @param credentials username and password of the user
+     * @return authentication token
+     */
     @RequestMapping(value = "/login")
     public ResponseEntity<String> login(@RequestBody Map<String, String> credentials) {
 
@@ -47,6 +47,11 @@ public class AuthController {
         return new ResponseEntity<String>(jwtToken, HttpStatus.OK);
     }
 
+    /**
+     * Maps a register request from an user
+     * @param credentials username, password and public key of the user
+     * @return authentication token
+     */
     @RequestMapping(value = "/register")
     public ResponseEntity<String> register(@RequestBody Map<String, String> credentials) {
 
@@ -76,6 +81,11 @@ public class AuthController {
         return new ResponseEntity<String>(jwtToken, HttpStatus.OK);
     }
 
+    /**
+     * Maps a public key request from an user
+     * @param params username1 (sharer of the file), username2 (destination of the file), token
+     * @return public key of username2
+     */
     @RequestMapping(value = "/getPublicKey")
     public ResponseEntity<String> getPublicKey(@RequestBody Map<String, String> params) {
         String username1 = params.get("username1");
