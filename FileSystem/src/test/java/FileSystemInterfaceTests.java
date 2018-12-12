@@ -62,7 +62,7 @@ public class FileSystemInterfaceTests {
         FileSystemInterface.upload(encFiles, CREATOR);
 
 
-        Path userFile = Paths.get(CREATOR + "\\" + FILENAME + 0 + "oldv" + ".file" );
+        Path userFile = Paths.get(CREATOR + "\\" + FILENAME + 0 + "@oldv" + ".file" );
         Assert.assertTrue(Files.exists(userFile));
     }
 
@@ -79,8 +79,8 @@ public class FileSystemInterfaceTests {
 
 
         Assert.assertTrue(Files.exists(Paths.get(CREATOR + "\\" + FILENAME + ".file" )));
-        Assert.assertTrue(Files.exists(Paths.get(CREATOR + "\\" + FILENAME + 0 + "oldv" + ".file" )));
-        Assert.assertTrue(Files.exists(Paths.get(CREATOR + "\\" + FILENAME + 1 + "oldv" + ".file" )));
+        Assert.assertTrue(Files.exists(Paths.get(CREATOR + "\\" + FILENAME + 0 + "@oldv" + ".file" )));
+        Assert.assertTrue(Files.exists(Paths.get(CREATOR + "\\" + FILENAME + 1 + "@oldv" + ".file" )));
 
 
     }
@@ -100,9 +100,9 @@ public class FileSystemInterfaceTests {
 
 
         Assert.assertTrue(Files.exists(Paths.get(CREATOR + "\\" + FILENAME + ".file" )));
-        Assert.assertTrue(Files.exists(Paths.get(CREATOR + "\\" + FILENAME + 0 + "oldv" + ".file" )));
-        Assert.assertTrue(Files.exists(Paths.get(CREATOR + "\\" + FILENAME + 1 + "oldv" + ".file" )));
-        Assert.assertTrue(Files.exists(Paths.get(CREATOR + "\\" + FILENAME + 2 + "oldv" + ".file" )));
+        Assert.assertTrue(Files.exists(Paths.get(CREATOR + "\\" + FILENAME + 0 + "@oldv" + ".file" )));
+        Assert.assertTrue(Files.exists(Paths.get(CREATOR + "\\" + FILENAME + 1 + "@oldv" + ".file" )));
+        Assert.assertTrue(Files.exists(Paths.get(CREATOR + "\\" + FILENAME + 2 + "@oldv" + ".file" )));
 
     }
 
@@ -136,7 +136,7 @@ public class FileSystemInterfaceTests {
         FileSystemInterface.upload(encFiles, CREATOR);           // backup
 
         Assert.assertTrue(Files.exists(Paths.get(CREATOR + "\\" + FILENAME + ".file" )));
-        Assert.assertTrue(Files.exists(Paths.get(CREATOR + "\\" + FILENAME + 0 + "oldv" + ".file" )));
+        Assert.assertTrue(Files.exists(Paths.get(CREATOR + "\\" + FILENAME + 0 + "@oldv" + ".file" )));
 
 
     }
@@ -190,7 +190,7 @@ public class FileSystemInterfaceTests {
 
         //Check if the file is replaced by the old version
         Assert.assertTrue(Files.exists(Paths.get(CREATOR + "\\" + FILENAME + ".file" )));
-        Assert.assertFalse(Files.exists(Paths.get(CREATOR + "\\" + FILENAME + 0 + "oldv" + ".file" )));
+        Assert.assertFalse(Files.exists(Paths.get(CREATOR + "\\" + FILENAME + 0 + "@oldv" + ".file" )));
     }
 
     /**
@@ -203,7 +203,7 @@ public class FileSystemInterfaceTests {
         EncryptedFileWrapper[] encFiles = {encFile};
         FileSystemInterface.upload(encFiles, CREATOR);
 
-        Assert.assertFalse(Files.exists(Paths.get(CREATOR + "\\" + FILENAME + 0 + "oldv" + ".file" )));
+        Assert.assertFalse(Files.exists(Paths.get(CREATOR + "\\" + FILENAME + 0 + "@oldv" + ".file" )));
         Assert.assertTrue(FileSystemInterface.getOldVersion(CREATOR, FILENAME) == null);
 
         Assert.assertTrue(Files.exists(Paths.get(CREATOR + "\\" + FILENAME + ".file" )));
