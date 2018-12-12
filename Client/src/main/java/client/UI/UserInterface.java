@@ -69,6 +69,10 @@ public interface UserInterface {
         System.out.println("login or register?");
         String loginOrRegister = requestInput();
 
+        if(!(loginOrRegister.equals("login") || loginOrRegister.equals("register")))
+            return null;
+
+
         System.out.println();
         System.out.println("Please insert your information:");
 
@@ -126,7 +130,7 @@ public interface UserInterface {
         System.out.println(Command.pull + "  - get files from remote server");
         System.out.println(Command.push + "  - send file to remote server");
         System.out.println(Command.share + " - share file with another user");
-        System.out.println(Command.getBackup + "  - retrieves the last auto back-uped version of the file");
+        System.out.println(Command.getBackup + "  - replaces file with previous remote version");
         System.out.println(Command.list + "  - lists all files");
         System.out.println(Command.exit + "  - exit program");
         System.out.println();

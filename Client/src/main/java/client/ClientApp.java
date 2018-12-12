@@ -17,36 +17,46 @@ import org.springframework.web.client.RestTemplate;
 import javax.net.ssl.SSLContext;
 
 
-
-
-
+/**
+ * Main App Client Class
+ * @author Andre Fonseca 84698
+ * @author Leonor Loureiro 84736
+ * @author Sebastiao Amaro 84767
+ *
+ * Runs the operations through a terminal interface
+ *
+ * Client side of the Remote Document Access SIRS project
+ *
+ *
+ */
 public class ClientApp {
 
 
-    public static void main(String[] args) throws Exception {
+    public static void main(String[] args) {
+        // Initializes all the used cryptography
         Crypto.init();
-        Login login;
-        boolean running = true;
 
+        Login login = null;
+        boolean running = true;
 
         while(running) {
             UserInterface.home();
 
             try{
-                login = UserInterface.requestLogin();
+                while(login == null)
+                    login = UserInterface.requestLogin();
 
                 UserInterface.welcome(login.getUsername());
-
 
                 while (running) {
                     UserInterface.listCommands();
                     running = UserInterface.parseCommand();
                     UserInterface.clearScreen();
                 }
+
             }catch(Exception e){
                 e.printStackTrace();
                 System.out.println(e.getMessage());
-                continue;
             }
         }
 

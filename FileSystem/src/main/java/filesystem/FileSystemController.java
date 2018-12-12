@@ -19,7 +19,7 @@ public class FileSystemController {
     public ResponseEntity<FileSystemMessage> download(@Valid @RequestBody FileSystemMessage fMsg) throws IOException, ClassNotFoundException {
 
         if(!checkInput(fMsg))
-            throw new IOException();
+            new ResponseEntity(HttpStatus.BAD_REQUEST);
 
         FileSystemMessage message = new FileSystemMessage();
 
@@ -36,7 +36,7 @@ public class FileSystemController {
     public ResponseEntity upload(@Valid @RequestBody FileSystemMessage fMsg) throws IOException {
         System.out.println("RECEIVED");
         if(!checkInput(fMsg))
-            throw new IOException();
+            new ResponseEntity(HttpStatus.BAD_REQUEST);
 //        System.out.println(file.get(0).getFileName());
 //        System.out.println(Arrays.toString(file.get(0).getFile()));
         //Check if the token is valid
@@ -56,7 +56,9 @@ public class FileSystemController {
     public ResponseEntity share(@Valid@RequestBody FileSystemMessage fMsg) throws IOException, ClassNotFoundException {
         FileSystemMessage message = new FileSystemMessage();
 
-        checkInput(fMsg);
+        if(!checkInput(fMsg))
+            new ResponseEntity(HttpStatus.BAD_REQUEST);
+
         if(!FileSystemInterface.validateToken(fMsg.getUserName(), fMsg.getToken()))
             return new ResponseEntity(HttpStatus.PRECONDITION_FAILED);
 
@@ -67,7 +69,9 @@ public class FileSystemController {
     @RequestMapping(value = "/getoldversion")
     public ResponseEntity getoldversion(@Valid@RequestBody FileSystemMessage fMsg) throws IOException, ClassNotFoundException {
 
-        checkInput(fMsg);
+        if(!checkInput(fMsg))
+            new ResponseEntity(HttpStatus.BAD_REQUEST);
+
         FileSystemMessage message = new FileSystemMessage();
         System.out.println(fMsg.getUserName());
         System.out.println(fMsg.getBackUpFileName());
@@ -76,6 +80,8 @@ public class FileSystemController {
             return new ResponseEntity(HttpStatus.PRECONDITION_FAILED);
 
         message.setFiles(new EncryptedFileWrapper[]{ FileSystemInterface.getOldVersion(fMsg.getUserName(),fMsg.getBackUpFileName(),fMsg.getCorrupted())});
+        if(message.getFiles()[0] == null)
+            return new ResponseEntity(HttpStatus.CONFLICT);
         message.setUserName(fMsg.getUserName());
         return new ResponseEntity<FileSystemMessage>(message , HttpStatus.OK);
     }

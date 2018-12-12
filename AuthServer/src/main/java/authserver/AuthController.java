@@ -91,7 +91,7 @@ public class AuthController {
 
 
         if(token == null || token.isEmpty())
-            return new ResponseEntity<String>("Token is invalid", HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<String>("Token is invalid", HttpStatus.PRECONDITION_FAILED);
 
 
         if(authService.authenticate(username1, token)) {
