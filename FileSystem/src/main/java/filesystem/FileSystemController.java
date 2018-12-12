@@ -19,21 +19,26 @@ public class FileSystemController {
         FileSystemMessage message = new FileSystemMessage();
 
 
+        //if the input isnt valid respond with a badrequest status
         if(!checkInput(fMsg)) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
 
-        //Check if the token is valid
+        //Check if the token parameters are valid
 
         if(fMsg.getUserName() == null || fMsg.getUserName().isEmpty())
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         if(fMsg.getToken() == null || fMsg.getToken().isEmpty())
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+
+        //validate the token
         if(!FileSystemInterface.validateToken(fMsg.getUserName(), fMsg.getToken()))
             return new ResponseEntity<>(HttpStatus.PRECONDITION_FAILED);
 
+        //get the list of files to send to the client
         EncryptedFileWrapper[] list = FileSystemInterface.download(fMsg.getUserName());
 
+        //if the are no files to be downloaded
         if(list == null)
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         message.setFiles(FileSystemInterface.download(fMsg.getUserName()));
@@ -43,14 +48,17 @@ public class FileSystemController {
     @PostMapping(value = "/upload")
     public ResponseEntity upload(@Valid @RequestBody FileSystemMessage fMsg) throws IOException {
 
+        //check the parameters of the token
         if(fMsg.getUserName() == null || fMsg.getUserName().isEmpty())
             return new ResponseEntity<FileSystemMessage>(HttpStatus.BAD_REQUEST);
         if(fMsg.getToken() == null || fMsg.getToken().isEmpty())
             return new ResponseEntity<FileSystemMessage>(HttpStatus.BAD_REQUEST);
 
+        //if the input isnt valid respond with a badrequest status
         if(!checkInput(fMsg))
             return new ResponseEntity(HttpStatus.BAD_REQUEST);
 
+        //validate the token
         if(!FileSystemInterface.validateToken(fMsg.getUserName(), fMsg.getToken()))
             return new ResponseEntity(HttpStatus.PRECONDITION_FAILED);
 
@@ -63,17 +71,21 @@ public class FileSystemController {
     public ResponseEntity share(@Valid@RequestBody FileSystemMessage fMsg) throws IOException, ClassNotFoundException {
 
 
+        //check the parameters of the token
         if(fMsg.getUserName() == null || fMsg.getUserName().isEmpty())
             return new ResponseEntity<FileSystemMessage>(HttpStatus.BAD_REQUEST);
         if(fMsg.getToken() == null || fMsg.getToken().isEmpty())
             return new ResponseEntity<FileSystemMessage>(HttpStatus.BAD_REQUEST);
 
+        //if the input isnt valid respond with a badrequest status
         if(!checkInput(fMsg))
             return new ResponseEntity(HttpStatus.BAD_REQUEST);
 
+        //validate the token
         if(!FileSystemInterface.validateToken(fMsg.getUserName(), fMsg.getToken()))
             return new ResponseEntity(HttpStatus.PRECONDITION_FAILED);
 
+        //if share operation couldnt be completed, return a respond with non acceptable status
         if(!FileSystemInterface.share(fMsg.getUserName(),fMsg.getUserToShareWith(),fMsg.getFiles()[0]))
             return new ResponseEntity(HttpStatus.NOT_ACCEPTABLE);
 
@@ -88,16 +100,19 @@ public class FileSystemController {
         if(fMsg.getToken() == null || fMsg.getToken().isEmpty())
             return new ResponseEntity<FileSystemMessage>(HttpStatus.BAD_REQUEST);
 
+        //validate the token
         if(!checkInput(fMsg))
             return new ResponseEntity(HttpStatus.BAD_REQUEST);
 
+        //validate the token
         if(!FileSystemInterface.validateToken(fMsg.getUserName(), fMsg.getToken()))
             return new ResponseEntity(HttpStatus.PRECONDITION_FAILED);
 
         FileSystemMessage message = new FileSystemMessage();
 
-
         message.setFiles(new EncryptedFileWrapper[]{ FileSystemInterface.getOldVersion(fMsg.getUserName(),fMsg.getBackUpFileName())});
+
+        //if the file returned is null, it means the there is no backup version
         if(message.getFiles()[0] == null)
             return new ResponseEntity(HttpStatus.CONFLICT);
         message.setUserName(fMsg.getUserName());
@@ -105,6 +120,11 @@ public class FileSystemController {
     }
 
 
+    /**
+     * Check if the names of message from the client, are all valid
+     * @param fMsg
+     * @return if the names are valid or not
+     */
     public Boolean checkInput(FileSystemMessage fMsg){
         System.out.println("Started Validation");
         if (fMsg.getUserName()!= null ) {

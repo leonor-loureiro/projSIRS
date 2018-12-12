@@ -23,6 +23,7 @@ public class Application {
 
 
 
+        //keystore directory
         String keystoreFile = "./" + "\\src\\main\\resources\\serverkeystore.jks";
 
         System.out.println("Please introduce the password");
@@ -30,6 +31,7 @@ public class Application {
 
         KeyStore ks = KeyStore.getInstance("jks");
 
+        //get input from user
         char[] pw = requestSensibleInput();
 
         Boolean wrong = true;
@@ -38,6 +40,7 @@ public class Application {
                 ks.load(new FileInputStream(keystoreFile), pw);
                 wrong = false;
 
+                //if there is an exception it means the password was wrong so we try again
             } catch (IOException e) {
                 System.out.println("Wrong password try again");
                 pw = requestSensibleInput();
