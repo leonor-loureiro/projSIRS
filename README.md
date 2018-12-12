@@ -1,22 +1,23 @@
-# ProjSIRS
-Secure remote cloud-based application for document store and access
+# ProjSIRS - Group 11
+Secure cloud-based application for remote document access
 
-Step to execute:
+Steps to execute:
 
 Installation:
 
--Install Java 8
+-Install JDK 8
 -Install MySQL
--Install maven
+-Install Maven
 
 Step by Step:
 
 - Create database with the script provided at AuthServer/src/main/database/create-database.sql
 
-- Go to the AuthServer/src/main/resources/config.example, change the name to config.properties and change the credetials to match the ones in the MySQL installation.
+- Go to the AuthServer/src/main/resources/, rename the file config.example to config.properties and change the credetials to match the ones in the MySQL installation.
 
--Go to the folder Scripts and run the WindowsStartInstall.
-  -if in linux, go to the project root directory:
+-On Windows: go to the folder Scripts and run the WindowsStartInstall.
+
+-On Linux, go to the project root directory:
     -And execute mvn clean install.
     -Open another terminal and go to AuthServer/ and run mvn spring-boot:run
     -Open another terminal and go to FileSystem/ and run mvn spring-boot:run
