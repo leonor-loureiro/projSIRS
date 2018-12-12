@@ -48,9 +48,6 @@ public class Application {
             input = new FileInputStream("./" + "\\src\\main\\resources\\config.properties");
             properties.load(input);
 
-            System.out.println(properties.getProperty("database"));
-            System.out.println(properties.getProperty("dbuser"));
-            System.out.println(properties.getProperty("dbpassword"));
         }catch (IOException e){
             e.printStackTrace();
         }

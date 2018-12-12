@@ -77,7 +77,16 @@ public interface UserInterface {
         System.out.println("Please insert your information:");
 
         System.out.println("Username: ");
-        login.setUsername(requestInput());
+
+        String username = requestInput();
+
+        if (!username.matches("[a-zA-Z0-9]*")) {
+            System.out.println("The password can only contain letters and numbers");
+            return null;
+        }
+        login.setUsername(username);
+
+
 
         System.out.println("Password: ");
         login.setPassword(requestSensibleInput());
