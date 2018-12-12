@@ -29,7 +29,6 @@ public interface FileManager {
         try (FileOutputStream stream = new FileOutputStream(dest)) {
             stream.write(file.getFile());
         }
-
     }
 
 
@@ -78,9 +77,6 @@ public interface FileManager {
                 }
             }
         }
-
         return results;
     }
-
-
 }

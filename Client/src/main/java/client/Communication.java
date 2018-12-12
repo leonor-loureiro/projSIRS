@@ -30,12 +30,13 @@ import java.util.*;
 
 
 public class Communication {
+    /**
+     * Token used for communication with FileSystem, given by Auth
+     */
     private String loginToken;
     private String serverUrl = "https://localhost:8080/operations";
     private String authServerUrl = "https://localhost:8081/auth";
-    public void ping(){
 
-    }
 
     public String getLoginToken() {
         return loginToken;
@@ -45,11 +46,24 @@ public class Communication {
         this.loginToken = loginToken;
     }
 
-    public boolean register(User user) throws UserAlreadyExists, BadArgument {
 
+    /* ******************************************************************************
+     *
+     *                      Auth Server Communication
+     *
+     * ******************************************************************************/
+
+    /**
+     * Register Client in the system
+     * @param user the logged in user info
+     * @return true if the register succeeded
+     * @throws UserAlreadyExists if the user already exists
+     * @throws BadArgument if the information provided doesn't follow the correct format
+     */
+    public boolean register(User user) throws UserAlreadyExists, BadArgument {
         RestTemplate restTemplate = restTemplate();
 
-        //create the params
+        //create the parameters
         Map<String, String> msg = new HashMap<String, String>();
         msg.put("username", user.getUsername());
         msg.put("password", String.valueOf(user.getPassword()));
@@ -70,6 +84,7 @@ public class Communication {
             loginToken = response.getBody();
             return true;
         }
+
         //User already exists
         if(response.getStatusCode() == HttpStatus.CONFLICT)
             throw new UserAlreadyExists(response.getBody());
@@ -81,6 +96,15 @@ public class Communication {
         return false;
     }
 
+    /**
+     * Logs in the user to the server
+     * Provides the user with a temporary token that allows for a limited time
+     * the communication with FileSystem
+     * @param user the user to be logged in
+     * @return true if log in was successful
+     * @throws InvalidUser if no username was found or password doesn't match
+     * @throws BadArgument if the information didn't follow expected format
+     */
     public boolean login(User user) throws InvalidUser, BadArgument {
 
         RestTemplate restTemplate = restTemplate();
@@ -122,6 +146,65 @@ public class Communication {
 
     }
 
+    /**
+     * Requests the public key of a certain user
+     * @param username1 the user requesting username2's key
+     * @param username2 the user who's key is being requested
+     * @return the key of username2's user
+     * @throws CryptoException When the interpretation of public key fails
+     * @throws BadArgument When the request didn't follow proper format
+     * @throws TokenInvalid When the Token is invalid (bad token or timeout)
+     */
+    public PublicKey getUserKey(String username1, String username2) throws CryptoException, BadArgument, TokenInvalid {
+        RestTemplate restTemplate = restTemplate();
+
+        //create the params
+        Map<String, String> msg = new HashMap<String, String>();
+        msg.put("username1", username1);
+        msg.put("username2", username2);
+        msg.put("token", loginToken);
+
+        //set headers
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+
+        //set entity to send
+        HttpEntity request = new HttpEntity(msg, headers);
+
+        // send
+        ResponseEntity<String> response = restTemplate.postForEntity(authServerUrl + "/getPublicKey", request, String.class);
+
+        // Process response (Key)
+        if (response.getStatusCode() == HttpStatus.OK) {
+            byte[] encoded = Crypto.toByteArray((response.getBody()));
+            return Crypto.recoverPublicKey(encoded);
+        }
+
+        if (response.getStatusCode() == HttpStatus.BAD_REQUEST) {
+            throw new BadArgument(response.getBody());
+        }
+
+        if (response.getStatusCode() == HttpStatus.PRECONDITION_FAILED) {
+            throw new TokenInvalid(response.getBody());
+        }
+
+        return null;
+    }
+
+
+
+    /* ******************************************************************************
+     *
+     *                      File System Communication
+     *
+     * ******************************************************************************/
+
+    /**
+     * Gets all the remote files of the given user
+     * @param user user to which the files belong to
+     * @return the list of user's files
+     * @throws BadArgument if the request arguments didn't match the defined format
+     */
     public EncryptedFileWrapper[] getFiles(User user) throws BadArgument {
         RestTemplate restTemplate = restTemplate();
 
@@ -142,12 +225,11 @@ public class Communication {
         ResponseEntity<FileSystemMessage> out = restTemplate.exchange(serverUrl+"/download",HttpMethod.POST, entity
                 , FileSystemMessage.class);
 
-
         //Invalid arguments
         if(out.getStatusCode() == HttpStatus.BAD_REQUEST)
             throw new BadArgument("Bad input, check filenames for special characters.");
 
-
+        // get Files
         EncryptedFileWrapper[] files = out.getBody().getFiles();
 
         System.out.println("Downloaded files:");
@@ -159,40 +241,6 @@ public class Communication {
         return files;
     }
 
-    public PublicKey getUserKey(String username1, String username2) throws CryptoException, BadArgument, TokenInvalid {
-        RestTemplate restTemplate = restTemplate();
-
-        //create the params
-        Map<String, String> msg = new HashMap<String, String>();
-        msg.put("username1", username1);
-        msg.put("username2", username2);
-        msg.put("token", loginToken);
-
-        //set headers
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-
-        //set entity to send
-        HttpEntity request = new HttpEntity(msg, headers);
-
-        // send
-        ResponseEntity<String> response = restTemplate.postForEntity(authServerUrl + "/getPublicKey", request, String.class);
-
-        if (response.getStatusCode() == HttpStatus.OK) {
-            byte[] encoded = Crypto.toByteArray((response.getBody()));
-            return Crypto.recoverPublicKey(encoded);
-        }
-
-        if (response.getStatusCode() == HttpStatus.BAD_REQUEST) {
-            throw new BadArgument(response.getBody());
-        }
-
-        if (response.getStatusCode() == HttpStatus.BAD_REQUEST) {
-            throw new TokenInvalid(response.getBody());
-        }
-
-        return null;
-    }
 
     /**
      * Sends the staged files to the server
@@ -211,7 +259,12 @@ public class Communication {
 
     }
 
-
+    /**
+     * Shares a file from logged in user to another user
+     * @param user logged in user
+     * @param file file to be shared
+     * @param destUser target user to receive file
+     */
     public void shareFile(User user, EncryptedFileWrapper file, String destUser){
         RestTemplate restTemp = restTemplate();
 
@@ -227,21 +280,21 @@ public class Communication {
         restTemp.postForObject(serverUrl+"/share", message,  ResponseEntity.class);
     }
 
-
+    /**
+     * Requests an older version of the file and resets remote's current head to that file
+     * @param user logged in user
+     * @param filename name of the file to be reset to an older version
+     * @return older version of the file with given name
+     * @throws BadArgument if the request format wasn't valid
+     */
     public EncryptedFileWrapper[] getOldVersion(User user,String filename) throws BadArgument {
         RestTemplate restTemp = restTemplate();
 
         FileSystemMessage message = new FileSystemMessage();
 
         message.setUserName(user.getUsername());
-
         message.setBackUpFileName(filename);
-
         message.setToken(loginToken);
-
-        System.out.println(user.getUsername());
-
-        System.out.println(filename);
 
 
         HttpHeaders headers = new HttpHeaders();
@@ -266,6 +319,15 @@ public class Communication {
         return files;
 
     }
+
+
+    /* ******************************************************************************
+     *
+     *                      Auxiliar Communication Function
+     *
+     * ******************************************************************************/
+
+
     /**
      * Generates a rest template for https
      * @return https rest template

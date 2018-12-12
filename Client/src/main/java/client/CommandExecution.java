@@ -17,10 +17,12 @@ import javax.crypto.SecretKey;
 import java.io.IOException;
 import java.security.*;
 import java.security.cert.CertificateException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+/**
+ * Class that executes commands offered to this app's clients
+ */
 public class CommandExecution {
 
     /**
@@ -36,6 +38,13 @@ public class CommandExecution {
 
     public void setUser(User user) {this.user = user; }
 
+
+    /**
+     * Logins the user into the system so network dependent operations can be completed
+     * @param login the login information
+     * @throws BadArgument if the input is invalid
+     * @throws InvalidUser if the login information is incorrect
+     */
     public void login(Login login) throws BadArgument, InvalidUser {
         setUser(new User(login.getUsername(), login.getPassword()));
 
@@ -45,9 +54,10 @@ public class CommandExecution {
             return;
         }
 
-        // Extract public key
         PublicKey publicKey = null;
         PrivateKey privateKey = null;
+
+        // Extract public key and private keys
         try {
             publicKey = KeystoreManager.getPublicKey(getKeystoreFileName(user.getUsername()),
                     user.getUsername() + "-certificate", user.getPassword());
@@ -57,6 +67,7 @@ public class CommandExecution {
             e.printStackTrace();
         }
 
+        // set public and private keys
         user.setPublicKey(publicKey);
         user.setPrivateKey(privateKey);
     }
@@ -64,9 +75,9 @@ public class CommandExecution {
 
     /**
      * Register the given user to the service and generates his needed private information
-     * @param login
+     * @param login the login information
      */
-    public boolean register(Login login) throws BadArgument, UserAlreadyExists {
+    public void register(Login login) throws BadArgument, UserAlreadyExists {
         //Create the user
         User user = new User(login.getUsername(), login.getPassword());
 
@@ -79,18 +90,17 @@ public class CommandExecution {
 
         } catch (CryptoException e) {
             e.printStackTrace();
-            return false;
+            return;
         }
 
         // Send register request
         setUser(user);
         if(!communication.register(user)){
-            return false;
+            return;
         }
 
         // Create keystore and store key pair
         char[] pwdArray = login.getPassword();
-
         try {
             KeystoreManager.CreateAndStoreCertificate(keyPair,
                     getKeystoreFileName(login.getUsername()),
@@ -99,14 +109,8 @@ public class CommandExecution {
 
         }catch (Exception e){
             e.printStackTrace();
-            return false;
         }
 
-        return true;
-    }
-
-    private String getKeystoreFileName(String username) {
-        return "./" + username + "keys" + ".jceks";
     }
 
     /**
@@ -134,80 +138,7 @@ public class CommandExecution {
 
     }
 
-    /**
-     * Gets file and generates a file wrapper by filename
-     * @param filename file's name
-     * @return file wrapper
-     */
-    public FileWrapper getFileWrapper(String filename) throws BadArgument {
-        FileWrapper file = null;
-        try {
-            // Reading File
-            file = FileManager.loadFile(filename, user.getUsername());
 
-            if(file == null)
-                throw new BadArgument("No such file: " + filename);
-
-            // Get file's key (if it exists)
-            if (storeFileKey(filename, file)) return null;
-
-        } catch (IOException e) {
-            e.printStackTrace();
-            System.out.println("Unable to read file. Wrong filename or no permission.");
-        }
-        return file;
-    }
-
-    /**
-     * Verifies if file Key is in KeyStore, if not, adds it
-     * @param filename the file's name
-     * @param file the file's wrapper
-     * @return true if successfully stored
-     */
-    private boolean storeFileKey(String filename, FileWrapper file){
-        try{
-            SecretKey key  = KeystoreManager.getSecretKey(getKeystoreFileName(user.getUsername()), filename, user.getPassword());
-
-            // If key doesn't exist, generate it
-            if(key == null){
-                System.out.println("Generating File Key...");
-
-                if(file.getFileKey() == null)
-                    key = Crypto.generateSecretKey();
-
-                else
-                    key = Crypto.extractSecretKey(file.getFileKey());
-
-                KeystoreManager.StoreSecretKey(key, getKeystoreFileName(user.getUsername()), filename, user.getPassword());
-            }
-
-            if(file == null || key == null)
-                return true;
-
-            file.setFileKey(key.getEncoded());
-
-        } catch (CryptoException | CertificateException | UnrecoverableKeyException | KeyStoreException | NoSuchAlgorithmException | IOException e) {
-            e.printStackTrace();
-        }
-        return false;
-    }
-
-    /**
-     * Stores files and their keys
-     * @param fw file wrapper to be stored
-     */
-    public void saveFileWrappers(List<FileWrapper> fw)  {
-
-        for(FileWrapper f : fw){
-            storeFileKey(f.getFileName(), f);
-            try {
-                FileManager.saveFile(f);
-            } catch (IOException e) {
-                System.out.println("Unable to save file: " + f.getFileName());
-            }
-        }
-
-    }
 
     /**
      * get all remote files and removes them from staging
@@ -224,7 +155,6 @@ public class CommandExecution {
         user.removeFilesFromStaged(files);
 
         saveFileWrappers(files);
-
     }
 
     /**
@@ -265,7 +195,6 @@ public class CommandExecution {
         //Get file key and encrypt it
         FileWrapper fileWrapper = getFileWrapper(fileName);
 
-        //TODO: Remove this set when wrapper already has key
         try {
             fileWrapper.setFileName("from" + user.getUsername() + fileName);
             fileWrapper.setFileCreator(dest);
@@ -307,10 +236,9 @@ public class CommandExecution {
 
     /**
      * Requests an older version of a given file
-     * @param fileName
+     * @param fileName name of the file to be backed up
      */
     public void getBackup(String fileName) throws BadArgument {
-
 
         System.out.println(user.getUsername());
         System.out.println(fileName);
@@ -319,7 +247,6 @@ public class CommandExecution {
         List<FileWrapper> files = SecurityHandler.decryptFileWrappers(Arrays.asList(file), user.getPrivateKey());
 
         saveFileWrappers(files);
-
     }
 
     /**
@@ -329,6 +256,99 @@ public class CommandExecution {
         System.out.println("Shutting down...");
 
     }
+
+
+
+
+    /* ******************************************************************************
+     *
+     *                      Auxiliar Communication Function
+     *
+     * ******************************************************************************/
+
+    /**
+     * Generates the keystore for the files name of the given user
+     * @param username user's username
+     * @return keystore name
+     */
+    private String getKeystoreFileName(String username) {
+        return "./" + username + "keys" + ".jceks";
+    }
+
+
+    /**
+     * Stores files and their keys
+     * @param fw file wrapper to be stored
+     */
+    public void saveFileWrappers(List<FileWrapper> fw)  {
+
+        for(FileWrapper f : fw){
+            storeFileKey(f.getFileName(), f);
+            try {
+                FileManager.saveFile(f);
+            } catch (IOException e) {
+                System.out.println("Unable to save file: " + f.getFileName());
+            }
+        }
+    }
+
+    /**
+     * Verifies if file Key is in KeyStore, if not, adds it
+     * @param filename the file's name
+     * @param file the file's wrapper
+     * @return true if successfully stored
+     */
+    private boolean storeFileKey(String filename, FileWrapper file){
+        try{
+            SecretKey key  = KeystoreManager.getSecretKey(getKeystoreFileName(user.getUsername()), filename, user.getPassword());
+
+            // If key doesn't exist, generate it
+            if(key == null){
+                System.out.println("Generating File Key...");
+
+                if(file.getFileKey() == null)
+                    key = Crypto.generateSecretKey();
+                else
+                    key = Crypto.extractSecretKey(file.getFileKey());
+
+                KeystoreManager.StoreSecretKey(key, getKeystoreFileName(user.getUsername()), filename, user.getPassword());
+            }
+
+            if(file == null || key == null)
+                return true;
+
+            file.setFileKey(key.getEncoded());
+
+        } catch (CryptoException | CertificateException | UnrecoverableKeyException | KeyStoreException | NoSuchAlgorithmException | IOException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    /**
+     * Gets file and generates a file wrapper by filename
+     * @param filename file's name
+     * @return file wrapper
+     */
+    public FileWrapper getFileWrapper(String filename) throws BadArgument {
+        FileWrapper file = null;
+        try {
+            // Reading File
+            file = FileManager.loadFile(filename, user.getUsername());
+
+            if(file == null)
+                throw new BadArgument("No such file: " + filename);
+
+            // Get file's key (if it exists)
+            if (storeFileKey(filename, file)) return null;
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.out.println("Unable to read file. Wrong filename or no permission.");
+        }
+        return file;
+    }
+
 
 
 }
