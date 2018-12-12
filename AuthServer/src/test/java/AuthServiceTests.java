@@ -36,7 +36,15 @@ public class AuthServiceTests {
                 properties.getProperty("dbpassword"),
                 properties.getProperty("database"));
 
+
         authService = AuthService.getInstance();
+
+        AuthService.keystoreFile = "./" + "\\src\\main\\resources\\serverkeystore.jks";
+        AuthService.keystorePwd = "password";
+        AuthService.keyPwd = "password";
+        AuthService.myAlias = "server-keypair";
+
+
     }
 
     /**

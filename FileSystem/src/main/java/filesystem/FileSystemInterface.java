@@ -11,16 +11,49 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.PublicKey;
 import java.util.ArrayList;
+import java.util.Properties;
 
+/**
+ * This class implements the functions of the file system service
+ *
+ * <li>Upload files</li>
+ * <li>Download files</li>
+ * <li>Share files</li>
+ * <li>Retrieve backup</li>
+ */
 public class FileSystemInterface {
 
 
-    private static final String keystoreFile = "./" + "\\src\\main\\resources\\serverkeystore.jks";
-    private static final String keystorePwd = Application.properties.getProperty("keystorepwd");
-    private static final String authServerAlias = Application.properties.getProperty("myalias");
+    private static String keystoreFile;
+    private static String keystorePwd;
+    private static String authServerAlias;
 
 
+    /**
+     * Initializes the file system interface
+     */
+    public static void init(){
+        if(Application.properties == null){
+            try {
+                Application.properties = new Properties();
+                InputStream input = new FileInputStream("./" + "\\src\\main\\resources\\config.properties");
+                Application.properties.load(input);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        keystoreFile = "./" + "\\src\\main\\resources\\serverkeystore.jks";
+        keystorePwd = Application.properties.getProperty("keystorepwd");
+        authServerAlias = Application.properties.getProperty("myalias");
+    }
 
+
+    /**
+     * Checks if a token is valid
+     * @param username username of the user the token was for
+     * @param token authentication token
+     * @return true if is valid; false otherwise
+     */
     public static boolean validateToken(String username, String token){
 
         PublicKey key = null;

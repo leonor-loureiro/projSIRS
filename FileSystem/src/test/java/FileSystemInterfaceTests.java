@@ -26,6 +26,7 @@ public class FileSystemInterfaceTests {
     @Before
     public void setUp(){
 
+        FileSystemInterface.init();
         encFile = new EncryptedFileWrapper();
         encFile.setFileName(FILENAME);
         encFile.setFileCreator(CREATOR);
@@ -224,7 +225,7 @@ public class FileSystemInterfaceTests {
         //Check if the folder exists
         Assert.assertTrue(Files.exists(Paths.get("./" + user2)));
         //Check if the file exists
-        Assert.assertTrue(Files.exists(Paths.get(user2 + "\\" + "from-" + CREATOR + "_" + FILENAME + ".file" )));
+        Assert.assertTrue(Files.exists(Paths.get(user2 + "\\" +  FILENAME + ".file" )));
 
         //Clean up
         File index = new File("./" + user2);
@@ -252,7 +253,7 @@ public class FileSystemInterfaceTests {
         //Check if the folder exists
         Assert.assertTrue(Files.exists(Paths.get("./" + user2)));
         //Check if the file exists
-        Assert.assertTrue(Files.exists(Paths.get(user2 + "\\" + "from-" + CREATOR + "_" + FILENAME + ".file" )));
+        Assert.assertTrue(Files.exists(Paths.get(user2 + "\\" + FILENAME + ".file" )));
 
         //Clean up
         File index = new File("./" + user2);
@@ -271,6 +272,7 @@ public class FileSystemInterfaceTests {
         FileSystemInterface.upload(encFiles, CREATOR);
         String user2 = "user2";
         FileSystemInterface.upload(encFiles, user2);
+        encFile.setFileName("from-" +CREATOR + "_" + FILENAME);
         FileSystemInterface.share(CREATOR, user2, encFile);
 
         //Check if the folder exists
@@ -279,7 +281,7 @@ public class FileSystemInterfaceTests {
         Assert.assertTrue(Files.exists(Paths.get(user2 + "\\" + FILENAME + ".file" )));
 
         //Check if the file exists
-        Assert.assertTrue(Files.exists(Paths.get(user2 + "\\" + "from-" + CREATOR + "_" + FILENAME + ".file" )));
+        Assert.assertTrue(Files.exists(Paths.get(user2 + "\\" +FILENAME + ".file" )));
 
         //Clean up
         File index = new File("./" + user2);

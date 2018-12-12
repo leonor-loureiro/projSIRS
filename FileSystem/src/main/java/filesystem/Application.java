@@ -12,6 +12,16 @@ import java.security.cert.CertificateException;
 import java.util.Properties;
 import java.util.Scanner;
 
+/**
+* Main App of FileSystem
+* @author Andre Fonseca 84698
+* @author Leonor Loureiro 84736
+* @author Sebastiao Amaro 84767
+*
+* Responsible for managing the user's files
+*
+* File System server side of the Remote Document Access SIRS project
+*/
 @SpringBootApplication
 public class Application {
 
@@ -31,6 +41,8 @@ public class Application {
         }catch (IOException e){
             e.printStackTrace();
         }
+
+
         //keystore directory
         String keystoreFile = "./" + "\\src\\main\\resources\\serverkeystore.jks";
 
@@ -65,10 +77,15 @@ public class Application {
 
 
         Crypto.init();
+        FileSystemInterface.init();
 
         SpringApplication.run(Application.class, args);
     }
 
+    /**
+     * Requests a password
+     * @return
+     */
     public static char[] requestSensibleInput(){
         char[] result;
         try{

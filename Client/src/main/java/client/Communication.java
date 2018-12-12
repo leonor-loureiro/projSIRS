@@ -16,9 +16,12 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.http.ssl.SSLContextBuilder;
 import org.springframework.http.*;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestTemplate;
 
 import javax.net.ssl.SSLContext;
+import javax.xml.ws.http.HTTPException;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -79,22 +82,26 @@ public class Communication {
         //set entity to send
         HttpEntity request = new HttpEntity(msg,headers);
 
-        // send
-        ResponseEntity<String> response = restTemplate.postForEntity(authServerUrl + "/register", request, String.class);
+        try {
+            // send
+            ResponseEntity<String> response = restTemplate.postForEntity(authServerUrl + "/register", request, String.class);
 
-        if(response.getStatusCode() == HttpStatus.OK){
-            loginToken = response.getBody();
-            return true;
+            if(response.getStatusCode() == HttpStatus.OK){
+                loginToken = response.getBody();
+                return true;
+            }
+
+        }catch (HttpStatusCodeException e){
+            //User already exists
+            if(e.getStatusCode() == HttpStatus.CONFLICT) {
+                throw new UserAlreadyExists("Already exits user " + user.getUsername());
+            }
+
+            //Invalid arguments
+            if(e.getStatusCode() == HttpStatus.BAD_REQUEST) {
+                throw new BadArgument("Invalid username or password");
+            }
         }
-
-        //User already exists
-        if(response.getStatusCode() == HttpStatus.CONFLICT)
-            throw new UserAlreadyExists(response.getBody());
-
-        //Invalid arguments
-        if(response.getStatusCode() == HttpStatus.BAD_REQUEST)
-            throw new BadArgument(response.getBody());
-
         return false;
     }
 
@@ -123,26 +130,29 @@ public class Communication {
         //set entity to send
         HttpEntity request = new HttpEntity(msg,headers);
 
-        // send
-        ResponseEntity<String> response = restTemplate.postForEntity(authServerUrl + "/login", request, String.class);
+        try {
+            // send
+            ResponseEntity<String> response = restTemplate.postForEntity(authServerUrl + "/login", request, String.class);
 
-        //System.out.println("Status: " + response.getStatusCode().toString());
+            if(response.getStatusCode() == HttpStatus.OK){
+                loginToken =  response.getBody();
+                System.out.println("Login successful");
+                return true;
+            }
 
 
-        if(response.getStatusCode() == HttpStatus.OK){
-            loginToken =  response.getBody();
-            //System.out.println("Token: " + loginToken);
-            System.out.println("Login successful");
-            return true;
+        }catch (HttpStatusCodeException e){
+
+            //User does not exist
+            if(e.getStatusCode() == HttpStatus.CONFLICT) {
+                throw new InvalidUser("Invalid username or password");
+            }
+
+            //Invalid arguments
+            if(e.getStatusCode() == HttpStatus.BAD_REQUEST) {
+                throw new BadArgument("Invalid username or password");
+            }
         }
-
-        //User does not exist
-        if(response.getStatusCode() == HttpStatus.CONFLICT)
-            throw new InvalidUser(response.getBody());
-
-        //Invalid arguments
-        if(response.getStatusCode() == HttpStatus.BAD_REQUEST)
-            throw new BadArgument(response.getBody());
 
         return false;
 
@@ -173,27 +183,29 @@ public class Communication {
         //set entity to send
         HttpEntity request = new HttpEntity(msg, headers);
 
-        // send
-        ResponseEntity<String> response = restTemplate.postForEntity(authServerUrl + "/getPublicKey", request, String.class);
+        try {
+            // send
+            ResponseEntity<String> response = restTemplate.postForEntity(authServerUrl + "/getPublicKey", request, String.class);
 
-        // Process response (Key)
-        if (response.getStatusCode() == HttpStatus.OK) {
-            byte[] encoded = Crypto.toByteArray((response.getBody()));
-            return Crypto.recoverPublicKey(encoded);
+            // Process response (Key)
+            if (response.getStatusCode() == HttpStatus.OK) {
+                byte[] encoded = Crypto.toByteArray((response.getBody()));
+                return Crypto.recoverPublicKey(encoded);
+            }
+
+        }catch (HttpStatusCodeException e){
+            if (e.getStatusCode() == HttpStatus.BAD_REQUEST) {
+                throw new BadArgument("Invalid username");
+            }
+
+            if (e.getStatusCode() == HttpStatus.PRECONDITION_FAILED) {
+                throw new TokenInvalid("Session expired. Login again.");
+            }
+
+            if (e.getStatusCode() == HttpStatus.CONFLICT) {
+                throw new InvalidUser("User " + username2 + " is not registered");
+            }
         }
-
-        if (response.getStatusCode() == HttpStatus.BAD_REQUEST) {
-            throw new BadArgument(response.getBody());
-        }
-
-        if (response.getStatusCode() == HttpStatus.PRECONDITION_FAILED) {
-            throw new TokenInvalid(response.getBody());
-        }
-
-        if (response.getStatusCode() == HttpStatus.CONFLICT) {
-            throw new InvalidUser(response.getBody());
-        }
-
         return null;
     }
 
@@ -226,28 +238,32 @@ public class Communication {
 
         //set entity to send
         HttpEntity entity = new HttpEntity(obj,headers);
+        try {
+            // send
+            ResponseEntity<FileSystemMessage> out = restTemplate.exchange(serverUrl + "/download", HttpMethod.POST, entity
+                    , FileSystemMessage.class);
 
-        // send
-        ResponseEntity<FileSystemMessage> out = restTemplate.exchange(serverUrl+"/download",HttpMethod.POST, entity
-                , FileSystemMessage.class);
 
-        //Invalid arguments
-        if(out.getStatusCode() == HttpStatus.BAD_REQUEST)
-            throw new BadArgument("Bad input, check filenames for special characters.");
-        if(out.getStatusCode() == HttpStatus.NOT_FOUND) {
-            System.out.println("ReThrew");
-            throw new BadArgument("No added file yet");
+            // get Files
+            EncryptedFileWrapper[] files = out.getBody().getFiles();
+
+            System.out.println("Downloaded files:");
+            for (EncryptedFileWrapper file : files) {
+                System.out.println("- " + file.getFileName());
+            }
+
+            return files;
+        }catch (HttpStatusCodeException e){
+            //Invalid arguments
+            if (e.getStatusCode() == HttpStatus.BAD_REQUEST) {
+                throw new BadArgument("Bad input. Check filenames for special characters.");
+            }
+            if (e.getStatusCode() == HttpStatus.NOT_FOUND) {
+                throw new BadArgument("No file has been added");
+            }
+
         }
-
-        // get Files
-        EncryptedFileWrapper[] files = out.getBody().getFiles();
-
-        System.out.println("Downloaded files:");
-        for (EncryptedFileWrapper file : files) {
-            System.out.println("- " + file.getFileName());
-        }
-
-        return files;
+        return null;
     }
 
 
@@ -309,22 +325,31 @@ public class Communication {
         //set entity to send
         HttpEntity entity = new HttpEntity(message,headers);
 
-        // send
-        ResponseEntity<FileSystemMessage> out = restTemp.exchange(serverUrl+"/getoldversion",HttpMethod.POST, entity
-                , FileSystemMessage.class);
+       try {
+           // send
+           ResponseEntity<FileSystemMessage> out = restTemp.exchange(serverUrl + "/getoldversion", HttpMethod.POST, entity
+                   , FileSystemMessage.class);
 
-        if(out.getStatusCode() == HttpStatus.BAD_REQUEST)
-            throw new BadArgument("Invalid parameters");
-        if(out.getStatusCode() == HttpStatus.CONFLICT)
-            throw new BadArgument("Backup doesn't exist");
 
-        EncryptedFileWrapper[] files = out.getBody().getFiles();
+           EncryptedFileWrapper[] files = out.getBody().getFiles();
 
-        for (EncryptedFileWrapper file : files) {
-            System.out.println("got this file " + file.getFileName());
-        }
+           for (EncryptedFileWrapper file : files) {
+               System.out.println("Retrieved file: " + file.getFileName());
+           }
 
-        return files;
+           return files;
+
+       }catch (HttpStatusCodeException e){
+
+           if (e.getStatusCode() == HttpStatus.BAD_REQUEST) {
+               throw new BadArgument("Invalid parameters");
+           }
+           if (e.getStatusCode() == HttpStatus.CONFLICT) {
+               throw new BadArgument("Backup doesn't exist");
+           }
+
+       }
+       return null;
 
     }
 

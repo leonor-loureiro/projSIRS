@@ -9,10 +9,20 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 import java.io.IOException;
 
+/**
+ * This functions maps the request done to the file system server
+ */
 @RestController
 @RequestMapping("/operations")
 public class FileSystemController {
 
+    /**
+     * Returns the list of files of the user
+     * @param fMsg file system message
+     * @return list of encrypted files
+     * @throws IOException
+     * @throws ClassNotFoundException
+     */
     @RequestMapping(value = "/download")
     public ResponseEntity<FileSystemMessage> download(@Valid @RequestBody FileSystemMessage fMsg) throws IOException, ClassNotFoundException {
 
@@ -45,6 +55,12 @@ public class FileSystemController {
         return new ResponseEntity<>(message, HttpStatus.OK);
     }
 
+    /**
+     * Uploads a list of files to a users folder
+     * @param fMsg file system message
+     * @return status of the request
+     * @throws IOException
+     */
     @PostMapping(value = "/upload")
     public ResponseEntity upload(@Valid @RequestBody FileSystemMessage fMsg) throws IOException {
 
@@ -67,6 +83,13 @@ public class FileSystemController {
         return new ResponseEntity(HttpStatus.OK);
     }
 
+    /**
+     * Share (copy) a file to another user
+     * @param fMsg file system message
+     * @return response status
+     * @throws IOException
+     * @throws ClassNotFoundException
+     */
     @RequestMapping(value = "/share")
     public ResponseEntity share(@Valid@RequestBody FileSystemMessage fMsg) throws IOException, ClassNotFoundException {
 
@@ -92,6 +115,13 @@ public class FileSystemController {
         return new ResponseEntity(HttpStatus.OK);
     }
 
+    /**
+     * Get a previous version of the file and replaces the current version with it
+     * @param fMsg file system message
+     * @return response status
+     * @throws IOException
+     * @throws ClassNotFoundException
+     */
     @RequestMapping(value = "/getoldversion")
     public ResponseEntity getoldversion(@Valid@RequestBody FileSystemMessage fMsg) throws IOException, ClassNotFoundException {
 

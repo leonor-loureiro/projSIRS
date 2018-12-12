@@ -40,7 +40,7 @@ public class CommandExecution {
 
 
     /**
-     * Logins the user into the system so network dependent operations can be completed
+     * Logs in the user into the system so network dependent operations can be completed
      * @param login the login information
      * @throws BadArgument if the input is invalid
      * @throws InvalidUser if the login information is incorrect
@@ -50,7 +50,7 @@ public class CommandExecution {
 
         // Tries to login at auth server
         if(!communication.login(user)){
-            System.out.println("Login Failed");
+            System.out.println("Username or password are invalid");
             return;
         }
 
@@ -184,23 +184,27 @@ public class CommandExecution {
      */
     public void share(String dest, String fileName) throws TokenInvalid, BadArgument {
 
-        //Get user's public key
-        PublicKey publicKey = null;
-        try {
-            try {
-                publicKey = communication.getUserKey(user.getUsername(), dest);
-            } catch (InvalidUser invalidUser) {
-                System.out.println("Invalid user to share with");
-            }
-        } catch (CryptoException e) {
-            e.printStackTrace();
-        }
+        if(dest.equals(user.getUsername()))
+            System.out.println("It's not possible to share a file with yourself");
 
         //Get file key and encrypt it
         FileWrapper fileWrapper = getFileWrapper(fileName);
         if(fileWrapper == null) {
             System.out.println("No file found with given name: " + fileName);
             return;
+        }
+
+        //Get user's public key
+        PublicKey publicKey = null;
+        try {
+            try {
+                publicKey = communication.getUserKey(user.getUsername(), dest);
+            } catch (InvalidUser invalidUser) {
+                System.out.println("User " + dest + " isn't registered");
+            }
+            return;
+        } catch (CryptoException e) {
+            e.printStackTrace();
         }
 
         try {
@@ -248,9 +252,10 @@ public class CommandExecution {
      */
     public void getBackup(String fileName) throws BadArgument {
 
-        System.out.println(user.getUsername());
-        System.out.println(fileName);
         EncryptedFileWrapper[] file = communication.getOldVersion(user, fileName);
+
+        if(file == null)
+            throw new BadArgument("File " + fileName + " doesn't have a backup");
 
         List<FileWrapper> files = SecurityHandler.decryptFileWrappers(Arrays.asList(file), user.getPrivateKey());
 

@@ -66,7 +66,7 @@ public interface UserInterface {
         Login login = new Login();
 
         System.out.println();
-        System.out.println("login or register?");
+        System.out.println("login || register:");
         String loginOrRegister = requestInput();
 
         if(!(loginOrRegister.equals("login") || loginOrRegister.equals("register")))
@@ -81,7 +81,7 @@ public interface UserInterface {
         String username = requestInput();
 
         if (!username.matches("[a-zA-Z0-9]*")) {
-            System.out.println("The password can only contain letters and numbers");
+            System.out.println("A username can only contain letters and numbers");
             return null;
         }
         login.setUsername(username);
@@ -160,15 +160,15 @@ public interface UserInterface {
                     break;
 
                 case add:
-                    System.out.println("Insert filename u want to add");
+                    System.out.println("Insert name of the file you want to add:");
                     fileName = requestInput();
                     commandExec.add(fileName);
                     break;
 
                 case share:
-                    System.out.println("Insert filename you want to share");
+                    System.out.println("Insert filename:");
                     fileName = requestInput();
-                    System.out.println("User you want to share with");
+                    System.out.println("Share file with user:");
                     user = requestInput();
                     commandExec.share(user, fileName);
                     break;
@@ -196,11 +196,11 @@ public interface UserInterface {
                     break;
             }
         } catch (IllegalArgumentException e) {
-            //e.printStackTrace();
             System.out.println("Unknown Command!");
         } catch (BadArgument | TokenInvalid e) {
-            //e.printStackTrace();
             System.out.println(e.getMessage());
+        } catch (Exception e){
+            e.printStackTrace();
         }
 
         System.out.println();

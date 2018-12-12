@@ -25,14 +25,10 @@ import java.util.Random;
  */
 public class AuthService {
 
-   /* private static final String keystoreFile = "./" + "\\src\\main\\resources\\serverkeystore.jks";
-    private static final String keystorePwd = "password";
-    private static final String keyPwd = "password";
-    private static final String myAlias = "server-keypair"; */
-    private static final String keystoreFile = "./" + "\\src\\main\\resources\\serverkeystore.jks";
-    private static final String keystorePwd = Application.properties.getProperty("keystorepwd");
-    private static final String keyPwd = Application.properties.getProperty("keypwd");
-    private static final String myAlias = Application.properties.getProperty("myalias");
+    public static String keystoreFile;
+    public static String keystorePwd;
+    public static String keyPwd;
+    public static String myAlias;
 
     // Token Validity
     private  static final int VALID_PERIOD = 1800000;
@@ -64,6 +60,11 @@ public class AuthService {
         db = new DBConnection(Application.properties.getProperty("dbuser"),
                Application.properties.getProperty("dbpassword"),
                Application.properties.getProperty("database"));
+
+        keystoreFile = "./" + "\\src\\main\\resources\\serverkeystore.jks";
+        keystorePwd = Application.properties.getProperty("keystorepwd");
+        keyPwd = Application.properties.getProperty("keypwd");
+        myAlias = Application.properties.getProperty("myalias");
     }
 
     /**
