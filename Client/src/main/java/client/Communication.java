@@ -20,7 +20,9 @@ import org.springframework.web.client.RestTemplate;
 
 import javax.net.ssl.SSLContext;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
@@ -124,12 +126,12 @@ public class Communication {
         // send
         ResponseEntity<String> response = restTemplate.postForEntity(authServerUrl + "/login", request, String.class);
 
-        System.out.println("Status: " + response.getStatusCode().toString());
+        //System.out.println("Status: " + response.getStatusCode().toString());
 
 
         if(response.getStatusCode() == HttpStatus.OK){
             loginToken =  response.getBody();
-            System.out.println("Token: " + loginToken);
+            //System.out.println("Token: " + loginToken);
             System.out.println("Login successful");
             return true;
         }
@@ -155,7 +157,7 @@ public class Communication {
      * @throws BadArgument When the request didn't follow proper format
      * @throws TokenInvalid When the Token is invalid (bad token or timeout)
      */
-    public PublicKey getUserKey(String username1, String username2) throws CryptoException, BadArgument, TokenInvalid {
+    public PublicKey getUserKey(String username1, String username2) throws CryptoException, BadArgument, TokenInvalid, InvalidUser {
         RestTemplate restTemplate = restTemplate();
 
         //create the params
@@ -186,6 +188,10 @@ public class Communication {
 
         if (response.getStatusCode() == HttpStatus.PRECONDITION_FAILED) {
             throw new TokenInvalid(response.getBody());
+        }
+
+        if (response.getStatusCode() == HttpStatus.CONFLICT) {
+            throw new InvalidUser(response.getBody());
         }
 
         return null;
@@ -239,7 +245,6 @@ public class Communication {
         System.out.println("Downloaded files:");
         for (EncryptedFileWrapper file : files) {
             System.out.println("- " + file.getFileName());
-            System.out.println(file.getFile() == null);
         }
 
         return files;
@@ -309,6 +314,8 @@ public class Communication {
                 , FileSystemMessage.class);
 
         if(out.getStatusCode() == HttpStatus.BAD_REQUEST)
+            throw new BadArgument("Invalid parameters");
+        if(out.getStatusCode() == HttpStatus.CONFLICT)
             throw new BadArgument("Backup doesn't exist");
 
         EncryptedFileWrapper[] files = out.getBody().getFiles();
@@ -336,12 +343,25 @@ public class Communication {
     private RestTemplate restTemplate()
     {
 
+
+        Properties properties = new Properties();
+        InputStream input = null;
+
+        try{
+            input = new FileInputStream("./" + "\\src\\main\\resources\\config.properties");
+            properties.load(input);
+
+        }catch (IOException e){
+            e.printStackTrace();
+        }
+
+
         File trustStore = new File("./" + "\\src\\main\\resources\\clienttruststore.jks");
 
         SSLContextBuilder sslContextBuilder = new SSLContextBuilder();
 
         try {
-            sslContextBuilder.loadTrustMaterial(trustStore, "password".toCharArray());
+            sslContextBuilder.loadTrustMaterial(trustStore, properties.getProperty("trustpw").toCharArray());
         } catch (NoSuchAlgorithmException | KeyStoreException | CertificateException | IOException e) {
             e.printStackTrace();
         }

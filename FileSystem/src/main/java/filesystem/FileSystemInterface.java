@@ -16,8 +16,8 @@ public class FileSystemInterface {
 
 
     private static final String keystoreFile = "./" + "\\src\\main\\resources\\serverkeystore.jks";
-    private static final String keystorePwd = "password";
-    private static final String authServerAlias = "auth-public-key";
+    private static final String keystorePwd = Application.properties.getProperty("keystorepwd");
+    private static final String authServerAlias = Application.properties.getProperty("myalias");
 
 
 
@@ -251,7 +251,6 @@ public class FileSystemInterface {
 
         Path pathuser2 = Paths.get("./" + user2);
 
-        Path fileName = Paths.get("./" + user1 + "/" + filename + ".file");
 
 
         //check if user1 folder exists
@@ -260,11 +259,6 @@ public class FileSystemInterface {
             return false;
         }
 
-        //check if file exists
-        if (!Files.exists(fileName)) {
-            System.out.println("File" + " " + filename + " " + "doesnt exist");
-            return false;
-        }
 
         //check if user2 folders exists if not create it
         if (!Files.exists(pathuser2)) {
@@ -273,7 +267,7 @@ public class FileSystemInterface {
         }
 
         //put the file in user2 folder
-        FileOutputStream writer = new FileOutputStream(user2 + "\\" + "from-" + user1 + "_" + filename + ".file");
+        FileOutputStream writer = new FileOutputStream(user2 + "\\" + filename + ".file");
         ObjectOutputStream outwriter = new ObjectOutputStream(writer);
         outwriter.writeObject(file);
         writer.close();

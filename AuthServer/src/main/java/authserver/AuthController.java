@@ -107,7 +107,7 @@ public class AuthController {
         if(authService.authenticate(username1, token)) {
             try {
                 String publicKey = authService.getPublicKey(username2);
-                System.out.println(publicKey);
+                //System.out.println(publicKey);
                 return new ResponseEntity<String>( publicKey, HttpStatus.OK);
 
             } catch (InvalidUserException e) {

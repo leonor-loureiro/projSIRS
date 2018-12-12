@@ -72,10 +72,10 @@ public class TokenManager {
             Date currentDate = new Date(System.currentTimeMillis());
 
             //Print details
-            System.out.println("ID: " + claims.getId());
+          /*  System.out.println("ID: " + claims.getId());
             System.out.println("Subject: " + claims.getSubject());
             System.out.println("Issuer: " + claims.getIssuer());
-            System.out.println("Expiration: " + claims.getExpiration());
+            System.out.println("Expiration: " + claims.getExpiration()); */
 
             return jtwSubject.equals(subject) && jtwIssuer.equals(issuer) &&
                     jtwIssuedAt.before(currentDate) && jtwExpireDate.after(currentDate);

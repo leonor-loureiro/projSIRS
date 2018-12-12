@@ -41,7 +41,6 @@ public class KeystoreManager {
         Date startDate = new Date(now);
 
         String cn = "CN="+subjectDN;
-        System.out.println(cn);
         X500Name dnName = new X500Name(cn);
 
         // Using the current timestamp as the certificate serial number

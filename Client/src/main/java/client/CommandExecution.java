@@ -187,7 +187,11 @@ public class CommandExecution {
         //Get user's public key
         PublicKey publicKey = null;
         try {
-            publicKey = communication.getUserKey(user.getUsername(), dest);
+            try {
+                publicKey = communication.getUserKey(user.getUsername(), dest);
+            } catch (InvalidUser invalidUser) {
+                System.out.println("Invalid user to share with");
+            }
         } catch (CryptoException e) {
             e.printStackTrace();
         }
@@ -200,7 +204,7 @@ public class CommandExecution {
         }
 
         try {
-            fileWrapper.setFileName("from" + user.getUsername() + fileName);
+            fileWrapper.setFileName("from-" + user.getUsername() + "_"  + fileName);
             fileWrapper.setFileCreator(dest);
             fileWrapper.setFileKey(Crypto.generateSecretKey().getEncoded());
         } catch (CryptoException e) {

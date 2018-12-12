@@ -25,10 +25,14 @@ import java.util.Random;
  */
 public class AuthService {
 
-    private static final String keystoreFile = "./" + "\\src\\main\\resources\\serverkeystore.jks";
+   /* private static final String keystoreFile = "./" + "\\src\\main\\resources\\serverkeystore.jks";
     private static final String keystorePwd = "password";
     private static final String keyPwd = "password";
-    private static final String myAlias = "server-keypair";
+    private static final String myAlias = "server-keypair"; */
+    private static final String keystoreFile = "./" + "\\src\\main\\resources\\serverkeystore.jks";
+    private static final String keystorePwd = Application.properties.getProperty("keystorepwd");
+    private static final String keyPwd = Application.properties.getProperty("keypwd");
+    private static final String myAlias = Application.properties.getProperty("myalias");
 
     // Token Validity
     private  static final int VALID_PERIOD = 1800000;
@@ -123,7 +127,7 @@ public class AuthService {
         try {
             //Get user from database
             User user = db.getUser(username);
-            System.out.println(user.getUsername() + "->" + user.getSaltedPwd());
+            //System.out.println(user.getUsername() + "->" + user.getSaltedPwd());
             if (user == null)
                 throw new InvalidUserException("User does not exist");
 

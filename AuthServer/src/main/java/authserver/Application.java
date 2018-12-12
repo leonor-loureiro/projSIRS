@@ -40,7 +40,6 @@ public class Application {
 
 
 
-        String keystoreFile = "./" + "\\src\\main\\resources\\serverkeystore.jks";
         properties = new Properties();
         InputStream input = null;
 
@@ -62,8 +61,10 @@ public class Application {
         Boolean wrong = true;
         while(wrong) {
             try {
-                ks.load(new FileInputStream(keystoreFile), pw);
+                ks.load(new FileInputStream("./" + "\\src\\main\\resources\\serverkeystore.jks"), pw);
                 wrong = false;
+                properties.setProperty("keystorepwd",String.copyValueOf(pw));
+                properties.setProperty("keypwd",String.copyValueOf(pw));
 
             } catch (IOException e) {
                 System.out.println("Wrong password try again");

@@ -1,3 +1,6 @@
-dbpassword=nino_1500
+dbpassword=root
 database=localhost/sirs
 dbuser=root
+keystorepwd
+keypwd
+myalias=server-keypair

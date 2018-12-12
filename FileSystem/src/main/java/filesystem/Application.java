@@ -22,7 +22,15 @@ public class Application {
     public static void main(String[] args) throws KeyStoreException, FileNotFoundException {
 
 
+        properties = new Properties();
+        InputStream input = null;
+        try{
+            input = new FileInputStream("./" + "\\src\\main\\resources\\config.properties");
+            properties.load(input);
 
+        }catch (IOException e){
+            e.printStackTrace();
+        }
         //keystore directory
         String keystoreFile = "./" + "\\src\\main\\resources\\serverkeystore.jks";
 
@@ -39,6 +47,8 @@ public class Application {
             try {
                 ks.load(new FileInputStream(keystoreFile), pw);
                 wrong = false;
+                properties.setProperty("keystorepwd",String.copyValueOf(pw));
+                properties.setProperty("keypwd",String.copyValueOf(pw));
 
                 //if there is an exception it means the password was wrong so we try again
             } catch (IOException e) {
