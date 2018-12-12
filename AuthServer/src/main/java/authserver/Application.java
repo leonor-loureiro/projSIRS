@@ -6,12 +6,18 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
+import java.security.cert.CertificateException;
 import java.util.Arrays;
 import java.util.Properties;
 import java.util.Random;
+import java.util.Scanner;
 
 @SpringBootApplication
 public class Application {
@@ -23,8 +29,23 @@ public class Application {
     private static final String myAlias = "server-keypair";
     public static Properties properties;
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws KeyStoreException, FileNotFoundException {
 
+        System.out.println("Please introduce the password");
+        Scanner scanner =  new Scanner(System.in);
+        String password = scanner.next();
+
+        KeyStore ks = KeyStore.getInstance("jks");
+
+        try {
+            ks.load(new FileInputStream(keystoreFile),password.toCharArray());
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        } catch (CertificateException e) {
+            System.out.println("Wrong password");
+        }
         Crypto.init();
 
         properties = new Properties();
