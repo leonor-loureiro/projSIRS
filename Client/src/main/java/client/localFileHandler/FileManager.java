@@ -14,7 +14,7 @@ public interface FileManager {
     String path ="./";
 
     /**
-     * Stores locally the given file and it's encrypting key
+     * Stores locally the given file
      * @param file the fileWrapper to be saved
      * @throws IOException an IOException maybe thrown if file already exists with that name
      */
@@ -30,7 +30,6 @@ public interface FileManager {
             stream.write(file.getFile());
         }
 
-        // Store the key
     }
 
 
@@ -49,7 +48,6 @@ public interface FileManager {
         if (files != null) {
             for (File file : files) {
                 if (file.isFile() && file.getName().equals(name)) {
-                    //temp.setFile(getFileC ontent(file));
                     temp.setFile(Files.readAllBytes(file.toPath()));
                     temp.setFileName(file.getName());
                     temp.setFileCreator(username);
@@ -61,41 +59,6 @@ public interface FileManager {
         return null;
     }
 
-    static byte[] getFileContent(File inputFile){
-        FileInputStream inputStream = null;
-        byte[] file = null;
-        try {
-            inputStream = new FileInputStream(inputFile);
-            file = new byte[(int) inputFile.length()];
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        
-        return file;
-    }
-
-    /**
-     * Loads all files found into a list of file wrappers
-     * @return all files as FileWrappers
-     */
-    static List<FileWrapper> loadFiles(){
-
-        List<FileWrapper> results = new ArrayList<>();
-        // Will be null if path is invalid
-        File[] files = new File(path).listFiles();
-
-        if (files != null) {
-            for (File file : files) {
-                if (file.isFile()) {
-                    FileWrapper temp = new FileWrapper();
-                    temp.setFile(getFileContent(file));
-                    temp.setFileName(file.getName());
-                    results.add(temp);
-                }
-            }
-        }
-        return results;
-    }
 
     /**
      * Finds the name (with extensions included) of the files in the folder
