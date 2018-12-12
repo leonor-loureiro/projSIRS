@@ -16,26 +16,28 @@ public class FileSystemController {
     @RequestMapping(value = "/download")
     public ResponseEntity<FileSystemMessage> download(@Valid @RequestBody FileSystemMessage fMsg) throws IOException, ClassNotFoundException {
 
-        if(!checkInput(fMsg))
-            new ResponseEntity(HttpStatus.BAD_REQUEST);
-
         FileSystemMessage message = new FileSystemMessage();
+
+
+        if(!checkInput(fMsg)) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
 
         //Check if the token is valid
 
         if(fMsg.getUserName() == null || fMsg.getUserName().isEmpty())
-            return new ResponseEntity<FileSystemMessage>(HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         if(fMsg.getToken() == null || fMsg.getToken().isEmpty())
-            return new ResponseEntity<FileSystemMessage>(HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         if(!FileSystemInterface.validateToken(fMsg.getUserName(), fMsg.getToken()))
-            return new ResponseEntity<FileSystemMessage>(HttpStatus.PRECONDITION_FAILED);
+            return new ResponseEntity<>(HttpStatus.PRECONDITION_FAILED);
 
         EncryptedFileWrapper[] list = FileSystemInterface.download(fMsg.getUserName());
 
         if(list == null)
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         message.setFiles(FileSystemInterface.download(fMsg.getUserName()));
-        return new ResponseEntity<FileSystemMessage>(message, HttpStatus.OK);
+        return new ResponseEntity<>(message, HttpStatus.OK);
     }
 
     @PostMapping(value = "/upload")
@@ -47,7 +49,7 @@ public class FileSystemController {
             return new ResponseEntity<FileSystemMessage>(HttpStatus.BAD_REQUEST);
 
         if(!checkInput(fMsg))
-            new ResponseEntity(HttpStatus.BAD_REQUEST);
+            return new ResponseEntity(HttpStatus.BAD_REQUEST);
 
         if(!FileSystemInterface.validateToken(fMsg.getUserName(), fMsg.getToken()))
             return new ResponseEntity(HttpStatus.PRECONDITION_FAILED);
@@ -67,7 +69,7 @@ public class FileSystemController {
             return new ResponseEntity<FileSystemMessage>(HttpStatus.BAD_REQUEST);
 
         if(!checkInput(fMsg))
-            new ResponseEntity(HttpStatus.BAD_REQUEST);
+            return new ResponseEntity(HttpStatus.BAD_REQUEST);
 
         if(!FileSystemInterface.validateToken(fMsg.getUserName(), fMsg.getToken()))
             return new ResponseEntity(HttpStatus.PRECONDITION_FAILED);
@@ -87,7 +89,7 @@ public class FileSystemController {
             return new ResponseEntity<FileSystemMessage>(HttpStatus.BAD_REQUEST);
 
         if(!checkInput(fMsg))
-            new ResponseEntity(HttpStatus.BAD_REQUEST);
+            return new ResponseEntity(HttpStatus.BAD_REQUEST);
 
         if(!FileSystemInterface.validateToken(fMsg.getUserName(), fMsg.getToken()))
             return new ResponseEntity(HttpStatus.PRECONDITION_FAILED);
@@ -104,6 +106,7 @@ public class FileSystemController {
 
 
     public Boolean checkInput(FileSystemMessage fMsg){
+        System.out.println("Started Validation");
         if (fMsg.getUserName()!= null ) {
             if(!fMsg.getUserName().matches("[a-zA-Z0-9]*")) {
                 System.out.println("Bad username");
@@ -117,9 +120,10 @@ public class FileSystemController {
             }
         }
         if(fMsg.getBackUpFileName()!=null){
-            if(!fMsg.getBackUpFileName().matches("[a-zA-Z0-9._-]*"))
+            if(!fMsg.getBackUpFileName().matches("[a-zA-Z0-9._-]*")) {
                 System.out.println("Bad filename for backup");
                 return false;
+            }
         }
         EncryptedFileWrapper[] files = fMsg.getFiles();
 
