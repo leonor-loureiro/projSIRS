@@ -82,12 +82,18 @@ public interface UserInterface {
         System.out.println("Password: ");
         login.setPassword(requestSensibleInput());
 
+
         System.out.println();
 
         if(loginOrRegister.equals("login"))
             commandExec.login(login);
-        else
+        else{
+            if(login.getPassword().length < 6){
+                System.out.println("Please use a password with 6 or more characters");
+                return null;
+            }
             commandExec.register(login);
+        }
 
         return login;
     }
@@ -254,4 +260,5 @@ public interface UserInterface {
     static boolean validateInputNames(String input){
         return false;
     }
+
 }
