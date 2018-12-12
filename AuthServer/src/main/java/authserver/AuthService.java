@@ -9,15 +9,10 @@ import crypto.TokenManager;
 import crypto.exception.CryptoException;
 
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.Key;
-import java.security.KeyFactory;
-import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
-import java.security.spec.InvalidKeySpecException;
-import java.security.spec.X509EncodedKeySpec;
 import java.sql.SQLException;
 import java.util.Properties;
 import java.util.Random;
@@ -47,7 +42,17 @@ public class AuthService {
     //Random generator for token IDs
     private static Random random = new Random();
 
-    private AuthService(){
+    private AuthService() {
+
+        if(Application.properties == null){
+            try {
+                Application.properties = new Properties();
+                InputStream input = new FileInputStream("./" + "\\src\\main\\resources\\config.properties");
+                Application.properties.load(input);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
 
         db = new DBConnection(Application.properties.getProperty("dbuser"),
                Application.properties.getProperty("dbpassword"),
@@ -61,6 +66,9 @@ public class AuthService {
     }
 
     public String register(String username, String password, String Kpub) throws UserAlreadyExistsException {
+        if(!validUsername(username))
+            return null;
+
         String saltedPwd = null;
         try {
             saltedPwd = Crypto.hash(password);
@@ -87,7 +95,8 @@ public class AuthService {
     }
 
     public String login(String username, String password) throws InvalidUserException {
-
+        if(!validUsername(username))
+            return null;
 
         try {
             //Get user from database
@@ -110,6 +119,9 @@ public class AuthService {
     }
 
     public boolean authenticate(String username, String token){
+        if(!validUsername(username))
+            return false;
+
         PublicKey key = null;
         try {
             key = Crypto.getPublicKey(keystoreFile, keystorePwd, myAlias);
@@ -120,10 +132,15 @@ public class AuthService {
     }
 
     public String getPublicKey(String username) throws InvalidUserException {
+        if(!validUsername(username))
+            return null;
+
         try {
             // Get public key
-            return db.getPublicKey(username);
-
+            String  publicKey = db.getPublicKey(username);
+            if(publicKey == null)
+                throw new InvalidUserException("Invalid user");
+            return publicKey;
         } catch (SQLException e) {
             throw new InvalidUserException("Invalid user");
         }
@@ -139,5 +156,12 @@ public class AuthService {
         }
         String id = "" + random.nextInt(9000000) + 1000000;
         return TokenManager.createJTW(id, "authServer", username, VALID_PERIOD, signingKey);
+    }
+
+    private boolean validUsername(String username){
+        if (username!= null && username.matches("[a-zA-Z0-9]*")) {
+                return true;
+        }
+        return false;
     }
 }

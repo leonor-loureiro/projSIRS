@@ -18,6 +18,8 @@ public class DBConnection {
     private static final String INSERT_USER_SQL = "insert into users (username, saltedPwd, kpub) values ( ? , ? , ?)";
     // Select public key SQL
     private static final String SELECT_KEY_SQL = "Select kpub from users where username = ?";
+    // Remove user SQL
+    private static final String REMOVE_USER_SQL = "delete from users where username = ?";
 
     // Database URL
     private final String DB_URL;// = "jdbc:mysql://localhost/sirs";
@@ -32,6 +34,7 @@ public class DBConnection {
     private PreparedStatement selectStm;
     private PreparedStatement insertStm;
     private PreparedStatement selectKeyStm;
+    private PreparedStatement removeStm;
 
 
     /**
@@ -90,6 +93,12 @@ public class DBConnection {
         }
     }
 
+    /**
+     * Extracts the user's public key
+     * @param username user's username
+     * @return user's public key
+     * @throws SQLException
+     */
     public String getPublicKey(String username) throws SQLException {
         //Create connection
         conn = DriverManager.getConnection(DB_URL,USER,PASS);
@@ -146,6 +155,32 @@ public class DBConnection {
         } finally {
             // Clean up
             insertStm.close();
+            conn.close();
+        }
+    }
+
+    /**
+     * Deletes a user from the database
+     * @param username user's username
+     * @return true if successful; false otherwise
+     * @throws SQLException
+     */
+    public boolean removeUser(String username) throws SQLException {
+
+        //Create connection
+        conn = DriverManager.getConnection(DB_URL,USER,PASS);
+        // Prepare statement
+        removeStm = conn.prepareStatement(REMOVE_USER_SQL);
+        //Set params
+        removeStm.setString(1, username);
+
+        try {
+            // Execute delete statement
+            return removeStm.executeUpdate() == 1;
+
+        } finally {
+            // Clean up
+            removeStm.close();
             conn.close();
         }
     }

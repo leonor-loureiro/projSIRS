@@ -62,7 +62,6 @@ public class Crypto {
 
 
     public static String toString(byte[] input) {
-        //return Base64.getEncoder().encodeToString(input);
         return new String(Base64.encode(input));
     }
 
@@ -73,7 +72,6 @@ public class Crypto {
      * @return converted string
      */
     public static byte[] toByteArray(String input) {
-        //return Base64.getDecoder().decode(input);
         return Base64.decode(input);
     }
 
@@ -342,6 +340,13 @@ public class Crypto {
         }
     }
 
+    /**
+     * Encrypts data with RSA
+     * @param data data to be encrypted
+     * @param key key used to encrypt
+     * @return ciphered data
+     * @throws CryptoException
+     */
     public static byte[] encryptRSA (byte[] data, Key key) throws CryptoException {
         if(data == null)
             throw  new CryptoException("Data is null");
@@ -360,6 +365,13 @@ public class Crypto {
         }
     }
 
+    /**
+     * Decrypts ciphered data with RSA
+     * @param data ciphered data
+     * @param key key used to decipher
+     * @return deciphered data
+     * @throws CryptoException
+     */
     public static byte[] decryptRSA (byte[] data, Key key) throws CryptoException {
         if(data == null)
             throw  new CryptoException("Data is null");
@@ -382,17 +394,22 @@ public class Crypto {
      *                  SYMMETRIC ENCRYPTION / DECRYPTION
      ***********************************************************************/
 
+    /**
+     * Generates a secret key
+     * @return secret key
+     * @throws CryptoException
+     */
     public static SecretKey generateSecretKey() throws CryptoException {
         return generateSecretKey(256, "AES");
     }
 
-        /**
-         * Generates a secret key
-         * @param size key size
-         * @param alg algorithm
-         * @return secret key
-         * @throws CryptoException
-         */
+    /**
+     * Generates a secret key
+     * @param size key size
+     * @param alg algorithm
+     * @return secret key
+     * @throws CryptoException
+     */
     public static SecretKey generateSecretKey(int size, String alg) throws CryptoException {
         KeyGenerator keyGen = null;
         try {
@@ -404,14 +421,32 @@ public class Crypto {
         return keyGen.generateKey();
     }
 
+    /**
+     * Convert a byte array to a Secret Key
+     * @param encoded encoded secret key
+     * @param alg encryption algorithm
+     * @return secret key
+     */
     public static SecretKey extractSecretKey(byte[] encoded, String alg){
         return new SecretKeySpec(encoded, 0, encoded.length, alg);
     }
 
+    /**
+     * Converts a byte array to an AES secret key
+     * @param encoded encoded key
+     * @return secret key
+     */
     public static SecretKey extractSecretKey(byte[] encoded){
         return new SecretKeySpec(encoded, 0, encoded.length, "AES");
     }
 
+    /**
+     * Encrypts data with AES
+     * @param key AES secret key
+     * @param data data to cipher
+     * @return ciphered data
+     * @throws CryptoException
+     */
     public static byte[] encryptAES(byte[] key, byte[] data) throws CryptoException {
         //Create secret key
         SecretKeySpec sKey = new SecretKeySpec(key,"AES");
@@ -446,6 +481,13 @@ public class Crypto {
     }
 
 
+    /**
+     * Decipher data encrypted with AES
+     * @param key AES secret key
+     * @param cipherIVandData IV|ciphered data
+     * @return deciphered data
+     * @throws CryptoException
+     */
     public static byte[] decryptAES(byte[] key, byte[] cipherIVandData) throws CryptoException {
         //Extract IV
         byte iv[] = new byte[16];
@@ -481,22 +523,38 @@ public class Crypto {
      *                          MESSAGE AUTHENTICATION CODE (MAC)
      *****************************************************************************************/
 
+    /**
+     * Compute a MAC using HmacSHA256
+     * @param key encoded key
+     * @param message message
+     * @return computed mac
+     * @throws CryptoException
+     */
     public static String computeMAC(byte[] key, byte[] message) throws CryptoException {
         return computeMAC(key, message, "HmacSHA256");
     }
 
+    /**
+     * Checks if the mac is valid
+     * @param key encoded key
+     * @param message message
+     * @param mac mac
+     * @return true if mac matches message; false otherwise
+     * @throws CryptoException
+     */
     public static boolean validateMAC(byte[] key, byte[] message, String mac) throws CryptoException {
         return validateMAC(key, message, mac, "HmacSHA256");
 
     }
-        /**
-         * Computes the MAC of a message
-         * @param key secret key
-         * @param message message
-         * @param alg MAC algorithm
-         * @return MAC
-         * @throws CryptoException
-         */
+
+    /**
+     * Computes the MAC of a message
+     * @param key secret key
+     * @param message message
+     * @param alg MAC algorithm
+     * @return MAC
+     * @throws CryptoException
+     */
     public static String computeMAC(byte[] key, byte[] message, String alg) throws CryptoException {
 
         if(message == null)
