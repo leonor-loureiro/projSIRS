@@ -50,7 +50,7 @@ public class FileSystemController {
         if(!FileSystemInterface.validateToken(fMsg.getUserName(), fMsg.getToken()))
             return new ResponseEntity(HttpStatus.PRECONDITION_FAILED);
 
-        FileSystemInterface.upload(fMsg.getFiles());
+        FileSystemInterface.upload(fMsg.getFiles(),fMsg.getUserName());
 
         return new ResponseEntity(HttpStatus.OK);
     }
@@ -115,7 +115,7 @@ public class FileSystemController {
             }
         }
         if(fMsg.getBackUpFileName()!=null){
-            if(!fMsg.getBackUpFileName().matches("[a-zA-Z0-9[.]_-]*"))
+            if(!fMsg.getBackUpFileName().matches("[a-zA-Z0-9._-]*"))
                 System.out.println("Bad filename for backup");
                 return false;
         }
