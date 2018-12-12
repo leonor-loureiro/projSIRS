@@ -8,8 +8,6 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.io.IOException;
-import java.sql.SQLOutput;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/operations")
@@ -97,7 +95,7 @@ public class FileSystemController {
         FileSystemMessage message = new FileSystemMessage();
 
 
-        message.setFiles(new EncryptedFileWrapper[]{ FileSystemInterface.getOldVersion(fMsg.getUserName(),fMsg.getBackUpFileName(),fMsg.getCorrupted())});
+        message.setFiles(new EncryptedFileWrapper[]{ FileSystemInterface.getOldVersion(fMsg.getUserName(),fMsg.getBackUpFileName())});
         if(message.getFiles()[0] == null)
             return new ResponseEntity(HttpStatus.CONFLICT);
         message.setUserName(fMsg.getUserName());

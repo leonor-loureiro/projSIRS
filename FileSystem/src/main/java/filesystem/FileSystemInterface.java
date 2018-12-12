@@ -11,7 +11,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.PublicKey;
 import java.util.ArrayList;
-import java.util.Map;
 
 public class FileSystemInterface {
 
@@ -160,26 +159,26 @@ public class FileSystemInterface {
         return true;
     }
 
-    public static EncryptedFileWrapper getOldVersion(String fileCreator,String fileName,Boolean corrupted) throws IOException, ClassNotFoundException {
+    public static EncryptedFileWrapper getOldVersion(String fileCreator, String fileName) throws IOException, ClassNotFoundException {
         File file = new File(fileCreator + "\\" + fileName + ".file");
-        int versionumber = 0;
+        int versionNr = 0;
             file.delete();
             loop:
             for (int i = 0; true; i++) {
                 File oldbackup = new File(fileCreator + "\\" + fileName + i + "oldv" + ".file");
                 if (oldbackup.exists()) {
-                    versionumber++;
+                    versionNr++;
                     continue;
 
                 } else {
                     if(i==0)
                         return null;
-                    versionumber--;
+                    versionNr--;
                     break loop;
                 }
             }
             File newMainFile = new File(fileCreator + "\\" + fileName + ".file");
-            File higherVersionFile = new File(fileCreator + "\\" + fileName +  versionumber +"oldv"  + ".file");
+            File higherVersionFile = new File(fileCreator + "\\" + fileName + versionNr +"oldv"  + ".file");
             higherVersionFile.renameTo(newMainFile);
 
             FileInputStream f = new FileInputStream(newMainFile);
