@@ -20,22 +20,9 @@ public class FileSystemInterface {
     private static final String keystorePwd = "password";
     private static final String authServerAlias = "auth-public-key";
 
-    // f* this not necessary
 
- /*   public static void newfile(FileWrapper file){
-        System.out.println("Creating new file");
 
-        String filename = file.getFileName();
-
-        String fileCreator = file.getFileCreator();
-
-        String fileMAC = file.getFileMAC();
-
-        System.out.println(filename + " " + fileCreator + " " + fileMAC);
-
-    } */
-
-   public static boolean validateToken(String username, String token){
+    public static boolean validateToken(String username, String token){
 
         PublicKey key = null;
         try {
@@ -43,15 +30,13 @@ public class FileSystemInterface {
         } catch (CryptoException e) {
             return false;
         }
+
         return TokenManager.validateJTW(token, "authServer", username, key);
     }
 
     public static EncryptedFileWrapper[] download(String name) throws IOException, ClassNotFoundException {
         System.out.println("Downloading files");
 
-        // check sessiontoken
-
-        // check folder of user
 
         System.out.println(name);
         Path path = Paths.get("./" + name);
@@ -59,10 +44,8 @@ public class FileSystemInterface {
         if(!Files.exists(path)){
             System.out.println(name + " " + "not registered");
 
-            //Send exception
         }
 
-        // download all files? or file by file?
 
         File folder = new File(path.toString());
 
@@ -87,6 +70,8 @@ public class FileSystemInterface {
         for(int i =0;i<files.size();i++){
             vectorEnc[i] = files.get(i);
         }
+
+
         return vectorEnc;
 
 
@@ -100,7 +85,6 @@ public class FileSystemInterface {
         String fileCreator = files[0].getFileCreator();
 
 
-        // check if user has a folder if not create it
 
         Path path = Paths.get("./" + fileCreator);
 
@@ -134,13 +118,6 @@ public class FileSystemInterface {
 
         System.out.println("Finished uploading files");
 
-
-
-        // for each file check mac and compare to the mac(file)
-
-        // add files to the folder if exists
-
-        // return OK
 
 
     }
@@ -201,33 +178,37 @@ public class FileSystemInterface {
 
     }
 
-    public static void share(String user1,String user2,EncryptedFileWrapper file) throws IOException, ClassNotFoundException {
-
+    public static Boolean share(String user1,String user2,EncryptedFileWrapper file) throws IOException {
         System.out.println("Share file");
 
 
-        // check if user exists and user exists
-
-
-        // add file to user2 folder
-
         String filename = file.getFileName();
+
+        Path pathuser1 = Paths.get("./" + user1);
 
         Path pathuser2 = Paths.get("./" + user2);
 
+        Path fileName = Paths.get("./" + user2 + "/" + filename + ".file");
 
-        if (!Files.exists(pathuser2)){
+
+        if (!Files.exists(pathuser1)) {
+            System.out.println("User" + " " + pathuser1 + " " + "doesnt exist");
+            return false;
+        }
+        if (!Files.exists(pathuser2)) {
             System.out.println("User" + " " + pathuser2 + " " + "doesnt exist");
+            return false;
+        }
+        if (!Files.exists(fileName)) {
+            System.out.println("User" + " " + filename + " " + "doesnt exist");
+            return false;
         }
 
         FileOutputStream writer = new FileOutputStream(user2 + "\\" + filename + ".file");
-        ObjectOutputStream outwriter = new ObjectOutputStream(writer );
+        ObjectOutputStream outwriter = new ObjectOutputStream(writer);
         outwriter.writeObject(file);
         outwriter.close();
-
-
-
-        // return ok
+        return true;
 
 
     }
