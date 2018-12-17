@@ -35,7 +35,7 @@ public class Application {
         properties = new Properties();
         InputStream input = null;
         try{
-            input = new FileInputStream("./" + "\\src\\main\\resources\\config.properties");
+            input = new FileInputStream("./" + "/src/main/resources/config.properties");
             properties.load(input);
 
         }catch (IOException e){
@@ -44,7 +44,7 @@ public class Application {
 
 
         //keystore directory
-        String keystoreFile = "./" + "\\src\\main\\resources\\serverkeystore.jks";
+        String keystoreFile = "./" + "/src/main/resources/serverkeystore.jks";
 
         System.out.println("Please introduce the password");
 

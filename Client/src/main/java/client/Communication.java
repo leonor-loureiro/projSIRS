@@ -373,7 +373,7 @@ public class Communication {
         InputStream input = null;
 
         try{
-            input = new FileInputStream("./" + "\\src\\main\\resources\\config.properties");
+            input = new FileInputStream("./" + "/src/main/resources/config.properties");
             properties.load(input);
 
         }catch (IOException e){
@@ -381,7 +381,7 @@ public class Communication {
         }
 
 
-        File trustStore = new File("./" + "\\src\\main\\resources\\clienttruststore.jks");
+        File trustStore = new File("./" + "/src/main/resources/clienttruststore.jks");
 
         SSLContextBuilder sslContextBuilder = new SSLContextBuilder();
 

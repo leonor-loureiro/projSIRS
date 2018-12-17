@@ -44,7 +44,7 @@ public class Application {
         InputStream input = null;
 
         try{
-            input = new FileInputStream("./" + "\\src\\main\\resources\\config.properties");
+            input = new FileInputStream("./" + "/src/main/resources/config.properties");
             properties.load(input);
 
         }catch (IOException e){
@@ -61,7 +61,7 @@ public class Application {
         Boolean wrong = true;
         while(wrong) {
             try {
-                ks.load(new FileInputStream("./" + "\\src\\main\\resources\\serverkeystore.jks"), pw);
+                ks.load(new FileInputStream("./" + "/src/main/resources/serverkeystore.jks"), pw);
                 wrong = false;
                 properties.setProperty("keystorepwd",String.copyValueOf(pw));
                 properties.setProperty("keypwd",String.copyValueOf(pw));

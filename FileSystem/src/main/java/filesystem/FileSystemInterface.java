@@ -36,13 +36,13 @@ public class FileSystemInterface {
         if(Application.properties == null){
             try {
                 Application.properties = new Properties();
-                InputStream input = new FileInputStream("./" + "\\src\\main\\resources\\config.properties");
+                InputStream input = new FileInputStream("./" + "/src/main/resources/config.properties");
                 Application.properties.load(input);
             } catch (IOException e) {
                 e.printStackTrace();
             }
         }
-        keystoreFile = "./" + "\\src\\main\\resources\\serverkeystore.jks";
+        keystoreFile = "./" + "/src/main/resources/serverkeystore.jks";
         keystorePwd = Application.properties.getProperty("keystorepwd");
         authServerAlias = Application.properties.getProperty("myalias");
     }
@@ -166,10 +166,10 @@ public class FileSystemInterface {
             String fileName  = files[i].getFileName();
 
             //check if there is a need to create a backup
-            System.out.println("Was there need to backup the file:" + " " + checkForBackup(fileCreator + "\\" + fileName));
+            System.out.println("Was there need to backup the file:" + " " + checkForBackup(fileCreator + "/" + fileName));
 
             //build the file in the system
-            FileOutputStream writer = new FileOutputStream(fileCreator + "\\" + fileName + ".file");
+            FileOutputStream writer = new FileOutputStream(fileCreator + "/" + fileName + ".file");
             ObjectOutputStream outwriter = new ObjectOutputStream(writer );
             outwriter.writeObject(files[i]);
             writer.close();
@@ -230,11 +230,11 @@ public class FileSystemInterface {
      */
 
     public static EncryptedFileWrapper getOldVersion(String fileCreator, String fileName) throws IOException, ClassNotFoundException {
-        File file = new File(fileCreator + "\\" + fileName + ".file");
+        File file = new File(fileCreator + "/" + fileName + ".file");
         int versionNr = 0;
             loop:
             for (int i = 0; true; i++) {
-                File oldbackup = new File(fileCreator + "\\" + fileName + i + "@oldv" + ".file");
+                File oldbackup = new File(fileCreator + "/" + fileName + i + "@oldv" + ".file");
                 if (oldbackup.exists()) {
                     versionNr++;
                     continue;
@@ -250,8 +250,8 @@ public class FileSystemInterface {
             file.delete();
 
             //replace the current version with the previous one
-            File newMainFile = new File(fileCreator + "\\" + fileName + ".file");
-            File higherVersionFile = new File(fileCreator + "\\" + fileName + versionNr +"@oldv"  + ".file");
+            File newMainFile = new File(fileCreator + "/" + fileName + ".file");
+            File higherVersionFile = new File(fileCreator + "/" + fileName + versionNr +"@oldv"  + ".file");
             higherVersionFile.renameTo(newMainFile);
 
             //get the file from the filesystem to return
@@ -300,7 +300,7 @@ public class FileSystemInterface {
         }
 
         //put the file in user2 folder
-        FileOutputStream writer = new FileOutputStream(user2 + "\\" + filename + ".file");
+        FileOutputStream writer = new FileOutputStream(user2 + "/" + filename + ".file");
         ObjectOutputStream outwriter = new ObjectOutputStream(writer);
         outwriter.writeObject(file);
         writer.close();

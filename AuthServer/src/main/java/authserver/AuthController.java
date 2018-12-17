@@ -17,6 +17,11 @@ public class AuthController {
 
     private AuthService authService = AuthService.getInstance();
 
+    @RequestMapping(value = "/test")
+    public String test() {
+
+       return "Working";
+    }
     /**
      * Maps a login request from an user
      * @param credentials username and password of the user

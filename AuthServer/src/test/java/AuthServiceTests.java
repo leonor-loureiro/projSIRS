@@ -29,7 +29,7 @@ public class AuthServiceTests {
         Crypto.init();
 
         Properties properties = new Properties();
-        InputStream input = new FileInputStream("./" + "\\src\\main\\resources\\config.properties");
+        InputStream input = new FileInputStream("./" + "/src/main/resources/config.properties");
         properties.load(input);
 
         db = new DBConnection(properties.getProperty("dbuser"),
@@ -39,7 +39,7 @@ public class AuthServiceTests {
 
         authService = AuthService.getInstance();
 
-        AuthService.keystoreFile = "./" + "\\src\\main\\resources\\serverkeystore.jks";
+        AuthService.keystoreFile = "./" + "/src/main/resources/serverkeystore.jks";
         AuthService.keystorePwd = "password";
         AuthService.keyPwd = "password";
         AuthService.myAlias = "server-keypair";

@@ -317,10 +317,12 @@ public class CommandExecution {
 
             // If key doesn't exist, generate it
             if(key == null){
-                System.out.println("Generating File Key...");
 
-                if(file.getFileKey() == null)
+
+                if(file.getFileKey() == null) {
+                    System.out.println("Generating File Key...");
                     key = Crypto.generateSecretKey();
+                }
                 else
                     key = Crypto.extractSecretKey(file.getFileKey());
 

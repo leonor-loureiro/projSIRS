@@ -50,7 +50,7 @@ public class AuthService {
         if(Application.properties == null){
             try {
                 Application.properties = new Properties();
-                InputStream input = new FileInputStream("./" + "\\src\\main\\resources\\config.properties");
+                InputStream input = new FileInputStream("./" + "/src/main/resources/config.properties");
                 Application.properties.load(input);
             } catch (IOException e) {
                 e.printStackTrace();
@@ -61,7 +61,7 @@ public class AuthService {
                Application.properties.getProperty("dbpassword"),
                Application.properties.getProperty("database"));
 
-        keystoreFile = "./" + "\\src\\main\\resources\\serverkeystore.jks";
+        keystoreFile = "./" + "/src/main/resources/serverkeystore.jks";
         keystorePwd = Application.properties.getProperty("keystorepwd");
         keyPwd = Application.properties.getProperty("keypwd");
         myAlias = Application.properties.getProperty("myalias");
